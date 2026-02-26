@@ -1,5 +1,5 @@
 import { routineApi } from "@/lib/api/routine";
-import { COLORS } from "@/lib/constants";
+import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatRestTime } from "@/lib/format";
 import { getSelectedExercises } from "@/lib/store/exercise-selection";
 import type { ExerciseResponse } from "@/lib/types/exercise";
@@ -25,7 +25,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 
 interface RoutineItem {
@@ -36,6 +36,7 @@ interface RoutineItem {
 
 export default function NewRoutineScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { routineId } = useLocalSearchParams<{ routineId?: string }>();
   const isEditMode = !!routineId;
 
@@ -183,7 +184,11 @@ export default function NewRoutineScreen() {
         </Pressable>
       </View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1 px-5"
+        contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* 루틴 정보 */}
         <View className="mb-4 rounded-2xl bg-card p-5">
           <Text className="mb-2 text-sm font-medium text-white/60">

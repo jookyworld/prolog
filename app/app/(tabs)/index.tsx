@@ -1,9 +1,9 @@
-import { COLORS } from "@/lib/constants";
+import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatRelativeDate } from "@/lib/format";
 import { BODY_PART_LABEL, type BodyPart } from "@/lib/types/exercise";
 import { ChevronRight, X } from "lucide-react-native";
 import { ActivityIndicator, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Svg, { Polyline, Circle, Text as SvgText } from "react-native-svg";
 import { useState, useEffect } from "react";
@@ -52,6 +52,7 @@ function getBodyPartLabel(bodyParts: BodyPart[]): string {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [selectedSessions, setSelectedSessions] = useState<
     Record<number, number | null>
   >({});
@@ -117,7 +118,10 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView className="flex-1">
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
+      >
         {/* 헤더 */}
         <View className="px-5 py-4">
           <Text className="text-2xl font-bold text-white">홈</Text>

@@ -1,5 +1,5 @@
 import { routineApi } from "@/lib/api/routine";
-import { COLORS } from "@/lib/constants";
+import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import type { RoutineDetail } from "@/lib/types/routine";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -23,8 +23,6 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-
-const TAB_BAR_HEIGHT = 50;
 
 export default function RoutineDetailScreen() {
   const router = useRouter();

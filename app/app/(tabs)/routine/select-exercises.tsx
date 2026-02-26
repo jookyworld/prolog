@@ -1,5 +1,5 @@
 import { exerciseApi } from "@/lib/api/exercise";
-import { COLORS } from "@/lib/constants";
+import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { setSelectedExercises } from "@/lib/store/exercise-selection";
 import type { BodyPart, ExerciseResponse } from "@/lib/types/exercise";
 import { BODY_PARTS, BODY_PART_LABEL } from "@/lib/types/exercise";
@@ -17,11 +17,12 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 export default function SelectExercisesScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { returnTo, routineId: returnRoutineId } = useLocalSearchParams<{
     returnTo?: string;
     routineId?: string;
@@ -297,7 +298,7 @@ export default function SelectExercisesScreen() {
               </Text>
             </View>
           }
-          contentContainerStyle={{ paddingBottom: 40 }}
+          contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
         />
       )}
 

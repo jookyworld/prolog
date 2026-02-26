@@ -1,5 +1,5 @@
 import { workoutApi } from "@/lib/api/workout";
-import { COLORS } from "@/lib/constants";
+import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatRelativeDate } from "@/lib/format";
 import {
   WorkoutSession,
@@ -14,7 +14,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 type TypeFilter = "all" | "routine" | "free";
@@ -27,6 +27,7 @@ const TYPE_FILTERS: { value: TypeFilter; label: string }[] = [
 
 export default function WorkoutHistoryScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +98,10 @@ export default function WorkoutHistoryScreen() {
       </View>
 
       {/* 컨텐츠 */}
-      <ScrollView className="flex-1 px-5">
+      <ScrollView
+        className="flex-1 px-5"
+        contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
+      >
         {loading ? (
           <View className="items-center py-20">
             <ActivityIndicator size="small" color={COLORS.primary} />

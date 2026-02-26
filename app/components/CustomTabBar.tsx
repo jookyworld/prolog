@@ -1,10 +1,9 @@
-import { COLORS } from "@/lib/constants";
+import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Dumbbell } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 const FAB_SIZE = 50;
-const TAB_BAR_HEIGHT = 50;
 const HIDDEN_TABS = ["workout"];
 
 interface CustomTabBarProps extends BottomTabBarProps {

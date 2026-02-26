@@ -1,5 +1,5 @@
 import { communityApi } from "@/lib/api/community";
-import { COLORS } from "@/lib/constants";
+import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatRelativeDate } from "@/lib/format";
 import type { SharedRoutineDetail } from "@/lib/types/community";
 import { BODY_PART_LABEL } from "@/lib/types/exercise";
@@ -20,7 +20,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 function formatVolume(kg: number): string {
   if (kg >= 1000) {
@@ -40,6 +40,7 @@ function formatDuration(seconds: number): string {
 
 export default function CommunityDetailScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const routineId = Number(id);
 
@@ -151,7 +152,10 @@ export default function CommunityDetailScreen() {
         <View className="w-8" />
       </View>
 
-      <ScrollView className="flex-1">
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 80 + TAB_BAR_HEIGHT + insets.bottom }}
+      >
         {/* 작성자 정보 */}
         <View className="border-b border-white/5 px-5 py-4">
           <View className="flex-row items-center gap-3">
@@ -297,11 +301,13 @@ export default function CommunityDetailScreen() {
           </View>
         )}
 
-        <View className="h-4" />
       </ScrollView>
 
       {/* 하단 고정 액션 바 */}
-      <View className="border-t border-white/5 bg-background px-5 pb-5 pt-3">
+      <View
+        className="border-t border-white/5 bg-background px-5 pt-3"
+        style={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom }}
+      >
         <View className="flex-row gap-3">
           <Pressable
             onPress={handleLike}

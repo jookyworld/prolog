@@ -1,5 +1,5 @@
 import { communityApi } from "@/lib/api/community";
-import { COLORS } from "@/lib/constants";
+import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import type {
   SharedRoutineListItem,
   SharedRoutineSortType,
@@ -22,7 +22,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 type TabType = "all" | "liked";
 
@@ -170,6 +170,7 @@ function RoutineCard({ routine, onImport, onPress }: RoutineCardProps) {
 
 export default function CommunityScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [sortType, setSortType] = useState<SharedRoutineSortType>("latest");
   const [routines, setRoutines] = useState<SharedRoutineListItem[]>([]);
@@ -243,6 +244,7 @@ export default function CommunityScreen() {
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView
         className="flex-1"
+        contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

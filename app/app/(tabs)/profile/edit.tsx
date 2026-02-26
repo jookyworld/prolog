@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/auth-context";
 import { userApi } from "@/lib/api/user";
-import { COLORS } from "@/lib/constants";
+import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import type { Gender } from "@/lib/types/auth";
 import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
@@ -16,7 +16,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: "MALE", label: "남성" },
@@ -27,6 +27,7 @@ const GENDER_OPTIONS: { value: Gender; label: string }[] = [
 export default function ProfileEditScreen() {
   const { user, updateUser } = useAuth();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const [nickname, setNickname] = useState(user?.nickname ?? "");
   const [gender, setGender] = useState<Gender>(user?.gender ?? "UNKNOWN");
@@ -93,7 +94,11 @@ export default function ProfileEditScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          className="flex-1 px-5"
+          contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Nickname */}
           <View className="mt-6">
             <Text className="mb-2 text-sm font-medium text-white/60">
@@ -162,8 +167,6 @@ export default function ProfileEditScreen() {
               onChangeText={setWeight}
             />
           </View>
-
-          <View className="h-10" />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

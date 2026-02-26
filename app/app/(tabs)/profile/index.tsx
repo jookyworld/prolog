@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/auth-context";
-import { COLORS } from "@/lib/constants";
+import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { useRouter } from "expo-router";
 import {
   ChevronRight,
@@ -11,11 +11,12 @@ import {
   Weight,
 } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const { user } = useAuth();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const genderLabel =
     user?.gender === "MALE"
@@ -26,7 +27,10 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
-      <ScrollView className="flex-1 px-5">
+      <ScrollView
+        className="flex-1 px-5"
+        contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
+      >
         {/* 헤더 */}
         <View className="flex-row items-center justify-between py-4">
           <Text className="text-2xl font-bold text-white">내 정보</Text>

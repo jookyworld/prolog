@@ -1,6 +1,6 @@
 import { routineApi } from "@/lib/api/routine";
 import { workoutApi } from "@/lib/api/workout";
-import { COLORS } from "@/lib/constants";
+import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatElapsedTime } from "@/lib/format";
 import { useWorkout } from "@/contexts/workout-context";
 import { getSelectedExercises } from "@/lib/store/exercise-selection";
@@ -31,11 +31,12 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 export default function WorkoutSessionScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { routineId } = useLocalSearchParams<{ routineId: string }>();
   const { activeSession, startWorkout, endWorkout } = useWorkout();
 
@@ -653,6 +654,7 @@ export default function WorkoutSessionScreen() {
       ) : currentExercise ? (
         <ScrollView
           className="flex-1 px-5 pt-4"
+          contentContainerStyle={{ paddingBottom: 60 + TAB_BAR_HEIGHT + insets.bottom }}
           showsVerticalScrollIndicator={false}
         >
           {/* Exercise title with controls */}

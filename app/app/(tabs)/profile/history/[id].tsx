@@ -1,5 +1,5 @@
 import { workoutApi } from "@/lib/api/workout";
-import { COLORS } from "@/lib/constants";
+import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatDate, formatElapsedTime } from "@/lib/format";
 import {
   WorkoutSessionDetail,
@@ -8,11 +8,12 @@ import {
 import { ArrowLeft, Calendar, Clock, Flame, Layers, Trash2 } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 export default function WorkoutHistoryDetailScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [session, setSession] = useState<WorkoutSessionDetail | null>(null);
@@ -124,7 +125,11 @@ export default function WorkoutHistoryDetailScreen() {
         </Pressable>
       </View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1 px-5"
+        contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* 요약 카드 */}
         <View className="mb-4 rounded-2xl bg-card p-5">
           <View className="mb-4 flex-row items-center gap-2">
