@@ -1,0 +1,68 @@
+# PROLOG - Monorepo 프로젝트 구조 및 규칙
+
+## 프로젝트 개요
+운동 기록 관리 서비스 (점진적 과부하 추적 + 성장 분석)
+개인 프로젝트, Claude Code 중심 개발
+
+## 프로젝트 구성 (3개)
+- backend/  : Spring Boot API (Java 21, MySQL, Redis) - 배포 완료
+- app/      : React Native 사용자 앱 (Expo, TypeScript) - 출시 예정
+- admin/    : 관리자 웹 (Next.js, Phase 3 계획)
+
+## 핵심 규칙
+
+### Backend (Spring Boot)
+- 패키지 구조: domain/{도메인}/{controller,service,repository,entity,dto}
+- 레이어 분리 엄수: Controller → Service → Repository → Entity
+- DTO 필수 사용 (Entity 직접 반환 금지)
+- 예외 처리: GlobalExceptionHandler (@ControllerAdvice)
+- 인증: JWT (SecurityConfig, JwtAuthenticationFilter)
+- 포트: 8080
+- 주요 도메인: user, exercise, routine, workout, stats
+
+### App (React Native + Expo)
+- 라우팅: 파일 기반 (app/ 폴더)
+- 구조: app/(auth), app/(tabs)/{홈,루틴,운동,커뮤니티,프로필}
+- API: lib/api/{도메인}.ts 사용, 직접 fetch 금지
+- 타입: lib/types/{도메인}.ts, any 사용 금지
+- 폼: react-hook-form + zod
+- 상태: Context API (contexts/)
+- 스타일: NativeWind (Tailwind for RN)
+
+### Git 컨벤션
+- 브랜치: main → develop → feature/{scope}-{기능명}
+- 커밋: <type>(<scope>): <subject>
+  - type: feat, fix, refactor, docs, chore, test
+  - scope: backend, app, admin, 또는 도메인명
+  - 예: feat(backend): 통계 API 추가
+
+### 환경 변수
+- backend/.env: JWT_SECRET, MYSQL_PASSWORD
+- app/.env: EXPO_PUBLIC_API_URL
+
+### 보안
+- .env 파일 절대 커밋 금지 (.gitignore로 차단됨)
+- JWT 토큰: Access 1시간, Refresh 7일
+- 비밀번호: BCrypt 해싱
+
+## 주요 문서
+- DEVELOPMENT.md: 개발 가이드 (작업 패턴, 파일 위치)
+- API.md: API 명세서 (39개 엔드포인트)
+- REQUIREMENTS.md: 비즈니스 로직, 데이터 모델
+- backend/README.md: 백엔드 상세
+- app/README.md: 앱 상세
+
+## 작업 시 참고
+1. 새 API 추가: DEVELOPMENT.md "일반적인 작업 패턴" 섹션
+2. 새 화면 추가: app/app/(tabs)/ 파일 생성
+3. API 변경: Backend 수정 → app/lib/types, api 동기화
+4. 배포: backend는 GitHub Actions 자동 배포
+
+## 현재 진행 (2026-02-26)
+- Phase 1 (MVP): ✅ 완료
+- Phase 2 (통계): 🚧 20%
+- Phase 3 (커뮤니티): 📋 계획
+
+## 주요 기술 스택
+Backend: Spring Boot 4.0.1, Java 21, MySQL 8, Redis 7, JWT
+App: Expo, React Native, TypeScript 5.9, NativeWind
