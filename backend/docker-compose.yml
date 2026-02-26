@@ -1,0 +1,66 @@
+services:
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: prolog-npm
+    profiles: [prod]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "81:81" # 관리자 웹 UI
+    volumes:
+      - npm-data:/data
+      - npm-letsencrypt:/etc/letsencrypt
+    depends_on:
+      - spring-app
+    networks:
+      - prolog-network
+    restart: unless-stopped
+
+  spring-app:
+    image: jookyworld/prolog-backend:latest
+    container_name: prolog-backend
+    profiles: [prod]
+    env_file: .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - prolog-network
+
+  mysql:
+    image: mysql:8.4
+    container_name: prolog-mysql
+    ports:
+      - "127.0.0.1:3306:3306" # 로컬 개발용, 외부 접근 차단
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: prolog
+      TZ: Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+    volumes:
+      - prolog-mysql-data:/var/lib/mysql
+    networks:
+      - prolog-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: prolog-redis
+    ports:
+      - "127.0.0.1:6379:6379" # 로컬 개발용, 외부 접근 차단
+    networks:
+      - prolog-network
+
+networks:
+  prolog-network:
+    driver: bridge
+
+volumes:
+  prolog-mysql-data:
+  npm-data:
+  npm-letsencrypt:

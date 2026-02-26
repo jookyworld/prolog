@@ -1,0 +1,115 @@
+# ==============================
+# Dependencies
+# ==============================
+node_modules/
+.pnp/
+.pnp.js
+.yarn/
+bower_components/
+package-lock.json.backup
+yarn.lock.backup
+pnpm-lock.yaml.backup
+
+# ==============================
+# Expo / React Native
+# ==============================
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Generated native folders
+/ios
+/android
+
+# Native build artifacts
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+*.hprof
+*.dex
+*.apk
+*.aab
+*.ipa
+
+# Metro bundler
+.metro-health-check*
+.metro/
+
+# EAS (Expo Application Services)
+.eas/
+eas.json
+
+# ==============================
+# Environment & Secrets
+# ==============================
+.env
+.env.*
+!.env.example
+!.env.template
+
+# ==============================
+# Expo specific configs
+# ==============================
+google-services.json
+GoogleService-Info.plist
+app.config.local.ts
+app.config.local.js
+
+# ==============================
+# TypeScript
+# ==============================
+*.tsbuildinfo
+.tsbuildinfo
+
+# ==============================
+# Debug & Logs
+# ==============================
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+pnpm-debug.*
+*.log
+
+# ==============================
+# Test & Coverage
+# ==============================
+coverage/
+.nyc_output/
+__snapshots__/
+jest-results/
+test-results/
+*.lcov
+
+# ==============================
+# Build & Cache
+# ==============================
+.cache/
+.parcel-cache/
+*.tgz
+*.gz
+*.zip
+*.tar
+*.tar.gz
+
+# ==============================
+# Database & Storage (if used)
+# ==============================
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.realm
+
+# ==============================
+# Misc
+# ==============================
+.eslintcache
+.stylelintcache
+*.tmp
+*.temp
+*.bak
+*.backup

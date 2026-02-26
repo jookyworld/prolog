@@ -1,0 +1,122 @@
+# ==============================
+# OS Files
+# ==============================
+.DS_Store
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+.fseventsd
+.TemporaryItems
+.apdisk
+Icon?
+*~
+*.swn
+
+# ==============================
+# IDE / Editor
+# ==============================
+.idea/
+.vscode/
+*.code-workspace
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+.project
+.classpath
+.settings/
+*.launch
+.buildpath
+*.iml
+.history/
+
+# ==============================
+# AI Tools
+# ==============================
+.claude/
+.cursor/
+.copilot/
+.aider*
+.codeium/
+.tabnine/
+.sourcegraph/
+
+# ==============================
+# Global Security - 절대 커밋 금지
+# ==============================
+# Keys & Certificates
+*.pem
+*.key
+*.cert
+*.crt
+*.der
+*.pfx
+*.p7b
+*.keystore
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+
+# Credentials & Secrets
+*.secret
+*.secrets
+*.credential*
+**/secrets/
+**/credentials/
+*.token
+*.tokens
+**/token/
+**/tokens/
+oauth*.json
+auth*.json
+google-services.json
+GoogleService-Info.plist
+service-account*.json
+firebase*.json
+!firebase.json
+
+# Environment files (production)
+*.env.production
+*.env.*.production
+
+# Cloud Provider Configs
+.aws/
+.azure/
+.gcloud/
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+
+# ==============================
+# Global Build & Cache
+# ==============================
+.cache/
+*.cache
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+*.patch
+*.diff
+*.pid
+*.seed
+.sass-cache/
+
+# ==============================
+# Logs (Global)
+# ==============================
+*.log
+*.log.*
+logs/
