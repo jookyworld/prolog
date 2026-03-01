@@ -8,7 +8,7 @@ public record WorkoutSetResponse(
         String exerciseName,
         String bodyPart,
         int setNumber,
-        int weight,
+        double weight,
         int reps
 ) {
     public static WorkoutSetResponse from(WorkoutSet set) {

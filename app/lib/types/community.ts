@@ -1,91 +1,83 @@
 import type { BodyPart } from "./exercise";
 
-// 루틴 스냅샷 구조
+// 루틴 스냅샷 구조 (백엔드 RoutineSnapshotWrapper)
 export interface RoutineSnapshot {
-  routineId: number;
-  title: string;
-  description: string;
-  exercises: ExerciseSnapshot[];
+  items: RoutineSnapshotItem[];
 }
 
-export interface ExerciseSnapshot {
+export interface RoutineSnapshotItem {
   exerciseId: number;
   exerciseName: string;
   bodyPart: BodyPart;
-  order: number;
-  targetSets?: number;
-  targetReps?: number;
+  orderInRoutine: number;
+  sets: number;
+  restSeconds: number;
 }
 
-// 세션 스냅샷 구조
+// 세션 스냅샷 구조 (백엔드 SessionSnapshotWrapper)
 export interface SessionSnapshot {
-  sessionId: number;
   completedAt: string;
   duration: number; // 초
   totalVolume: number;
-  totalSets: number;
   exercises: SessionExerciseSnapshot[];
 }
 
 export interface SessionExerciseSnapshot {
-  exerciseId: number;
   exerciseName: string;
   sets: SetSnapshot[];
-  totalVolume: number;
 }
 
 export interface SetSnapshot {
+  setNumber: number;
   weight: number;
   reps: number;
 }
 
-// 공유 루틴 리스트 아이템
+// 공유 루틴 리스트 아이템 (백엔드 SharedRoutineResponse)
 export interface SharedRoutineListItem {
   id: number;
+  username: string;
+  nickname: string;
   title: string;
-  content: string; // 한줄평
-
-  // 루틴 정보 (snapshot에서 추출)
+  description: string;
   exerciseCount: number;
-  estimatedDuration?: number; // 예상 시간 (분)
-  bodyParts: BodyPart[]; // 운동 부위들
-
-  // 통계
+  bodyParts: BodyPart[];
+  exerciseNames: string[]; // 대표 운동 종목 이름 (최대 3개)
   viewCount: number;
   importCount: number;
-  likeCount: number;
-  isLiked: boolean; // 현재 사용자가 좋아요 했는지
-
-  // 작성자 정보
-  author: {
-    id: number;
-    username: string;
-    nickname: string;
-    profileImage?: string;
-  };
-
   createdAt: string;
 }
 
-// 공유 루틴 상세
-export interface SharedRoutineDetail extends SharedRoutineListItem {
+// 공유 루틴 상세 (백엔드 SharedRoutineDetailResponse)
+export interface SharedRoutineDetail {
+  id: number;
+  username: string;
+  nickname: string;
+  title: string;
+  description: string;
+  exerciseCount: number;
+  bodyParts: BodyPart[];
+  exerciseNames: string[]; // 대표 운동 종목 이름 (최대 3개)
   routineSnapshot: RoutineSnapshot;
   lastSessionSnapshot?: SessionSnapshot;
+  viewCount: number;
+  importCount: number;
+  createdAt: string;
+  comments: Comment[];
+}
+
+export interface Comment {
+  id: number;
+  nickname: string;
+  content: string;
+  createdAt: string;
 }
 
 // API 요청/응답 타입
-export interface SharedRoutinesResponse {
-  items: SharedRoutineListItem[];
-  total: number;
-  page: number;
-  pageSize: number;
-  hasNext: boolean;
-}
-
 export interface CreateSharedRoutineRequest {
   routineId: number;
   title: string;
-  content: string;
+  description: string;
 }
 
-export type SharedRoutineSortType = "latest" | "popular" | "imported";
+export type SharedRoutineSortType = "RECENT" | "POPULAR" | "IMPORTED";

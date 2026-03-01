@@ -1,23 +1,29 @@
 import { communityApi } from "@/lib/api/community";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatRelativeDate } from "@/lib/format";
-import type { SharedRoutineDetail } from "@/lib/types/community";
+import type { SharedRoutineDetail, Comment } from "@/lib/types/community";
 import { BODY_PART_LABEL } from "@/lib/types/exercise";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
-  Heart,
   Eye,
   Download,
   ArrowLeft,
   Dumbbell,
   Clock,
+  Send,
+  Trash2,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -47,6 +53,7 @@ export default function CommunityDetailScreen() {
   const [routine, setRoutine] = useState<SharedRoutineDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [commentText, setCommentText] = useState("");
 
   useEffect(() => {
     loadData();
@@ -67,30 +74,6 @@ export default function CommunityDetailScreen() {
     }
   };
 
-  const handleLike = async () => {
-    if (!routine) return;
-
-    try {
-      if (routine.isLiked) {
-        await communityApi.unlikeRoutine(routineId);
-      } else {
-        await communityApi.likeRoutine(routineId);
-      }
-
-      setRoutine((prev) =>
-        prev
-          ? {
-              ...prev,
-              isLiked: !prev.isLiked,
-              likeCount: prev.isLiked ? prev.likeCount - 1 : prev.likeCount + 1,
-            }
-          : null
-      );
-    } catch (err) {
-      console.error("Failed to toggle like:", err);
-    }
-  };
-
   const handleImport = async () => {
     if (!routine) return;
 
@@ -102,13 +85,63 @@ export default function CommunityDetailScreen() {
       );
 
       // TODO: 성공 토스트 표시
-      console.log("루틴이 추가되었습니다:", result.routineId);
+      console.log("루틴이 추가되었습니다:", result.title);
 
       // 루틴 탭으로 이동
       router.push("/(tabs)/routine");
     } catch (err) {
       console.error("Failed to import routine:", err);
     }
+  };
+
+  const handleCommentSubmit = async () => {
+    if (!commentText.trim()) return;
+
+    try {
+      const newComment = await communityApi.createComment(routineId, commentText);
+
+      setRoutine((prev) =>
+        prev
+          ? {
+              ...prev,
+              comments: [...prev.comments, newComment],
+            }
+          : null
+      );
+
+      setCommentText("");
+      Keyboard.dismiss();
+    } catch (err) {
+      console.error("Failed to create comment:", err);
+      Alert.alert("오류", "댓글 작성에 실패했습니다.");
+    }
+  };
+
+  const handleCommentDelete = async (commentId: number) => {
+    Alert.alert("댓글 삭제", "이 댓글을 삭제하시겠습니까?", [
+      { text: "취소", style: "cancel" },
+      {
+        text: "삭제",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await communityApi.deleteComment(commentId);
+
+            setRoutine((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    comments: prev.comments.filter((c) => c.id !== commentId),
+                  }
+                : null
+            );
+          } catch (err) {
+            console.error("Failed to delete comment:", err);
+            Alert.alert("오류", "댓글 삭제에 실패했습니다.");
+          }
+        },
+      },
+    ]);
   };
 
   // 로딩 상태
@@ -160,16 +193,20 @@ export default function CommunityDetailScreen() {
         <View className="border-b border-white/5 px-5 py-4">
           <View className="flex-row items-center gap-3">
             <View className="h-12 w-12 items-center justify-center rounded-full bg-primary/20">
-              <Text className="text-base font-bold text-primary">
-                {routine.author.nickname[0]}
+              <Text className="text-lg font-bold text-primary">
+                {routine.nickname[0].toUpperCase()}
               </Text>
             </View>
             <View className="flex-1">
               <Text className="text-base font-semibold text-white">
-                {routine.author.nickname}
+                {routine.nickname}
               </Text>
               <Text className="text-sm text-white/40">
-                @{routine.author.username}
+                {new Date(routine.createdAt).toLocaleDateString('ko-KR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
               </Text>
             </View>
           </View>
@@ -180,9 +217,11 @@ export default function CommunityDetailScreen() {
           <Text className="mb-2 text-2xl font-bold text-white">
             {routine.title}
           </Text>
-          <Text className="mb-3 text-base text-white/70">
-            {routine.content}
-          </Text>
+          {routine.description && (
+            <Text className="mb-3 text-base text-white/70">
+              {routine.description}
+            </Text>
+          )}
 
           {/* 통계 */}
           <View className="flex-row items-center gap-4">
@@ -190,16 +229,6 @@ export default function CommunityDetailScreen() {
               <Eye size={16} color={COLORS.mutedForeground} />
               <Text className="text-sm text-white/50">
                 {routine.viewCount}
-              </Text>
-            </View>
-            <View className="flex-row items-center gap-1">
-              <Heart
-                size={16}
-                color={routine.isLiked ? COLORS.primary : COLORS.mutedForeground}
-                fill={routine.isLiked ? COLORS.primary : "transparent"}
-              />
-              <Text className="text-sm text-white/50">
-                {routine.likeCount}
               </Text>
             </View>
             <View className="flex-row items-center gap-1">
@@ -214,27 +243,25 @@ export default function CommunityDetailScreen() {
         {/* 운동 종목 */}
         <View className="border-b border-white/5 px-5 py-4">
           <Text className="mb-3 text-lg font-semibold text-white">
-            운동 종목 ({routine.routineSnapshot.exercises.length}개)
+            운동 종목 ({routine.routineSnapshot.items.length}개)
           </Text>
           <View className="gap-2">
-            {routine.routineSnapshot.exercises.map((exercise) => (
+            {routine.routineSnapshot.items.map((item) => (
               <View
-                key={exercise.exerciseId}
+                key={item.exerciseId}
                 className="flex-row items-center justify-between rounded-lg bg-card p-3"
               >
                 <View className="flex-1">
                   <Text className="text-base font-medium text-white">
-                    {exercise.exerciseName}
+                    {item.exerciseName}
                   </Text>
                   <Text className="text-xs text-white/40">
-                    {BODY_PART_LABEL[exercise.bodyPart]}
+                    {BODY_PART_LABEL[item.bodyPart]}
                   </Text>
                 </View>
-                {exercise.targetSets && exercise.targetReps && (
-                  <Text className="text-sm text-white/50">
-                    {exercise.targetSets}세트 × {exercise.targetReps}회
-                  </Text>
-                )}
+                <Text className="text-sm text-white/50">
+                  {item.sets}세트 × {item.restSeconds}초
+                </Text>
               </View>
             ))}
           </View>
@@ -242,7 +269,7 @@ export default function CommunityDetailScreen() {
 
         {/* 최근 수행 기록 */}
         {routine.lastSessionSnapshot && (
-          <View className="px-5 py-4">
+          <View className="border-b border-white/5 px-5 py-4">
             <Text className="mb-3 text-lg font-semibold text-white">
               최근 수행 기록
             </Text>
@@ -268,19 +295,19 @@ export default function CommunityDetailScreen() {
               </View>
 
               <View className="gap-3">
-                {routine.lastSessionSnapshot.exercises.map((exercise) => (
-                  <View key={exercise.exerciseId}>
+                {routine.lastSessionSnapshot.exercises.map((exercise, idx) => (
+                  <View key={idx}>
                     <Text className="mb-1.5 text-sm font-medium text-white">
                       {exercise.exerciseName}
                     </Text>
                     <View className="gap-1">
-                      {exercise.sets.map((set, idx) => (
+                      {exercise.sets.map((set, setIdx) => (
                         <View
-                          key={idx}
+                          key={setIdx}
                           className="flex-row items-center justify-between"
                         >
                           <Text className="w-6 text-xs text-white/40">
-                            {idx + 1}
+                            {set.setNumber}
                           </Text>
                           <Text className="w-20 text-sm text-white">
                             {set.weight}kg
@@ -301,36 +328,83 @@ export default function CommunityDetailScreen() {
           </View>
         )}
 
+        {/* 댓글 */}
+        <View className="px-5 py-4">
+          <Text className="mb-3 text-lg font-semibold text-white">
+            댓글 ({routine.comments.length})
+          </Text>
+          <View className="gap-3">
+            {routine.comments.length === 0 ? (
+              <Text className="py-8 text-center text-sm text-white/40">
+                첫 댓글을 작성해보세요
+              </Text>
+            ) : (
+              routine.comments.map((comment) => (
+                <View key={comment.id} className="rounded-lg bg-card p-3">
+                  <View className="mb-1 flex-row items-center justify-between">
+                    <Text className="text-sm font-semibold text-white">
+                      {comment.nickname}
+                    </Text>
+                    <View className="flex-row items-center gap-2">
+                      <Text className="text-xs text-white/40">
+                        {formatRelativeDate(comment.createdAt)}
+                      </Text>
+                      <Pressable
+                        onPress={() => handleCommentDelete(comment.id)}
+                        className="p-1"
+                      >
+                        <Trash2 size={14} color={COLORS.mutedForeground} />
+                      </Pressable>
+                    </View>
+                  </View>
+                  <Text className="text-sm text-white/70">
+                    {comment.content}
+                  </Text>
+                </View>
+              ))
+            )}
+          </View>
+        </View>
       </ScrollView>
 
       {/* 하단 고정 액션 바 */}
-      <View
-        className="border-t border-white/5 bg-background px-5 pt-3"
-        style={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom }}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
-        <View className="flex-row gap-3">
-          <Pressable
-            onPress={handleLike}
-            className={`flex-1 flex-row items-center justify-center gap-2 rounded-lg py-3 ${
-              routine.isLiked ? "bg-primary/20" : "bg-card"
-            }`}
-          >
-            <Heart
-              size={20}
-              color={routine.isLiked ? COLORS.primary : COLORS.white}
-              fill={routine.isLiked ? COLORS.primary : "transparent"}
+        <View
+          className="border-t border-white/5 bg-background px-5 pt-3"
+          style={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom }}
+        >
+          {/* 댓글 입력 */}
+          <View className="mb-3 flex-row items-center gap-2">
+            <TextInput
+              value={commentText}
+              onChangeText={setCommentText}
+              placeholder="댓글을 입력하세요..."
+              placeholderTextColor={COLORS.mutedForeground}
+              className="flex-1 rounded-lg bg-card px-4 py-3 text-sm text-white"
+              multiline
+              maxLength={200}
             />
-            <Text
-              className={`text-sm font-semibold ${
-                routine.isLiked ? "text-primary" : "text-white"
+            <Pressable
+              onPress={handleCommentSubmit}
+              disabled={!commentText.trim()}
+              className={`h-12 w-12 items-center justify-center rounded-lg ${
+                commentText.trim() ? "bg-primary" : "bg-card"
               }`}
             >
-              {routine.isLiked ? "좋아요 취소" : "좋아요"}
-            </Text>
-          </Pressable>
+              <Send
+                size={18}
+                color={commentText.trim() ? COLORS.white : COLORS.mutedForeground}
+              />
+            </Pressable>
+          </View>
+
+          {/* 가져오기 버튼 */}
           <Pressable
             onPress={handleImport}
-            className="flex-1 flex-row items-center justify-center gap-2 rounded-lg bg-primary py-3"
+            className="flex-row items-center justify-center gap-2 rounded-lg bg-primary py-3"
           >
             <Download size={20} color={COLORS.white} />
             <Text className="text-sm font-semibold text-white">
@@ -338,7 +412,7 @@ export default function CommunityDetailScreen() {
             </Text>
           </Pressable>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

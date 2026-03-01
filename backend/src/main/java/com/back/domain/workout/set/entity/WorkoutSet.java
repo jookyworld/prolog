@@ -43,7 +43,7 @@ public class WorkoutSet {
 
     @Column(nullable = false)
     private int setNumber;
-    private int weight;
+    private double weight;
     @Column(nullable = false)
     private int reps;
 

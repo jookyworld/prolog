@@ -27,5 +27,7 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
 
     List<Exercise> findAllByNameAndBodyPartAndCustomIsTrue(String name, BodyPart bodyPart);
 
+    java.util.Optional<Exercise> findByNameAndBodyPartAndCreatedBy_Id(String name, BodyPart bodyPart, Long userId);
+
     void deleteAllByCreatedBy_Id(Long userId);
 }

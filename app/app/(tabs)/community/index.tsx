@@ -7,11 +7,9 @@ import type {
 import { BODY_PART_LABEL, type BodyPart } from "@/lib/types/exercise";
 import { useRouter } from "expo-router";
 import {
-  Clock,
   Download,
   Dumbbell,
   Eye,
-  Heart,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
@@ -24,12 +22,10 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
-type TabType = "all" | "liked";
-
 const SORT_LABELS: Record<SharedRoutineSortType, string> = {
-  latest: "최신순",
-  popular: "인기순",
-  imported: "많이 가져간 순",
+  RECENT: "최신순",
+  POPULAR: "인기순",
+  IMPORTED: "많이 가져간 순",
 };
 
 function formatNumber(num: number): string {
@@ -58,96 +54,74 @@ function RoutineCard({ routine, onImport, onPress }: RoutineCardProps) {
       className="rounded-2xl bg-card p-4"
     >
       {/* 작성자 정보 */}
-      <View className="mb-3 flex-row items-center gap-3">
-        <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/20">
-          <Text className="text-sm font-bold text-primary">
-            {routine.author.nickname[0]}
-          </Text>
-        </View>
-        <View className="flex-1">
-          <Text className="text-sm font-semibold text-white">
-            {routine.author.nickname}
-          </Text>
-          <Text className="text-xs text-white/40">
-            @{routine.author.username}
-          </Text>
+      <View className="mb-3 flex-row items-center justify-between">
+        <View className="flex-row items-center gap-3">
+          <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/20">
+            <Text className="text-base font-bold text-primary">
+              {routine.nickname[0].toUpperCase()}
+            </Text>
+          </View>
+          <View>
+            <Text className="text-sm font-semibold text-white">
+              {routine.nickname}
+            </Text>
+            <Text className="text-xs text-white/40">
+              {new Date(routine.createdAt).toLocaleDateString('ko-KR', {
+                month: 'short',
+                day: 'numeric',
+              })}
+            </Text>
+          </View>
         </View>
       </View>
 
       {/* 루틴 제목 */}
-      <Text className="mb-1.5 text-lg font-bold text-white">{routine.title}</Text>
+      <Text className="mb-2 text-lg font-bold text-white">{routine.title}</Text>
 
-      {/* 한줄평 */}
-      <Text className="mb-2.5 text-sm text-white/60" numberOfLines={2}>
-        {routine.content}
-      </Text>
-
-      {/* 운동 부위 뱃지 + 루틴 정보 (한 줄) */}
-      <View className="mb-3 flex-row items-center gap-2">
-        {/* 운동 부위 뱃지 */}
-        {bodyPartLabels.slice(0, 3).map((label) => (
-          <View
-            key={label}
-            className="rounded-full bg-primary/15 px-2.5 py-0.5"
-          >
-            <Text className="text-xs font-semibold text-primary">{label}</Text>
-          </View>
-        ))}
-        {bodyPartLabels.length > 3 && (
-          <View className="rounded-full bg-primary/15 px-2.5 py-0.5">
-            <Text className="text-xs font-semibold text-primary">
-              +{bodyPartLabels.length - 3}
-            </Text>
-          </View>
-        )}
-
-        {/* 구분자 */}
-        <Text className="text-white/20">•</Text>
-
-        {/* 루틴 정보 */}
-        <View className="flex-row items-center gap-1">
-          <Dumbbell size={12} color={COLORS.mutedForeground} />
-          <Text className="text-xs text-white/50">
-            {routine.exerciseCount}종목
+      {/* 대표 운동 종목 */}
+      {routine.exerciseNames.length > 0 && (
+        <View className="mb-2 flex-row items-center gap-1">
+          <Dumbbell size={14} color={COLORS.primary} />
+          <Text className="flex-1 text-sm text-white/70" numberOfLines={1}>
+            {routine.exerciseNames.join(', ')}
+            {routine.exerciseCount > routine.exerciseNames.length &&
+              ` 외 ${routine.exerciseCount - routine.exerciseNames.length}개`}
           </Text>
         </View>
+      )}
 
-        {routine.estimatedDuration && (
-          <>
-            <Text className="text-white/20">•</Text>
-            <View className="flex-row items-center gap-1">
-              <Clock size={12} color={COLORS.mutedForeground} />
-              <Text className="text-xs text-white/50">
-                {routine.estimatedDuration}분
-              </Text>
-            </View>
-          </>
-        )}
+      {/* 설명 */}
+      {routine.description && (
+        <Text className="mb-3 text-sm text-white/50" numberOfLines={2}>
+          {routine.description}
+        </Text>
+      )}
+
+      {/* 운동 부위 뱃지 */}
+      <View className="mb-3 flex-row flex-wrap items-center gap-2">
+        {bodyPartLabels.map((label) => (
+          <View
+            key={label}
+            className="rounded-full bg-primary/10 px-2.5 py-1"
+          >
+            <Text className="text-xs font-medium text-primary">{label}</Text>
+          </View>
+        ))}
       </View>
 
       {/* 통계 & 액션 */}
       <View className="flex-row items-center justify-between border-t border-white/5 pt-3">
         {/* 통계 */}
-        <View className="flex-row items-center gap-4">
+        <View className="flex-row items-center gap-3">
           <View className="flex-row items-center gap-1">
             <Eye size={14} color={COLORS.mutedForeground} />
-            <Text className="text-xs text-white/40">
+            <Text className="text-xs text-white/50">
               {formatNumber(routine.viewCount)}
             </Text>
           </View>
           <View className="flex-row items-center gap-1">
-            <Heart
-              size={14}
-              color={routine.isLiked ? COLORS.primary : COLORS.mutedForeground}
-              fill={routine.isLiked ? COLORS.primary : "transparent"}
-            />
-            <Text className="text-xs text-white/40">
-              {formatNumber(routine.likeCount)}
-            </Text>
-          </View>
-          <View className="flex-row items-center gap-1">
             <Download size={14} color={COLORS.mutedForeground} />
-            <Text className="text-xs text-white/40">
+            <Text className="text-xs text-white/50">
               {formatNumber(routine.importCount)}
             </Text>
           </View>
@@ -171,8 +145,7 @@ function RoutineCard({ routine, onImport, onPress }: RoutineCardProps) {
 export default function CommunityScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = useState<TabType>("all");
-  const [sortType, setSortType] = useState<SharedRoutineSortType>("latest");
+  const [sortType, setSortType] = useState<SharedRoutineSortType>("RECENT");
   const [routines, setRoutines] = useState<SharedRoutineListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -180,19 +153,15 @@ export default function CommunityScreen() {
 
   useEffect(() => {
     loadRoutines();
-  }, [activeTab, sortType]);
+  }, [sortType]);
 
   const loadRoutines = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const response =
-        activeTab === "all"
-          ? await communityApi.getSharedRoutines(sortType)
-          : await communityApi.getLikedRoutines();
-
-      setRoutines(response.items);
+      const response = await communityApi.getSharedRoutines(sortType);
+      setRoutines(response.content);
     } catch (err) {
       console.error("Failed to load routines:", err);
       setError("루틴을 불러오는데 실패했습니다.");
@@ -219,7 +188,7 @@ export default function CommunityScreen() {
       );
 
       // TODO: 성공 토스트 표시
-      console.log("루틴이 추가되었습니다:", result.routineId);
+      console.log("루틴이 추가되었습니다:", result.title);
     } catch (err) {
       console.error("Failed to import routine:", err);
     }
@@ -261,62 +230,28 @@ export default function CommunityScreen() {
           </Text>
         </View>
 
-        {/* 탭 */}
+        {/* 정렬 */}
         <View className="mb-4 flex-row gap-2 px-5">
-          <Pressable
-            onPress={() => setActiveTab("all")}
-            className={`flex-1 rounded-lg py-3 ${
-              activeTab === "all" ? "bg-primary" : "bg-card"
-            }`}
-          >
-            <Text
-              className={`text-center text-sm font-semibold ${
-                activeTab === "all" ? "text-white" : "text-white/50"
-              }`}
-            >
-              전체
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setActiveTab("liked")}
-            className={`flex-1 rounded-lg py-3 ${
-              activeTab === "liked" ? "bg-primary" : "bg-card"
-            }`}
-          >
-            <Text
-              className={`text-center text-sm font-semibold ${
-                activeTab === "liked" ? "text-white" : "text-white/50"
-              }`}
-            >
-              좋아요한 루틴
-            </Text>
-          </Pressable>
-        </View>
-
-        {/* 정렬 (전체 탭에만 표시) */}
-        {activeTab === "all" && (
-          <View className="mb-4 flex-row gap-2 px-5">
-            {(Object.keys(SORT_LABELS) as SharedRoutineSortType[]).map(
-              (sort) => (
-                <Pressable
-                  key={sort}
-                  onPress={() => setSortType(sort)}
-                  className={`rounded-full px-4 py-2 ${
-                    sortType === sort ? "bg-primary/20" : "bg-card"
+          {(Object.keys(SORT_LABELS) as SharedRoutineSortType[]).map(
+            (sort) => (
+              <Pressable
+                key={sort}
+                onPress={() => setSortType(sort)}
+                className={`rounded-full px-4 py-2 ${
+                  sortType === sort ? "bg-primary/20" : "bg-card"
+                }`}
+              >
+                <Text
+                  className={`text-xs font-medium ${
+                    sortType === sort ? "text-primary" : "text-white/50"
                   }`}
                 >
-                  <Text
-                    className={`text-xs font-medium ${
-                      sortType === sort ? "text-primary" : "text-white/50"
-                    }`}
-                  >
-                    {SORT_LABELS[sort]}
-                  </Text>
-                </Pressable>
-              ),
-            )}
-          </View>
-        )}
+                  {SORT_LABELS[sort]}
+                </Text>
+              </Pressable>
+            ),
+          )}
+        </View>
 
         {/* 에러 상태 */}
         {error && (
@@ -337,9 +272,7 @@ export default function CommunityScreen() {
             {routines.length === 0 ? (
               <View className="items-center py-20">
                 <Text className="text-center text-white/40">
-                  {activeTab === "all"
-                    ? "아직 공유된 루틴이 없습니다"
-                    : "좋아요한 루틴이 없습니다"}
+                  아직 공유된 루틴이 없습니다
                 </Text>
               </View>
             ) : (

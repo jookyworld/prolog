@@ -50,7 +50,7 @@ public record HomeStatsResponse(
     }
 
     public record SetDetail(
-            int weight,
+            double weight,
             int reps
     ) {
     }

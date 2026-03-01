@@ -1014,12 +1014,12 @@ GET /stats/dashboard
 
 ## Community (커뮤니티)
 
-**상태:** 📋 Phase 3 (전체)
+**상태:** ✅ Phase 3-1 완료 (6개 API)
 
-### 1. 루틴 공유
+### 1. 루틴 공유 ✅
 
 ```http
-POST /community/routines
+POST /api/community/routines
 ```
 
 **인증:** 🔒 필요
@@ -1037,80 +1037,16 @@ POST /community/routines
 ```json
 {
   "id": 1,
-  "userId": 1,
   "username": "johndoe",
+  "nickname": "존도우",
   "title": "3개월 만에 벤치 100kg 달성한 상체 루틴",
   "description": "초보자도 따라하기 쉽게 구성했습니다. 주 2-3회 추천!",
-  "routineSnapshot": {
-    "items": [...]
-  },
-  "lastSessionSnapshot": {
-    "exercises": [...]
-  },
-  "viewCount": 0,
-  "importCount": 0,
-  "createdAt": "2026-02-26T10:00:00"
-}
-```
-
-**참고:**
-- `title`, `description`: 공유 시 작성하는 제목/설명 (원본 루틴과 별도)
-- `routineSnapshot`: 루틴 구조만 포함 (items 배열)
-- `lastSessionSnapshot`: 최근 수행 기록 (선택사항)
-
----
-
-### 2. 공유 루틴 목록
-
-```http
-GET /community/routines?page=0&size=20&sort=popular
-```
-
-**인증:** 🔒 필요
-
-**Query Parameters:**
-- `page` (default: 0)
-- `size` (default: 20)
-- `sort` (default: recent): recent, popular, imported
-
-**Response:** `200 OK`
-```json
-{
-  "content": [
-    {
-      "id": 1,
-      "username": "johndoe",
-      "title": "상체 루틴 A",
-      "viewCount": 150,
-      "importCount": 30,
-      "createdAt": "2026-02-26T10:00:00"
-    }
-  ],
-  "totalElements": 100
-}
-```
-
----
-
-### 3. 공유 루틴 상세
-
-```http
-GET /community/routines/{id}
-```
-
-**인증:** 🔒 필요
-
-**Response:** `200 OK`
-```json
-{
-  "id": 1,
-  "userId": 1,
-  "username": "johndoe",
-  "title": "3개월 만에 벤치 100kg 달성한 상체 루틴",
-  "description": "초보자도 따라하기 쉽게 구성했습니다. 주 2-3회 추천!",
+  "exerciseCount": 6,
+  "bodyParts": ["CHEST", "SHOULDER", "ARM"],
   "routineSnapshot": {
     "items": [
       {
+        "exerciseId": 1,
         "exerciseName": "벤치프레스",
         "bodyPart": "CHEST",
         "orderInRoutine": 1,
@@ -1120,6 +1056,110 @@ GET /community/routines/{id}
     ]
   },
   "lastSessionSnapshot": {
+    "completedAt": "2026-02-26T19:30:00",
+    "duration": 3600,
+    "totalVolume": 15420,
+    "exercises": [
+      {
+        "exerciseName": "벤치프레스",
+        "sets": [
+          { "setNumber": 1, "weight": 60.0, "reps": 12 }
+        ]
+      }
+    ]
+  },
+  "viewCount": 0,
+  "importCount": 0,
+  "createdAt": "2026-02-26T10:00:00",
+  "comments": []
+}
+```
+
+**참고:**
+- `title`, `description`: 공유 시 작성하는 제목/설명 (원본 루틴과 별도)
+- `routineSnapshot`: 루틴 구조만 포함 (items 배열)
+- `lastSessionSnapshot`: 최근 수행 기록 (선택사항, duration 단위: 초)
+
+---
+
+### 2. 공유 루틴 목록 ✅
+
+```http
+GET /api/community/routines?page=0&size=20&sort=RECENT
+```
+
+**인증:** 🔒 필요
+
+**Query Parameters:**
+- `page` (default: 0)
+- `size` (default: 20)
+- `sort` (default: RECENT): RECENT, POPULAR, IMPORTED
+
+**Response:** `200 OK`
+```json
+{
+  "content": [
+    {
+      "id": 1,
+      "username": "johndoe",
+      "nickname": "존도우",
+      "title": "상체 루틴 A",
+      "description": "가슴과 어깨 집중 루틴",
+      "exerciseCount": 6,
+      "bodyParts": ["CHEST", "SHOULDER"],
+      "exerciseNames": ["벤치프레스", "오버헤드 프레스", "딥스"],
+      "viewCount": 150,
+      "importCount": 30,
+      "createdAt": "2026-02-26T10:00:00"
+    }
+  ],
+  "totalElements": 100,
+  "totalPages": 5,
+  "size": 20,
+  "number": 0
+}
+```
+
+**참고:**
+- `exerciseNames`: 대표 운동 종목 이름 (최대 3개)
+
+---
+
+### 3. 공유 루틴 상세 ✅
+
+```http
+GET /api/community/routines/{id}
+```
+
+**인증:** 🔒 필요
+
+**Response:** `200 OK`
+```json
+{
+  "id": 1,
+  "username": "johndoe",
+  "nickname": "존도우",
+  "title": "3개월 만에 벤치 100kg 달성한 상체 루틴",
+  "description": "초보자도 따라하기 쉽게 구성했습니다. 주 2-3회 추천!",
+  "exerciseCount": 6,
+  "bodyParts": ["CHEST", "SHOULDER"],
+  "exerciseNames": ["벤치프레스", "오버헤드 프레스", "딥스"],
+  "routineSnapshot": {
+    "items": [
+      {
+        "exerciseId": 1,
+        "exerciseName": "벤치프레스",
+        "bodyPart": "CHEST",
+        "orderInRoutine": 1,
+        "sets": 5,
+        "restSeconds": 90
+      }
+    ]
+  },
+  "lastSessionSnapshot": {
+    "completedAt": "2026-02-26T19:30:00",
+    "duration": 3600,
+    "totalVolume": 15420,
     "exercises": [
       {
         "exerciseName": "벤치프레스",
@@ -1132,37 +1172,53 @@ GET /community/routines/{id}
   },
   "viewCount": 151,
   "importCount": 30,
-  "comments": [...],
+  "comments": [
+    {
+      "id": 1,
+      "nickname": "운동왕",
+      "content": "좋은 루틴이네요!",
+      "createdAt": "2026-02-26T11:00:00"
+    }
+  ],
   "createdAt": "2026-02-26T10:00:00"
 }
 ```
 
+**참고:**
+- 조회 시 `viewCount` 자동 증가
+- `exerciseNames`: 대표 운동 종목 이름 (최대 3개)
+
 ---
 
-### 4. 루틴 가져오기
+### 4. 루틴 가져오기 ✅
 
 ```http
-POST /community/routines/{id}/import
+POST /api/community/routines/{id}/import
 ```
 
 **인증:** 🔒 필요
 
-**Response:** `201 Created`
+**Response:** `200 OK`
 ```json
 {
   "id": 10,
   "title": "상체 루틴 A",
   "description": "가슴, 어깨 집중",
-  "items": [...]
+  "active": true,
+  "routineItems": [...]
 }
 ```
 
+**참고:**
+- 공유 루틴의 `importCount` 자동 증가
+- 운동 종목이 없으면 커스텀 운동으로 자동 생성
+
 ---
 
-### 5. 댓글 작성
+### 5. 댓글 작성 ✅
 
 ```http
-POST /community/routines/{id}/comments
+POST /api/community/routines/{id}/comments
 ```
 
 **인증:** 🔒 필요
@@ -1174,31 +1230,30 @@ POST /community/routines/{id}/comments
 }
 ```
 
-**Response:** `201 Created`
+**Response:** `200 OK`
 ```json
 {
   "id": 1,
-  "userId": 1,
-  "username": "johndoe",
+  "nickname": "존도우",
   "content": "좋은 루틴이네요!",
   "createdAt": "2026-02-26T10:00:00"
 }
 ```
 
-**참고:**
-- `likeCount` 필드는 Phase 3 후반에 추가 예정
-
 ---
 
-### 6. 댓글 삭제
+### 6. 댓글 삭제 ✅
 
 ```http
-DELETE /community/comments/{id}
+DELETE /api/community/comments/{id}
 ```
 
 **인증:** 🔒 필요
 
 **Response:** `204 No Content`
+
+**참고:**
+- 본인이 작성한 댓글만 삭제 가능
 
 ---
 
