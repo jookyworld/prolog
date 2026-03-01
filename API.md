@@ -105,7 +105,7 @@ Authorization: Bearer {access_token}
 | Routines (루틴) | 7개 | ✅ Phase 1 |
 | Workout Sessions (운동 세션) | 8개 | ✅ Phase 1 |
 | Stats (통계) | 5개 | 🚧 Phase 2 (1개 완료) |
-| Community (커뮤니티) | 8개 | 📋 Phase 3 |
+| Community (커뮤니티) | 8개 | 📋 Phase 3 (6개 Phase 3-1, 2개 Phase 3-2) |
 | Admin (관리자) | 2개 | ✅ Phase 1 |
 
 ---
@@ -1027,7 +1027,9 @@ POST /community/routines
 **Request Body:**
 ```json
 {
-  "routineId": 5
+  "routineId": 5,
+  "title": "3개월 만에 벤치 100kg 달성한 상체 루틴",
+  "description": "초보자도 따라하기 쉽게 구성했습니다. 주 2-3회 추천!"
 }
 ```
 
@@ -1037,16 +1039,24 @@ POST /community/routines
   "id": 1,
   "userId": 1,
   "username": "johndoe",
+  "title": "3개월 만에 벤치 100kg 달성한 상체 루틴",
+  "description": "초보자도 따라하기 쉽게 구성했습니다. 주 2-3회 추천!",
   "routineSnapshot": {
-    "title": "상체 루틴 A",
-    "description": "가슴, 어깨 집중",
     "items": [...]
+  },
+  "lastSessionSnapshot": {
+    "exercises": [...]
   },
   "viewCount": 0,
   "importCount": 0,
   "createdAt": "2026-02-26T10:00:00"
 }
 ```
+
+**참고:**
+- `title`, `description`: 공유 시 작성하는 제목/설명 (원본 루틴과 별도)
+- `routineSnapshot`: 루틴 구조만 포함 (items 배열)
+- `lastSessionSnapshot`: 최근 수행 기록 (선택사항)
 
 ---
 
@@ -1096,12 +1106,29 @@ GET /community/routines/{id}
   "id": 1,
   "userId": 1,
   "username": "johndoe",
+  "title": "3개월 만에 벤치 100kg 달성한 상체 루틴",
+  "description": "초보자도 따라하기 쉽게 구성했습니다. 주 2-3회 추천!",
   "routineSnapshot": {
-    "title": "상체 루틴 A",
-    "items": [...]
+    "items": [
+      {
+        "exerciseName": "벤치프레스",
+        "bodyPart": "CHEST",
+        "orderInRoutine": 1,
+        "sets": 5,
+        "restSeconds": 90
+      }
+    ]
   },
   "lastSessionSnapshot": {
-    "exercises": [...]
+    "exercises": [
+      {
+        "exerciseName": "벤치프레스",
+        "sets": [
+          { "setNumber": 1, "weight": 60.0, "reps": 12 },
+          { "setNumber": 2, "weight": 70.0, "reps": 10 }
+        ]
+      }
+    ]
   },
   "viewCount": 151,
   "importCount": 30,
@@ -1154,10 +1181,12 @@ POST /community/routines/{id}/comments
   "userId": 1,
   "username": "johndoe",
   "content": "좋은 루틴이네요!",
-  "likeCount": 0,
   "createdAt": "2026-02-26T10:00:00"
 }
 ```
+
+**참고:**
+- `likeCount` 필드는 Phase 3 후반에 추가 예정
 
 ---
 
@@ -1173,25 +1202,27 @@ DELETE /community/comments/{id}
 
 ---
 
-### 7. 댓글 좋아요
+### 7. 댓글 좋아요 🚧
 
 ```http
 POST /community/comments/{id}/like
 ```
 
 **인증:** 🔒 필요
+**상태:** 📋 Phase 3 후반
 
 **Response:** `200 OK`
 
 ---
 
-### 8. 댓글 좋아요 취소
+### 8. 댓글 좋아요 취소 🚧
 
 ```http
 DELETE /community/comments/{id}/like
 ```
 
 **인증:** 🔒 필요
+**상태:** 📋 Phase 3 후반
 
 **Response:** `204 No Content`
 

@@ -162,7 +162,20 @@ workout_sessions
 workout_sets
 ├── id, workout_session_id (FK → workout_sessions, CASCADE)
 ├── exercise_id (FK → exercises), exerciseName, bodyPartSnapshot
-├── setNumber, weight, reps
+├── setNumber, weight (DECIMAL 5,2), reps
+└── createdAt, updatedAt
+
+shared_routines (Phase 3)
+├── id, user_id (FK → users)
+├── title, description
+├── routine_snapshot_json (JSON), last_session_snapshot_json (JSON)
+├── view_count, import_count
+└── createdAt, updatedAt
+* 원본 routines와 FK 없음 (스냅샷 독립성)
+
+comments (Phase 3)
+├── id, shared_routine_id (FK → shared_routines), user_id (FK → users)
+├── content
 └── createdAt, updatedAt
 ```
 
