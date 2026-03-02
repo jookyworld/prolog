@@ -53,8 +53,8 @@ async function refreshAccessToken(): Promise<void> {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      // Send refresh token in Authorization header as fallback
-      "X-Refresh-Token": refreshToken,
+      // Send refresh token in Authorization header (backend expects this)
+      Authorization: `Bearer ${refreshToken}`,
     },
     credentials: "include", // Include cookies if backend uses them
   });
