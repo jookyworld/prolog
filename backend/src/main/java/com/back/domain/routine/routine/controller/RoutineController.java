@@ -19,10 +19,10 @@ public class RoutineController {
     private final RoutineService routineService;
 
     @PostMapping
-    public RoutineResponse createRoutine(@AuthenticationPrincipal UserPrincipal principal,
-                                         @Valid @RequestBody RoutineCreateRequest request) {
+    public RoutineDetailResponse createRoutine(@AuthenticationPrincipal UserPrincipal principal,
+                                               @Valid @RequestBody RoutineCreateRequest request) {
         Routine routine = routineService.createRoutine(principal.getId(), request);
-        return RoutineResponse.from(routine);
+        return routineService.getRoutineDetail(principal.getId(), routine.getId());
     }
 
     @GetMapping("/{routineId}")

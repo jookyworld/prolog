@@ -32,8 +32,15 @@ export const communityApi = {
   },
 
   // 루틴 가져오기
-  importRoutine: async (id: number): Promise<{ id: number; title: string }> => {
-    return apiFetch<{ id: number; title: string }>(
+  importRoutine: async (id: number): Promise<{
+    id: number;
+    title: string;
+    description: string;
+    active: boolean;
+    createdAt: string;
+    updatedAt: string;
+  }> => {
+    return apiFetch(
       `/api/community/routines/${id}/import`,
       { method: "POST" }
     );
