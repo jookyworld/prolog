@@ -3,13 +3,7 @@ import { routineApi } from "@/lib/api/routine";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import type { RoutineDetail } from "@/lib/types/routine";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import {
-  ArrowLeft,
-  EllipsisVertical,
-  Play,
-  RotateCcw,
-  Share2,
-} from "lucide-react-native";
+import { ArrowLeft, EllipsisVertical, Play, Share2 } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -251,7 +245,7 @@ export default function RoutineDetailScreen() {
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         {/* 루틴 정보 */}
         {(routine.description || !routine.active) && (
-          <View className="mb-4 rounded-xl border border-white/10 bg-card p-4">
+          <View className="mb-7 rounded-xl border border-white/10 bg-card p-4">
             <View className="mb-3 flex-row items-center justify-between">
               <Text className="text-xs font-semibold text-white/40">
                 루틴 정보
@@ -281,7 +275,7 @@ export default function RoutineDetailScreen() {
           운동 구성 ({sortedItems.length}개)
         </Text>
 
-        <View className="gap-4" style={{ paddingBottom: bottomPadding + 60 }}>
+        <View className="gap-3" style={{ paddingBottom: bottomPadding }}>
           {sortedItems.map((item, idx) => (
             <View key={item.routineItemId} className="rounded-2xl bg-card p-5">
               <View className="flex-row items-start justify-between gap-3">
@@ -328,40 +322,25 @@ export default function RoutineDetailScreen() {
         </View>
       </ScrollView>
 
-      {/* 하단 버튼 */}
-      <View
-        className="absolute bottom-0 left-0 right-0 px-5 pt-2"
-        style={{ paddingBottom: bottomPadding }}
-      >
-        {routine.active ? (
-          <Pressable
-            onPress={() =>
-              router.push(`/(tabs)/workout/session?routineId=${id}`)
-            }
-            className="flex-row items-center justify-center gap-2 rounded-2xl bg-primary py-4 active:opacity-80"
-          >
-            <Play size={18} color={COLORS.white} />
-            <Text className="text-base font-semibold text-white">
-              운동 시작
-            </Text>
-          </Pressable>
-        ) : (
-          <Pressable
-            onPress={handleActivate}
-            disabled={actionLoading}
-            className="flex-row items-center justify-center gap-2 rounded-2xl bg-primary py-4 active:opacity-80"
-          >
-            {actionLoading ? (
-              <ActivityIndicator size="small" color={COLORS.white} />
-            ) : (
-              <RotateCcw size={18} color={COLORS.white} />
-            )}
-            <Text className="text-base font-semibold text-white">
-              {actionLoading ? "처리 중..." : "다시 활성화"}
-            </Text>
-          </Pressable>
-        )}
-      </View>
+      {/* FAB - 운동 시작 버튼 (활성 루틴만) */}
+      {routine.active && (
+        <Pressable
+          onPress={() => router.push(`/(tabs)/workout/session?routineId=${id}`)}
+          className="absolute flex-row items-center gap-4 rounded-full bg-primary px-5 py-3.5 shadow-lg active:opacity-90"
+          style={{
+            bottom: TAB_BAR_HEIGHT + insets.bottom + 24,
+            right: 20,
+            shadowColor: COLORS.primary,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 8,
+          }}
+        >
+          <Play size={18} color={COLORS.white} fill={COLORS.white} />
+          <Text className="text-base font-semibold text-white">바로 시작</Text>
+        </Pressable>
+      )}
 
       {/* 공유 모달 */}
       <Modal
