@@ -84,8 +84,11 @@ firebase*.json
 !firebase.json
 
 # Environment files (production)
+.env
+.env.*
 *.env.production
 *.env.*.production
+!.env.example
 
 # Cloud Provider Configs
 .aws/

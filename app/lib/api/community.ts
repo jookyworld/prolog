@@ -1,8 +1,8 @@
 import { apiFetch } from "../api";
 import type {
-  SharedRoutineListItem,
-  SharedRoutineDetail,
   CreateSharedRoutineRequest,
+  SharedRoutineDetail,
+  SharedRoutineListItem,
   SharedRoutineSortType,
 } from "../types/community";
 
@@ -19,10 +19,10 @@ export const communityApi = {
   getSharedRoutines: async (
     sort: SharedRoutineSortType = "RECENT",
     page: number = 0,
-    size: number = 20
+    size: number = 20,
   ): Promise<PageResponse<SharedRoutineListItem>> => {
     return apiFetch<PageResponse<SharedRoutineListItem>>(
-      `/api/community/routines?page=${page}&size=${size}&sort=${sort}`
+      `/api/community/routines?page=${page}&size=${size}&sort=${sort}`,
     );
   },
 
@@ -32,7 +32,9 @@ export const communityApi = {
   },
 
   // 루틴 가져오기
-  importRoutine: async (id: number): Promise<{
+  importRoutine: async (
+    id: number,
+  ): Promise<{
     id: number;
     title: string;
     description: string;
@@ -40,15 +42,12 @@ export const communityApi = {
     createdAt: string;
     updatedAt: string;
   }> => {
-    return apiFetch(
-      `/api/community/routines/${id}/import`,
-      { method: "POST" }
-    );
+    return apiFetch(`/api/community/routines/${id}/import`, { method: "POST" });
   },
 
   // 공유 루틴 생성
   createSharedRoutine: async (
-    data: CreateSharedRoutineRequest
+    data: CreateSharedRoutineRequest,
   ): Promise<SharedRoutineDetail> => {
     return apiFetch<SharedRoutineDetail>(`/api/community/routines`, {
       method: "POST",
@@ -59,15 +58,17 @@ export const communityApi = {
   // 댓글 작성
   createComment: async (
     routineId: number,
-    content: string
-  ): Promise<{ id: number; nickname: string; content: string; createdAt: string }> => {
-    return apiFetch(
-      `/api/community/routines/${routineId}/comments`,
-      {
-        method: "POST",
-        body: JSON.stringify({ content }),
-      }
-    );
+    content: string,
+  ): Promise<{
+    id: number;
+    nickname: string;
+    content: string;
+    createdAt: string;
+  }> => {
+    return apiFetch(`/api/community/routines/${routineId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    });
   },
 
   // 댓글 삭제
