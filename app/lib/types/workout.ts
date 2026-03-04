@@ -8,14 +8,6 @@ export interface WorkoutSessionListItemRes {
   completedAt: string;
 }
 
-export interface PageWorkoutSessionListItemRes {
-  content: WorkoutSessionListItemRes[];
-  totalPages: number;
-  totalElements: number;
-  first: boolean;
-  last: boolean;
-}
-
 export interface WorkoutSetRes {
   setId: number;
   setNumber: number;

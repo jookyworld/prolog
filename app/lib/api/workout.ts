@@ -1,13 +1,14 @@
 import { apiFetch } from "../api";
 import type {
-  PageWorkoutSessionListItemRes,
   WorkoutSessionCompleteReq,
   WorkoutSessionDetailRes,
+  WorkoutSessionListItemRes,
   WorkoutSessionStartRes,
 } from "../types/workout";
+import type { PageResponse } from "../types/common";
 
 export const workoutApi = {
-  getSessions(): Promise<PageWorkoutSessionListItemRes> {
+  getSessions(): Promise<PageResponse<WorkoutSessionListItemRes>> {
     return apiFetch("/api/workouts/sessions?page=0&size=100");
   },
 

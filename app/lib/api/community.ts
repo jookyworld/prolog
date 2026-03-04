@@ -5,14 +5,7 @@ import type {
   SharedRoutineListItem,
   SharedRoutineSortType,
 } from "../types/community";
-
-interface PageResponse<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  size: number;
-  number: number;
-}
+import type { PageResponse } from "../types/common";
 
 export const communityApi = {
   // 공유 루틴 목록 조회

@@ -6,10 +6,10 @@ import com.back.domain.community.comment.service.CommentService;
 import com.back.domain.community.sharedRoutine.dto.*;
 import com.back.domain.community.sharedRoutine.service.SharedRoutineService;
 import com.back.domain.routine.routine.dto.RoutineResponse;
+import com.back.global.dto.PageResponse;
 import com.back.global.security.principal.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,11 +28,11 @@ public class SharedRoutineController {
     }
 
     @GetMapping
-    public Page<SharedRoutineResponse> getSharedRoutines(
+    public PageResponse<SharedRoutineResponse> getSharedRoutines(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "RECENT") SharedRoutineSortType sort) {
-        return sharedRoutineService.getSharedRoutines(page, size, sort);
+        return PageResponse.from(sharedRoutineService.getSharedRoutines(page, size, sort));
     }
 
     @GetMapping("/{id}")
