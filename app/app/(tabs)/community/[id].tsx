@@ -2,7 +2,6 @@ import { communityApi } from "@/lib/api/community";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatRelativeDate } from "@/lib/format";
 import type { SharedRoutineDetail, Comment } from "@/lib/types/community";
-import { BODY_PART_LABEL } from "@/lib/types/exercise";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Eye,
@@ -256,7 +255,7 @@ export default function CommunityDetailScreen() {
                     {item.exerciseName}
                   </Text>
                   <Text className="text-xs text-white/40">
-                    {BODY_PART_LABEL[item.bodyPart]}
+                    {item.bodyPart}
                   </Text>
                 </View>
                 <Text className="text-sm text-white/50">

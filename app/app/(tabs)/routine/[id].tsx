@@ -1,13 +1,11 @@
-import { routineApi } from "@/lib/api/routine";
 import { communityApi } from "@/lib/api/community";
+import { routineApi } from "@/lib/api/routine";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import type { RoutineDetail } from "@/lib/types/routine";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import {
   ArrowLeft,
-  Clock,
   EllipsisVertical,
-  Layers,
   Play,
   RotateCcw,
   Share2,
@@ -227,15 +225,20 @@ export default function RoutineDetailScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       {/* 헤더 */}
-      <View className="flex-row items-center justify-between px-5 py-4">
-        <View className="flex-row items-center">
+      <View className="flex-row items-center justify-between gap-3 px-5 py-4">
+        <View className="flex-1 flex-row items-center gap-3">
           <Pressable
             onPress={() => router.back()}
-            className="mr-3 h-10 w-10 items-center justify-center rounded-xl bg-white/5"
+            className="h-10 w-10 items-center justify-center rounded-xl bg-white/5"
           >
             <ArrowLeft size={20} color={COLORS.white} />
           </Pressable>
-          <Text className="text-2xl font-bold text-white">루틴 상세</Text>
+          <Text
+            className="flex-1 text-2xl font-bold text-white"
+            numberOfLines={1}
+          >
+            {routine.title}
+          </Text>
         </View>
         <Pressable
           onPress={handleSettingsMenu}
@@ -246,69 +249,77 @@ export default function RoutineDetailScreen() {
       </View>
 
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        {/* 요약 카드 */}
-        <View className="mb-4 rounded-2xl bg-card p-5">
-          <View className="mb-2 flex-row items-center gap-2">
-            <Text className="flex-1 text-xl font-bold text-white">
-              {routine.title}
-            </Text>
-            {routine.active ? (
-              <View className="rounded-md bg-primary/15 px-2.5 py-1">
-                <Text className="text-xs font-medium text-primary">활성</Text>
-              </View>
-            ) : (
-              <View className="rounded-md bg-white/10 px-2.5 py-1">
-                <Text className="text-xs font-medium text-white/50">
-                  보관됨
-                </Text>
-              </View>
-            )}
+        {/* 루틴 정보 */}
+        {(routine.description || !routine.active) && (
+          <View className="mb-4 rounded-xl border border-white/10 bg-card p-4">
+            <View className="mb-3 flex-row items-center justify-between">
+              <Text className="text-xs font-semibold text-white/40">
+                루틴 정보
+              </Text>
+              {routine.active ? (
+                <View className="rounded-md bg-primary/15 px-2.5 py-1">
+                  <Text className="text-xs font-medium text-primary">활성</Text>
+                </View>
+              ) : (
+                <View className="rounded-md bg-white/10 px-2.5 py-1">
+                  <Text className="text-xs font-medium text-white/50">
+                    보관됨
+                  </Text>
+                </View>
+              )}
+            </View>
+            {routine.description ? (
+              <Text className="text-sm leading-5 text-white/60">
+                {routine.description}
+              </Text>
+            ) : null}
           </View>
-          {routine.description ? (
-            <Text className="text-sm leading-5 text-white/50">
-              {routine.description}
-            </Text>
-          ) : null}
-        </View>
+        )}
 
         {/* 운동 구성 */}
         <Text className="mb-3 text-base font-semibold text-white/80">
           운동 구성 ({sortedItems.length}개)
         </Text>
 
-        <View className="gap-3" style={{ paddingBottom: bottomPadding + 60 }}>
+        <View className="gap-4" style={{ paddingBottom: bottomPadding + 60 }}>
           {sortedItems.map((item, idx) => (
             <View key={item.routineItemId} className="rounded-2xl bg-card p-5">
-              <View className="mb-3 flex-row items-center gap-3">
-                <View className="h-8 w-8 items-center justify-center rounded-lg bg-primary/15">
-                  <Text className="text-sm font-bold text-primary">
-                    {idx + 1}
-                  </Text>
-                </View>
-                <View className="flex-1">
-                  <Text className="text-base font-semibold text-white">
-                    {item.exerciseName}
-                  </Text>
-                  <Text className="text-xs text-white/40">
-                    {item.bodyPart}
-                    {item.partDetail ? ` · ${item.partDetail}` : ""}
-                  </Text>
-                </View>
-              </View>
-
-              <View className="flex-row gap-4">
-                <View className="flex-row items-center gap-1.5">
-                  <View className="h-7 w-7 items-center justify-center rounded-md bg-white/5">
-                    <Layers size={14} color={COLORS.mutedForeground} />
+              <View className="flex-row items-start justify-between gap-3">
+                <View className="flex-1 flex-row items-center gap-3">
+                  <View className="h-9 w-9 items-center justify-center rounded-xl bg-white/10">
+                    <Text className="text-base font-bold text-white">
+                      {idx + 1}
+                    </Text>
                   </View>
-                  <Text className="text-sm text-white/60">{item.sets}세트</Text>
-                </View>
-                <View className="flex-row items-center gap-1.5">
-                  <View className="h-7 w-7 items-center justify-center rounded-md bg-white/5">
-                    <Clock size={14} color={COLORS.mutedForeground} />
+                  <View className="flex-1">
+                    <Text className="mb-1 text-lg font-semibold text-white">
+                      {item.exerciseName}
+                    </Text>
+                    <View className="flex-row items-center gap-1.5">
+                      <View className="rounded-md bg-white/10 px-2 py-0.5">
+                        <Text className="text-xs text-white/60">
+                          {item.bodyPart}
+                        </Text>
+                      </View>
+                      {item.partDetail ? (
+                        <View className="rounded-md bg-white/10 px-2 py-0.5">
+                          <Text className="text-xs text-white/60">
+                            {item.partDetail}
+                          </Text>
+                        </View>
+                      ) : null}
+                      <Text className="text-[11px] text-white/25">
+                        • 휴식 {item.restSeconds}초
+                      </Text>
+                    </View>
                   </View>
-                  <Text className="text-sm text-white/60">
-                    휴식 {item.restSeconds}초
+                </View>
+                <View className="items-center justify-center rounded-xl bg-primary/20 px-3 py-2">
+                  <Text className="text-lg font-bold text-primary">
+                    {item.sets}
+                  </Text>
+                  <Text className="text-[10px] font-medium text-primary/80">
+                    세트
                   </Text>
                 </View>
               </View>
@@ -365,7 +376,9 @@ export default function RoutineDetailScreen() {
             style={{ paddingBottom: insets.bottom + 20 }}
           >
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-xl font-bold text-white">커뮤니티에 공유</Text>
+              <Text className="text-xl font-bold text-white">
+                커뮤니티에 공유
+              </Text>
               <Pressable onPress={() => setShareModalVisible(false)}>
                 <Text className="text-base text-white/50">취소</Text>
               </Pressable>

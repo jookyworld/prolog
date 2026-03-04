@@ -2,8 +2,14 @@ import { routineApi } from "@/lib/api/routine";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
 import type { RoutineListItem } from "@/lib/types/routine";
-import { Archive, ArrowLeft, ChevronRight, ClipboardList, Plus } from "lucide-react-native";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import {
+  Archive,
+  ArrowLeft,
+  ChevronRight,
+  ClipboardList,
+  Plus,
+} from "lucide-react-native";
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -13,8 +19,10 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function RoutineScreen() {
   const router = useRouter();
@@ -156,7 +164,9 @@ export default function RoutineScreen() {
       {/* 컨텐츠 */}
       <ScrollView
         className="flex-1 px-5"
-        contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
+        contentContainerStyle={{
+          paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16,
+        }}
       >
         {loading ? (
           <View className="items-center py-20">
@@ -200,14 +210,12 @@ export default function RoutineScreen() {
             {displayedRoutines.map((routine) => (
               <Pressable
                 key={routine.id}
-                onPress={() =>
-                  router.push(`/(tabs)/routine/${routine.id}`)
-                }
+                onPress={() => router.push(`/(tabs)/routine/${routine.id}`)}
                 onLongPress={() => handleLongPress(routine)}
                 className="rounded-2xl bg-card p-5 active:opacity-80"
               >
                 <View className="mb-2 flex-row items-center justify-between">
-                  <Text className="flex-1 text-base font-semibold text-white">
+                  <Text className="flex-1 text-lg font-semibold text-white">
                     {routine.title}
                   </Text>
                   {routine.active && (

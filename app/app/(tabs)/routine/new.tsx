@@ -3,7 +3,6 @@ import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatRestTime } from "@/lib/format";
 import { getSelectedExercises } from "@/lib/store/exercise-selection";
 import type { ExerciseResponse } from "@/lib/types/exercise";
-import { BODY_PART_LABEL } from "@/lib/types/exercise";
 import {
   ArrowLeft,
   ChevronDown,
@@ -243,7 +242,7 @@ export default function NewRoutineScreen() {
                       {item.exercise.name}
                     </Text>
                     <Text className="text-xs text-white/40">
-                      {BODY_PART_LABEL[item.exercise.bodyPart] ?? item.exercise.bodyPart}
+                      {item.exercise.bodyPart}
                       {item.exercise.partDetail
                         ? ` · ${item.exercise.partDetail}`
                         : ""}

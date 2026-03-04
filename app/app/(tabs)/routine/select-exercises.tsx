@@ -2,7 +2,7 @@ import { exerciseApi } from "@/lib/api/exercise";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { setSelectedExercises } from "@/lib/store/exercise-selection";
 import type { BodyPart, ExerciseResponse } from "@/lib/types/exercise";
-import { BODY_PARTS, BODY_PART_LABEL } from "@/lib/types/exercise";
+import { BODY_PARTS } from "@/lib/types/exercise";
 import { ArrowLeft, Check, Plus, Search, X } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFocusEffect } from "expo-router";
@@ -37,7 +37,7 @@ export default function SelectExercisesScreen() {
   // Custom exercise creation modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newBodyPart, setNewBodyPart] = useState<BodyPart>("CHEST");
+  const [newBodyPart, setNewBodyPart] = useState<BodyPart>("가슴");
   const [newPartDetail, setNewPartDetail] = useState("");
   const [creating, setCreating] = useState(false);
 
@@ -123,7 +123,7 @@ export default function SelectExercisesScreen() {
       setShowCreateModal(false);
       setNewName("");
       setNewPartDetail("");
-      setNewBodyPart("CHEST");
+      setNewBodyPart("가슴");
     } catch (err) {
       Alert.alert(
         "오류",
@@ -163,7 +163,7 @@ export default function SelectExercisesScreen() {
               )}
             </View>
             <Text className="text-xs text-white/40">
-              {BODY_PART_LABEL[item.bodyPart] ?? item.bodyPart}
+              {item.bodyPart}
               {item.partDetail ? ` · ${item.partDetail}` : ""}
             </Text>
           </View>
@@ -268,7 +268,7 @@ export default function SelectExercisesScreen() {
                   filterBodyPart === bp ? COLORS.white : "rgba(255,255,255,0.6)",
               }}
             >
-              {BODY_PART_LABEL[bp]}
+              {bp}
             </Text>
           </Pressable>
         ))}
@@ -371,7 +371,7 @@ export default function SelectExercisesScreen() {
                         newBodyPart === bp ? COLORS.white : "rgba(255,255,255,0.6)",
                     }}
                   >
-                    {BODY_PART_LABEL[bp]}
+                    {bp}
                   </Text>
                 </Pressable>
               ))}

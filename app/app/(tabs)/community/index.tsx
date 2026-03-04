@@ -4,7 +4,7 @@ import type {
   SharedRoutineListItem,
   SharedRoutineSortType,
 } from "@/lib/types/community";
-import { BODY_PART_LABEL, type BodyPart } from "@/lib/types/exercise";
+import type { BodyPart } from "@/lib/types/exercise";
 import { useRouter } from "expo-router";
 import {
   Download,
@@ -36,7 +36,7 @@ function formatNumber(num: number): string {
 }
 
 function getBodyPartLabels(bodyParts: BodyPart[]): string[] {
-  return [...new Set(bodyParts)].map((bp) => BODY_PART_LABEL[bp]);
+  return [...new Set(bodyParts)];
 }
 
 interface RoutineCardProps {

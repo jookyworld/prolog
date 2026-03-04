@@ -1,6 +1,6 @@
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatRelativeDate } from "@/lib/format";
-import { BODY_PART_LABEL, type BodyPart } from "@/lib/types/exercise";
+import type { BodyPart } from "@/lib/types/exercise";
 import { ChevronRight, X } from "lucide-react-native";
 import { ActivityIndicator, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -29,15 +29,15 @@ function formatDuration(seconds: number): string {
 
 function getBodyPartLabel(bodyParts: BodyPart[]): string {
   if (bodyParts.length === 0) return "";
-  if (bodyParts.length === 1) return BODY_PART_LABEL[bodyParts[0]];
+  if (bodyParts.length === 1) return bodyParts[0];
 
   const unique = [...new Set(bodyParts)];
-  if (unique.length === 1) return BODY_PART_LABEL[unique[0]];
+  if (unique.length === 1) return unique[0];
 
-  const hasLower = unique.some((bp) => bp === "LOWER_BODY");
+  const hasLower = unique.some((bp) => bp === "하체");
   const hasUpper = unique.some(
     (bp) =>
-      bp === "CHEST" || bp === "BACK" || bp === "SHOULDER" || bp === "ARM"
+      bp === "가슴" || bp === "등" || bp === "어깨" || bp === "팔"
   );
 
   if (hasLower && hasUpper) return "전신";
@@ -46,7 +46,6 @@ function getBodyPartLabel(bodyParts: BodyPart[]): string {
 
   return unique
     .slice(0, 2)
-    .map((bp) => BODY_PART_LABEL[bp])
     .join("·");
 }
 
