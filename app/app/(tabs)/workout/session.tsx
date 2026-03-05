@@ -53,6 +53,9 @@ export default function WorkoutSessionScreen() {
   const [originalRoutineItems, setOriginalRoutineItems] = useState<
     RoutineItemRes[] | null
   >(null);
+  const [collapsedExercises, setCollapsedExercises] = useState<Set<string>>(new Set());
+  const scrollViewRef = useRef<ScrollView>(null);
+  const exerciseRefs = useRef<Map<string, View>>(new Map());
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const setIdCounter = useRef(0);
   const initRef = useRef(false);
@@ -528,6 +531,37 @@ export default function WorkoutSessionScreen() {
     router.push(`/(tabs)/routine/select-exercises?returnTo=workout&routineId=${rid}`);
   };
 
+  const toggleCollapseExercise = (exerciseId: string) => {
+    setCollapsedExercises((prev) => {
+      const next = new Set(prev);
+      if (next.has(exerciseId)) {
+        next.delete(exerciseId);
+      } else {
+        next.add(exerciseId);
+      }
+      return next;
+    });
+  };
+
+  const isExerciseCompleted = (exercise: ActiveExercise) => {
+    return exercise.sets.every((set) => set.completed);
+  };
+
+  const scrollToCurrentExercise = () => {
+    if (exercises.length === 0) return;
+    const currentExercise = exercises[currentIndex];
+    const ref = exerciseRefs.current.get(currentExercise.id);
+    if (ref) {
+      ref.measureLayout(
+        scrollViewRef.current as any,
+        (x, y) => {
+          scrollViewRef.current?.scrollTo({ y: y - 20, animated: true });
+        },
+        () => {},
+      );
+    }
+  };
+
   const handleExerciseLongPress = (exerciseIdx: number, exerciseName: string) => {
     const buttons: any[] = [];
 
@@ -598,49 +632,36 @@ export default function WorkoutSessionScreen() {
         </Pressable>
       </View>
 
-      {/* Exercise tabs */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="max-h-11 border-b border-white/10 px-3"
-        contentContainerStyle={{ alignItems: "center", gap: 4 }}
-      >
-        {exercises.map((ex, idx) => (
-          <Pressable
-            key={ex.id}
-            onPress={() => setCurrentIndex(idx)}
-            onLongPress={() => handleExerciseLongPress(idx, ex.name)}
-            className={`rounded-full px-4 py-2 ${
-              idx === currentIndex ? "bg-primary" : "bg-white/5"
-            }`}
-          >
-            <Text
-              className={`text-sm font-medium ${
-                idx === currentIndex ? "text-white" : "text-white/50"
-              }`}
-              numberOfLines={1}
-            >
-              {ex.name}
+      {/* Progress indicator */}
+      {exercises.length > 0 && (
+        <View className="border-b border-white/10 px-5 py-3">
+          <View className="mb-1 flex-row items-center justify-between">
+            <Text className="text-xs text-white/40">
+              진행률: {exercises.filter(isExerciseCompleted).length}/{exercises.length} 운동
             </Text>
-          </Pressable>
-        ))}
-        {/* Add exercise button */}
-        <Pressable
-          onPress={handleAddExercise}
-          className="rounded-full bg-white/5 px-4 py-2"
-        >
-          <Text className="text-sm font-medium text-primary">+ 종목</Text>
-        </Pressable>
-      </ScrollView>
+            <Pressable onPress={handleAddExercise}>
+              <Text className="text-xs font-medium text-primary">+ 종목</Text>
+            </Pressable>
+          </View>
+          <View className="h-1 overflow-hidden rounded-full bg-white/10">
+            <View
+              className="h-full bg-primary"
+              style={{
+                width: `${(exercises.filter(isExerciseCompleted).length / exercises.length) * 100}%`,
+              }}
+            />
+          </View>
+        </View>
+      )}
 
-      {/* Exercise content */}
+      {/* Exercise list */}
       {exercises.length === 0 ? (
         <View className="flex-1 items-center justify-center px-6">
           <Text className="mb-2 text-lg font-semibold text-white/60">
             종목을 추가해주세요
           </Text>
           <Text className="mb-6 text-sm text-white/40">
-            상단의 + 종목 버튼을 눌러 운동을 추가하세요
+            오른쪽 상단의 + 종목 버튼을 눌러 운동을 추가하세요
           </Text>
           <Pressable
             onPress={handleAddExercise}
@@ -651,159 +672,183 @@ export default function WorkoutSessionScreen() {
             </Text>
           </Pressable>
         </View>
-      ) : currentExercise ? (
+      ) : (
         <ScrollView
-          className="flex-1 px-5 pt-4"
+          ref={scrollViewRef}
+          className="flex-1 pt-4"
           contentContainerStyle={{ paddingBottom: 60 + TAB_BAR_HEIGHT + insets.bottom }}
           showsVerticalScrollIndicator={false}
         >
-          {/* Exercise title with controls */}
-          <View className="mb-4 flex-row items-center justify-between">
-            <Text className="flex-1 text-xl font-bold text-white">
-              {currentExercise.name}
-            </Text>
-            <View className="flex-row gap-1">
-              {exercises.length > 1 && currentIndex > 0 && (
-                <Pressable
-                  onPress={() => moveExerciseUp(currentIndex)}
-                  className="h-8 w-8 items-center justify-center rounded-lg bg-white/5 active:opacity-80"
-                >
-                  <ChevronUp size={16} color={COLORS.mutedForeground} />
-                </Pressable>
-              )}
-              {exercises.length > 1 && currentIndex < exercises.length - 1 && (
-                <Pressable
-                  onPress={() => moveExerciseDown(currentIndex)}
-                  className="h-8 w-8 items-center justify-center rounded-lg bg-white/5 active:opacity-80"
-                >
-                  <ChevronDown size={16} color={COLORS.mutedForeground} />
-                </Pressable>
-              )}
-              {exercises.length > 1 && (
-                <Pressable
-                  onPress={() =>
-                    Alert.alert(
-                      "종목 삭제",
-                      `${currentExercise.name}을(를) 삭제하시겠습니까?`,
-                      [
-                        { text: "취소", style: "cancel" },
-                        {
-                          text: "삭제",
-                          style: "destructive",
-                          onPress: () => removeExercise(currentIndex),
-                        },
-                      ],
-                    )
-                  }
-                  className="h-8 w-8 items-center justify-center rounded-lg bg-white/5 active:opacity-80"
-                >
-                  <Trash2 size={14} color={COLORS.destructive} />
-                </Pressable>
-              )}
-            </View>
-          </View>
+          {exercises.map((exercise, exerciseIdx) => {
+            const isCompleted = isExerciseCompleted(exercise);
+            const isCollapsed = collapsedExercises.has(exercise.id);
+            const isCurrent = exerciseIdx === currentIndex;
 
-          {/* Set table header */}
-          <View className="mb-2 flex-row items-center px-1">
-            <Text className="w-10 text-center text-xs font-medium text-white/40">
-              세트
-            </Text>
-            <Text className="flex-1 text-center text-xs font-medium text-white/40">
-              무게(kg)
-            </Text>
-            <Text className="flex-1 text-center text-xs font-medium text-white/40">
-              횟수
-            </Text>
-            <View className="w-11" />
-          </View>
-
-          {/* Set rows */}
-          <View className="gap-2">
-            {currentExercise.sets.map((set) => (
+            return (
               <View
-                key={set.id}
-                className={`flex-row items-center rounded-xl px-1 py-2 ${
-                  set.completed ? "bg-primary/10" : "bg-card"
+                key={exercise.id}
+                ref={(ref) => {
+                  if (ref) exerciseRefs.current.set(exercise.id, ref);
+                }}
+                className={`mx-4 mb-4 rounded-2xl p-4 ${
+                  isCompleted
+                    ? "bg-green-500/10"
+                    : isCurrent
+                      ? "border-2 border-primary bg-primary/5"
+                      : "bg-card"
                 }`}
               >
-                <Text className="w-10 text-center text-sm font-bold text-white/60">
-                  {set.setNumber}
-                </Text>
-                <View className="mx-1 flex-1">
-                  <TextInput
-                    className="rounded-lg bg-white/5 px-3 py-2.5 text-center text-sm text-white"
-                    placeholder="0"
-                    placeholderTextColor={COLORS.placeholder}
-                    keyboardType="numeric"
-                    value={set.weight}
-                    onChangeText={(v) =>
-                      updateSet(currentIndex, set.id, { weight: v })
-                    }
-                  />
+                {/* Exercise header */}
+                <View className="mb-3 flex-row items-center justify-between">
+                  <Pressable
+                    onPress={() => {
+                      setCurrentIndex(exerciseIdx);
+                      if (isCollapsed) toggleCollapseExercise(exercise.id);
+                    }}
+                    className="flex-1 flex-row items-center gap-2"
+                  >
+                    <Text className="text-lg font-bold text-white">
+                      {exerciseIdx + 1}. {exercise.name}
+                    </Text>
+                    {isCompleted && (
+                      <View className="rounded-full bg-green-500/20 px-2 py-0.5">
+                        <Text className="text-[10px] font-bold text-green-400">
+                          완료
+                        </Text>
+                      </View>
+                    )}
+                  </Pressable>
+                  <View className="flex-row gap-1">
+                    {isCompleted && (
+                      <Pressable
+                        onPress={() => toggleCollapseExercise(exercise.id)}
+                        className="h-8 w-8 items-center justify-center rounded-lg bg-white/5 active:opacity-80"
+                      >
+                        {isCollapsed ? (
+                          <ChevronDown size={16} color={COLORS.mutedForeground} />
+                        ) : (
+                          <ChevronUp size={16} color={COLORS.mutedForeground} />
+                        )}
+                      </Pressable>
+                    )}
+                    <Pressable
+                      onLongPress={() =>
+                        handleExerciseLongPress(exerciseIdx, exercise.name)
+                      }
+                      className="h-8 w-8 items-center justify-center rounded-lg bg-white/5 active:opacity-80"
+                    >
+                      <Text className="text-white/60">⋮</Text>
+                    </Pressable>
+                  </View>
                 </View>
-                <View className="mx-1 flex-1">
-                  <TextInput
-                    className="rounded-lg bg-white/5 px-3 py-2.5 text-center text-sm text-white"
-                    placeholder="0"
-                    placeholderTextColor={COLORS.placeholder}
-                    keyboardType="numeric"
-                    value={set.reps}
-                    onChangeText={(v) =>
-                      updateSet(currentIndex, set.id, { reps: v })
-                    }
-                  />
-                </View>
-                <Pressable
-                  onPress={() =>
-                    updateSet(currentIndex, set.id, {
-                      completed: !set.completed,
-                    })
-                  }
-                  className={`ml-1 h-9 w-9 items-center justify-center rounded-lg ${
-                    set.completed ? "bg-primary" : "bg-white/5"
-                  }`}
-                >
-                  <Check
-                    size={16}
-                    color={set.completed ? COLORS.white : COLORS.iconMuted}
-                  />
-                </Pressable>
+
+                {/* Exercise sets (hidden if collapsed) */}
+                {!isCollapsed && (
+                  <>
+                    {/* Set table header */}
+                    <View className="mb-2 flex-row items-center px-1">
+                      <Text className="w-10 text-center text-xs font-medium text-white/40">
+                        세트
+                      </Text>
+                      <Text className="flex-1 text-center text-xs font-medium text-white/40">
+                        무게(kg)
+                      </Text>
+                      <Text className="flex-1 text-center text-xs font-medium text-white/40">
+                        횟수
+                      </Text>
+                      <View className="w-11" />
+                    </View>
+
+                    {/* Set rows */}
+                    <View className="gap-2">
+                      {exercise.sets.map((set) => (
+                        <View
+                          key={set.id}
+                          className={`flex-row items-center rounded-xl px-1 py-2 ${
+                            set.completed ? "bg-primary/10" : "bg-white/10"
+                          }`}
+                        >
+                          <Text className="w-10 text-center text-sm font-bold text-white/60">
+                            {set.setNumber}
+                          </Text>
+                          <View className="mx-1 flex-1">
+                            <TextInput
+                              className="rounded-lg bg-white/5 px-3 py-2.5 text-center text-sm text-white"
+                              placeholder="0"
+                              placeholderTextColor={COLORS.placeholder}
+                              keyboardType="numeric"
+                              value={set.weight}
+                              onChangeText={(v) =>
+                                updateSet(exerciseIdx, set.id, { weight: v })
+                              }
+                            />
+                          </View>
+                          <View className="mx-1 flex-1">
+                            <TextInput
+                              className="rounded-lg bg-white/5 px-3 py-2.5 text-center text-sm text-white"
+                              placeholder="0"
+                              placeholderTextColor={COLORS.placeholder}
+                              keyboardType="numeric"
+                              value={set.reps}
+                              onChangeText={(v) =>
+                                updateSet(exerciseIdx, set.id, { reps: v })
+                              }
+                            />
+                          </View>
+                          <Pressable
+                            onPress={() =>
+                              updateSet(exerciseIdx, set.id, {
+                                completed: !set.completed,
+                              })
+                            }
+                            className={`ml-1 h-9 w-9 items-center justify-center rounded-lg ${
+                              set.completed ? "bg-primary" : "bg-white/5"
+                            }`}
+                          >
+                            <Check
+                              size={16}
+                              color={set.completed ? COLORS.white : COLORS.iconMuted}
+                            />
+                          </Pressable>
+                        </View>
+                      ))}
+                    </View>
+
+                    {/* Add / Remove set buttons */}
+                    <View className="mt-3 flex-row justify-center gap-3">
+                      <Pressable
+                        onPress={() => removeSet(exerciseIdx)}
+                        className="flex-row items-center gap-1.5 rounded-xl bg-white/5 px-4 py-2.5 active:opacity-80"
+                      >
+                        <Minus size={14} color={COLORS.mutedForeground} />
+                        <Text className="text-sm text-white/60">세트 삭제</Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={() => addSet(exerciseIdx)}
+                        className="flex-row items-center gap-1.5 rounded-xl bg-white/5 px-4 py-2.5 active:opacity-80"
+                      >
+                        <Plus size={14} color={COLORS.mutedForeground} />
+                        <Text className="text-sm text-white/60">세트 추가</Text>
+                      </Pressable>
+                    </View>
+                  </>
+                )}
               </View>
-            ))}
-          </View>
-
-          {/* Add / Remove set buttons */}
-          <View className="mt-3 flex-row justify-center gap-3 pb-6">
-            <Pressable
-              onPress={() => removeSet(currentIndex)}
-              className="flex-row items-center gap-1.5 rounded-xl bg-white/5 px-4 py-2.5 active:opacity-80"
-            >
-              <Minus size={14} color={COLORS.mutedForeground} />
-              <Text className="text-sm text-white/60">세트 삭제</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => addSet(currentIndex)}
-              className="flex-row items-center gap-1.5 rounded-xl bg-white/5 px-4 py-2.5 active:opacity-80"
-            >
-              <Plus size={14} color={COLORS.mutedForeground} />
-              <Text className="text-sm text-white/60">세트 추가</Text>
-            </Pressable>
-          </View>
-
-          {/* Next exercise button */}
-          {currentIndex < exercises.length - 1 && (
-            <Pressable
-              onPress={() => setCurrentIndex(currentIndex + 1)}
-              className="mb-6 flex-row items-center justify-center gap-2 rounded-2xl bg-primary/10 py-4 active:opacity-80"
-            >
-              <Text className="text-base font-semibold text-primary">
-                다음 운동
-              </Text>
-              <ChevronRight size={18} color={COLORS.primary} />
-            </Pressable>
-          )}
+            );
+          })}
         </ScrollView>
-      ) : null}
+      )}
+
+      {/* Floating button: Scroll to current exercise */}
+      {exercises.length > 1 && (
+        <Pressable
+          onPress={scrollToCurrentExercise}
+          className="absolute bottom-20 right-5 h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg active:opacity-80"
+          style={{ elevation: 5 }}
+        >
+          <ChevronRight size={24} color={COLORS.white} />
+        </Pressable>
+      )}
 
       {/* Bottom timer bar */}
       <View className="flex-row items-center justify-center gap-2 border-t border-white/10 px-5 py-3">
