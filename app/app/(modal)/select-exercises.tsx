@@ -3,7 +3,7 @@ import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { setSelectedExercises } from "@/lib/store/exercise-selection";
 import type { BodyPart, ExerciseResponse } from "@/lib/types/exercise";
 import { BODY_PARTS } from "@/lib/types/exercise";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { ArrowLeft, Plus, Search, X } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -25,10 +25,6 @@ import {
 export default function SelectExercisesScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { returnTo, routineId: returnRoutineId } = useLocalSearchParams<{
-    returnTo?: string;
-    routineId?: string;
-  }>();
   const [exercises, setExercises] = useState<ExerciseResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -100,11 +96,10 @@ export default function SelectExercisesScreen() {
       .filter((e): e is ExerciseResponse => e !== undefined);
     setSelectedExercises(selected);
 
-    if (returnTo === "workout" && returnRoutineId) {
-      // Return to workout session
-      router.push(`/(tabs)/workout/session?routineId=${returnRoutineId}`);
+    // Modal을 닫고 이전 화면으로 돌아감
+    if (router.canDismiss()) {
+      router.dismiss();
     } else {
-      // Return to routine creation/edit
       router.back();
     }
   };
@@ -197,7 +192,14 @@ export default function SelectExercisesScreen() {
       <View className="flex-row items-center justify-between px-5 py-4">
         <View className="flex-row items-center">
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => {
+              // Modal을 닫고 이전 화면으로 돌아감
+              if (router.canDismiss()) {
+                router.dismiss();
+              } else {
+                router.back();
+              }
+            }}
             className="mr-3 h-10 w-10 items-center justify-center rounded-xl bg-white/5"
           >
             <ArrowLeft size={20} color={COLORS.white} />

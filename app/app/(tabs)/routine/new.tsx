@@ -386,7 +386,7 @@ export default function NewRoutineScreen() {
 
         {/* 종목 추가 버튼 */}
         <Pressable
-          onPress={() => router.push("/(tabs)/routine/select-exercises")}
+          onPress={() => router.push("/select-exercises")}
           className="mb-8 flex-row items-center justify-center gap-2 rounded-2xl border border-dashed py-4 active:opacity-80"
           style={{ borderColor: "rgba(255,255,255,0.15)" }}
         >

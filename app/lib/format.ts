@@ -41,11 +41,10 @@ export function formatRestTime(seconds: number): string {
 }
 
 /**
- * 초를 "HH:MM:SS" 형식으로 변환
+ * 초를 "MM:SS" 형식으로 변환
  */
 export function formatElapsedTime(seconds: number): string {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
+  const m = Math.floor(seconds / 60);
   const s = seconds % 60;
-  return [h, m, s].map((v) => String(v).padStart(2, "0")).join(":");
+  return [m, s].map((v) => String(v).padStart(2, "0")).join(":");
 }

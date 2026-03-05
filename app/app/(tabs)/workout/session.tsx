@@ -11,7 +11,7 @@ import type {
   WorkoutSessionCompleteReq,
 } from "@/lib/types/workout";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { Check, Clock, Minus, Plus } from "lucide-react-native";
+import { Check, Minus, Plus } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -500,7 +500,7 @@ export default function WorkoutSessionScreen() {
   const handleAddExercise = () => {
     const rid = isFreeWorkout ? "free" : routineId;
     router.push(
-      `/(tabs)/routine/select-exercises?returnTo=workout&routineId=${rid}`,
+      `/select-exercises?returnTo=workout&routineId=${rid}`,
     );
   };
 
@@ -559,53 +559,72 @@ export default function WorkoutSessionScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-5 py-3">
-        <Pressable onPress={handleCancel}>
-          <Text className="text-base font-medium text-destructive">
-            그만하기
+      {/* Header - Unified top bar */}
+      <View className="border-b border-white/10 px-5 py-4">
+        {/* Top row: Back, Title, Timer, Complete */}
+        <View className="mb-3 flex-row items-center">
+          <Pressable
+            onPress={handleCancel}
+            className="mr-3 h-9 w-9 items-center justify-center rounded-xl bg-white/5 active:bg-white/10"
+          >
+            <Text className="text-lg text-white/70">←</Text>
+          </Pressable>
+
+          <Text
+            className="flex-1 text-base font-bold text-white"
+            numberOfLines={1}
+          >
+            {routineTitle}
           </Text>
-        </Pressable>
-        <Text
-          className="flex-1 text-center text-base font-bold text-white"
-          numberOfLines={1}
-        >
-          {routineTitle}
-        </Text>
-        <Pressable onPress={handleComplete} disabled={completing}>
-          {completing ? (
-            <ActivityIndicator size="small" color={COLORS.primary} />
-          ) : (
-            <Text className="text-base font-medium text-primary">완료</Text>
-          )}
-        </Pressable>
-      </View>
 
-      {/* Progress indicator */}
-      {exercises.length > 0 &&
-        (() => {
-          const totalSets = exercises.reduce(
-            (sum, ex) => sum + ex.sets.length,
-            0,
-          );
-          const completedSets = exercises.reduce(
-            (sum, ex) => sum + ex.sets.filter((s) => s.completed).length,
-            0,
-          );
-          const progress =
-            totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
+          <View className="mx-3 rounded-lg bg-white/10 px-3 py-1.5">
+            <Text className="font-mono text-lg font-bold text-white">
+              {formatElapsedTime(elapsedTime)}
+            </Text>
+          </View>
 
-          return (
-            <View className="border-b border-white/10 px-5 py-3">
+          <Pressable
+            onPress={handleComplete}
+            disabled={completing}
+            className="rounded-xl bg-primary px-4 py-2 active:opacity-80"
+          >
+            {completing ? (
+              <ActivityIndicator size="small" color={COLORS.white} />
+            ) : (
+              <Text className="text-sm font-semibold text-white">완료</Text>
+            )}
+          </Pressable>
+        </View>
+
+        {/* Bottom row: Progress bar and add button */}
+        {exercises.length > 0 &&
+          (() => {
+            const totalSets = exercises.reduce(
+              (sum, ex) => sum + ex.sets.length,
+              0,
+            );
+            const completedSets = exercises.reduce(
+              (sum, ex) => sum + ex.sets.filter((s) => s.completed).length,
+              0,
+            );
+            const progress =
+              totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
+
+            return (
               <View className="flex-row items-center gap-3">
-                {/* Progress bar section */}
+                {/* Progress bar */}
                 <View className="flex-1">
-                  <Text className="mb-1 text-xs text-white/40">
-                    진행률: {completedSets}/{totalSets} 세트
-                  </Text>
-                  <View className="h-1 overflow-hidden rounded-full bg-white/10">
+                  <View className="mb-1.5 flex-row items-center justify-between">
+                    <Text className="text-xs font-medium text-white/50">
+                      진행률
+                    </Text>
+                    <Text className="text-xs font-semibold text-white/70">
+                      {completedSets}/{totalSets}
+                    </Text>
+                  </View>
+                  <View className="h-1.5 overflow-hidden rounded-full bg-white/10">
                     <View
-                      className="h-full bg-primary"
+                      className="h-full rounded-full bg-primary"
                       style={{ width: `${progress}%` }}
                     />
                   </View>
@@ -614,15 +633,15 @@ export default function WorkoutSessionScreen() {
                 {/* Add exercise button */}
                 <Pressable
                   onPress={handleAddExercise}
-                  className="flex-row items-center gap-1.5 rounded-xl bg-primary px-3 py-2.5 active:opacity-80"
+                  className="flex-row items-center gap-1.5 rounded-xl bg-white/8 px-3 py-2 active:opacity-80"
                 >
-                  <Text className="text-sm font-semibold text-white">종목</Text>
-                  <Plus size={16} color={COLORS.white} />
+                  <Plus size={14} color={COLORS.white} />
+                  <Text className="text-xs font-semibold text-white">종목</Text>
                 </Pressable>
               </View>
-            </View>
-          );
-        })()}
+            );
+          })()}
+      </View>
 
       {/* Exercise list */}
       {exercises.length === 0 ? (
@@ -631,7 +650,7 @@ export default function WorkoutSessionScreen() {
             종목을 추가해주세요
           </Text>
           <Text className="mb-6 text-sm text-white/40">
-            오른쪽 상단의 + 종목 버튼을 눌러 운동을 추가하세요
+            상단의 종목 버튼을 눌러 운동을 추가하세요
           </Text>
           <Pressable
             onPress={handleAddExercise}
@@ -736,13 +755,16 @@ export default function WorkoutSessionScreen() {
                           className="flex-row items-center gap-2.5"
                         >
                           <View style={{ width: 36 }}>
-                            <Text className="text-center text-base font-bold text-white/70">
+                            <Text className="text-center text-base font-bold text-white">
                               {set.setNumber}
                             </Text>
                           </View>
-                          <View className="flex-1 flex-row items-center gap-1 rounded-lg bg-white/5 px-3 py-2.5">
+                          <View
+                            className="flex-1 flex-row items-center gap-1 rounded-lg px-3 py-2.5"
+                            style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+                          >
                             <TextInput
-                              className="flex-1 text-center text-sm font-medium text-white"
+                              className="flex-1 text-center text-sm font-semibold text-white"
                               placeholder="0"
                               placeholderTextColor={COLORS.placeholder}
                               keyboardType="numeric"
@@ -753,11 +775,14 @@ export default function WorkoutSessionScreen() {
                                 })
                               }
                             />
-                            <Text className="text-sm text-white/40">kg</Text>
+                            <Text className="text-sm font-medium text-white/50">kg</Text>
                           </View>
-                          <View className="flex-1 flex-row items-center gap-1 rounded-lg bg-white/5 px-3 py-2.5">
+                          <View
+                            className="flex-1 flex-row items-center gap-1 rounded-lg px-3 py-2.5"
+                            style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+                          >
                             <TextInput
-                              className="flex-1 text-center text-sm font-medium text-white"
+                              className="flex-1 text-center text-sm font-semibold text-white"
                               placeholder="0"
                               placeholderTextColor={COLORS.placeholder}
                               keyboardType="numeric"
@@ -766,7 +791,7 @@ export default function WorkoutSessionScreen() {
                                 updateSet(exerciseIdx, set.id, { reps: v })
                               }
                             />
-                            <Text className="text-sm text-white/40">회</Text>
+                            <Text className="text-sm font-medium text-white/50">회</Text>
                           </View>
                           <Pressable
                             onPress={() =>
@@ -798,14 +823,6 @@ export default function WorkoutSessionScreen() {
           })}
         </ScrollView>
       )}
-
-      {/* Bottom timer bar */}
-      <View className="flex-row items-center justify-center gap-2 border-t border-white/10 px-5 py-3">
-        <Clock size={16} color={COLORS.mutedForeground} />
-        <Text className="text-base font-mono font-semibold text-white/60">
-          {formatElapsedTime(elapsedTime)}
-        </Text>
-      </View>
     </SafeAreaView>
   );
 }
