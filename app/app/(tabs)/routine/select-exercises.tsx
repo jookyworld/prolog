@@ -30,7 +30,7 @@ export default function SelectExercisesScreen() {
   const [exercises, setExercises] = useState<ExerciseResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [filterBodyPart, setFilterBodyPart] = useState<BodyPart | null>(null);
   const [search, setSearch] = useState("");
 
@@ -61,7 +61,7 @@ export default function SelectExercisesScreen() {
   // Reset selection when screen is focused
   useFocusEffect(
     useCallback(() => {
-      setSelectedIds(new Set());
+      setSelectedIds([]);
       setSearch("");
       setFilterBodyPart(null);
     }, []),
@@ -81,18 +81,21 @@ export default function SelectExercisesScreen() {
 
   const toggleSelect = useCallback((id: number) => {
     setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
+      if (prev.includes(id)) {
+        // 이미 선택됨 -> 제거
+        return prev.filter((selectedId) => selectedId !== id);
       } else {
-        next.add(id);
+        // 선택되지 않음 -> 배열 끝에 추가 (순서 유지)
+        return [...prev, id];
       }
-      return next;
     });
   }, []);
 
   const handleConfirm = () => {
-    const selected = exercises.filter((e) => selectedIds.has(e.id));
+    // 선택한 순서대로 운동 정렬
+    const selected = selectedIds
+      .map((id) => exercises.find((e) => e.id === id))
+      .filter((e): e is ExerciseResponse => e !== undefined);
     setSelectedExercises(selected);
 
     if (returnTo === "workout" && returnRoutineId) {
@@ -119,7 +122,7 @@ export default function SelectExercisesScreen() {
         ...(newPartDetail.trim() ? { partDetail: newPartDetail.trim() } : {}),
       });
       setExercises((prev) => [...prev, created]);
-      setSelectedIds((prev) => new Set(prev).add(created.id));
+      setSelectedIds((prev) => [...prev, created.id]);
       setShowCreateModal(false);
       setNewName("");
       setNewPartDetail("");
@@ -136,7 +139,8 @@ export default function SelectExercisesScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: ExerciseResponse }) => {
-      const isSelected = selectedIds.has(item.id);
+      const isSelected = selectedIds.includes(item.id);
+      const selectionOrder = isSelected ? selectedIds.indexOf(item.id) + 1 : null;
       return (
         <Pressable
           onPress={() => toggleSelect(item.id)}
@@ -144,14 +148,16 @@ export default function SelectExercisesScreen() {
           style={isSelected ? { backgroundColor: "rgba(49,130,246,0.08)" } : undefined}
         >
           <View
-            className="h-6 w-6 items-center justify-center rounded-md"
+            className="h-6 w-6 items-center justify-center rounded-lg"
             style={{
               backgroundColor: isSelected ? COLORS.primary : "rgba(255,255,255,0.08)",
               borderWidth: isSelected ? 0 : 1,
               borderColor: "rgba(255,255,255,0.15)",
             }}
           >
-            {isSelected && <Check size={14} color={COLORS.white} />}
+            {isSelected ? (
+              <Text className="text-xs font-bold text-white">{selectionOrder}</Text>
+            ) : null}
           </View>
           <View className="flex-1">
             <View className="flex-row items-center gap-2">
@@ -188,21 +194,21 @@ export default function SelectExercisesScreen() {
         </View>
         <Pressable
           onPress={handleConfirm}
-          disabled={selectedIds.size === 0}
+          disabled={selectedIds.length === 0}
           className="rounded-xl px-4 py-2"
           style={{
             backgroundColor:
-              selectedIds.size > 0 ? COLORS.primary : "rgba(255,255,255,0.05)",
+              selectedIds.length > 0 ? COLORS.primary : "rgba(255,255,255,0.05)",
           }}
         >
           <Text
             className="text-sm font-semibold"
             style={{
               color:
-                selectedIds.size > 0 ? COLORS.white : "rgba(255,255,255,0.3)",
+                selectedIds.length > 0 ? COLORS.white : "rgba(255,255,255,0.3)",
             }}
           >
-            확인{selectedIds.size > 0 ? ` (${selectedIds.size})` : ""}
+            확인{selectedIds.length > 0 ? ` (${selectedIds.length})` : ""}
           </Text>
         </Pressable>
       </View>
@@ -228,12 +234,12 @@ export default function SelectExercisesScreen() {
       </View>
 
       {/* 부위 필터 */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="mb-3 max-h-10 px-5"
-        contentContainerStyle={{ gap: 8 }}
-      >
+      <View className="mb-3 px-5">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8 }}
+        >
         <Pressable
           onPress={() => setFilterBodyPart(null)}
           className="rounded-full px-4 py-2"
@@ -272,7 +278,8 @@ export default function SelectExercisesScreen() {
             </Text>
           </Pressable>
         ))}
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       {/* 운동 목록 */}
       {loading ? (
@@ -289,13 +296,22 @@ export default function SelectExercisesScreen() {
           data={filtered}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderItem}
+          ItemSeparatorComponent={() => (
+            <View className="mx-5" style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.05)' }} />
+          )}
           ListEmptyComponent={
             <View className="items-center py-20">
-              <Text className="text-sm text-white/40">
+              <Search size={48} color="rgba(255,255,255,0.2)" />
+              <Text className="mt-4 text-sm text-white/40">
                 {search.trim()
                   ? "검색 결과가 없습니다"
                   : "등록된 운동이 없습니다"}
               </Text>
+              {!search.trim() && (
+                <Text className="mt-2 text-xs text-white/30">
+                  + 버튼을 눌러 커스텀 종목을 추가해보세요
+                </Text>
+              )}
             </View>
           }
           contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
