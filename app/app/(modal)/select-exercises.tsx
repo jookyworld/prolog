@@ -97,11 +97,7 @@ export default function SelectExercisesScreen() {
     setSelectedExercises(selected);
 
     // Modal을 닫고 이전 화면으로 돌아감
-    if (router.canDismiss()) {
-      router.dismiss();
-    } else {
-      router.back();
-    }
+    router.back();
   };
 
   const handleCreateCustom = async () => {
@@ -192,14 +188,7 @@ export default function SelectExercisesScreen() {
       <View className="flex-row items-center justify-between px-5 py-4">
         <View className="flex-row items-center">
           <Pressable
-            onPress={() => {
-              // Modal을 닫고 이전 화면으로 돌아감
-              if (router.canDismiss()) {
-                router.dismiss();
-              } else {
-                router.back();
-              }
-            }}
+            onPress={() => router.back()}
             className="mr-3 h-10 w-10 items-center justify-center rounded-xl bg-white/5"
           >
             <ArrowLeft size={20} color={COLORS.white} />
