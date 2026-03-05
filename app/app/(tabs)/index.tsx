@@ -9,6 +9,7 @@ import Svg, { Polyline, Circle, Text as SvgText } from "react-native-svg";
 import { useState, useEffect } from "react";
 import { homeApi } from "@/lib/api/home";
 import type { HomeStatsResponse } from "@/lib/types/home";
+import { useAuth } from "@/contexts/auth-context";
 
 
 function formatVolume(kg: number): string {
@@ -52,6 +53,7 @@ function getBodyPartLabel(bodyParts: BodyPart[]): string {
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const [selectedSessions, setSelectedSessions] = useState<
     Record<number, number | null>
   >({});
@@ -60,8 +62,10 @@ export default function HomeScreen() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadHomeStats();
-  }, []);
+    if (user) {
+      loadHomeStats();
+    }
+  }, [user]);
 
   const loadHomeStats = async () => {
     try {

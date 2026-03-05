@@ -3,9 +3,9 @@ import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { setSelectedExercises } from "@/lib/store/exercise-selection";
 import type { BodyPart, ExerciseResponse } from "@/lib/types/exercise";
 import { BODY_PARTS } from "@/lib/types/exercise";
-import { ArrowLeft, Check, Plus, Search, X } from "lucide-react-native";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { ArrowLeft, Plus, Search, X } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useFocusEffect } from "expo-router";
 import {
   ActivityIndicator,
   Alert,
@@ -17,8 +17,10 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function SelectExercisesScreen() {
   const router = useRouter();
@@ -140,23 +142,33 @@ export default function SelectExercisesScreen() {
   const renderItem = useCallback(
     ({ item }: { item: ExerciseResponse }) => {
       const isSelected = selectedIds.includes(item.id);
-      const selectionOrder = isSelected ? selectedIds.indexOf(item.id) + 1 : null;
+      const selectionOrder = isSelected
+        ? selectedIds.indexOf(item.id) + 1
+        : null;
       return (
         <Pressable
           onPress={() => toggleSelect(item.id)}
           className="flex-row items-center gap-4 px-5 py-3.5 active:opacity-80"
-          style={isSelected ? { backgroundColor: "rgba(49,130,246,0.08)" } : undefined}
+          style={
+            isSelected
+              ? { backgroundColor: "rgba(49,130,246,0.08)" }
+              : undefined
+          }
         >
           <View
             className="h-6 w-6 items-center justify-center rounded-lg"
             style={{
-              backgroundColor: isSelected ? COLORS.primary : "rgba(255,255,255,0.08)",
+              backgroundColor: isSelected
+                ? COLORS.primary
+                : "rgba(255,255,255,0.08)",
               borderWidth: isSelected ? 0 : 1,
               borderColor: "rgba(255,255,255,0.15)",
             }}
           >
             {isSelected ? (
-              <Text className="text-xs font-bold text-white">{selectionOrder}</Text>
+              <Text className="text-xs font-bold text-white">
+                {selectionOrder}
+              </Text>
             ) : null}
           </View>
           <View className="flex-1">
@@ -198,7 +210,9 @@ export default function SelectExercisesScreen() {
           className="rounded-xl px-4 py-2"
           style={{
             backgroundColor:
-              selectedIds.length > 0 ? COLORS.primary : "rgba(255,255,255,0.05)",
+              selectedIds.length > 0
+                ? COLORS.primary
+                : "rgba(255,255,255,0.05)",
           }}
         >
           <Text
@@ -240,44 +254,55 @@ export default function SelectExercisesScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: 8 }}
         >
-        <Pressable
-          onPress={() => setFilterBodyPart(null)}
-          className="rounded-full px-4 py-2"
-          style={{
-            backgroundColor:
-              filterBodyPart === null ? COLORS.primary : "rgba(255,255,255,0.08)",
-          }}
-        >
-          <Text
-            className="text-sm font-medium"
-            style={{
-              color: filterBodyPart === null ? COLORS.white : "rgba(255,255,255,0.6)",
-            }}
-          >
-            전체
-          </Text>
-        </Pressable>
-        {BODY_PARTS.map((bp) => (
           <Pressable
-            key={bp}
-            onPress={() => setFilterBodyPart(bp === filterBodyPart ? null : bp)}
+            onPress={() => setFilterBodyPart(null)}
             className="rounded-full px-4 py-2"
             style={{
               backgroundColor:
-                filterBodyPart === bp ? COLORS.primary : "rgba(255,255,255,0.08)",
+                filterBodyPart === null
+                  ? COLORS.primary
+                  : "rgba(255,255,255,0.08)",
             }}
           >
             <Text
               className="text-sm font-medium"
               style={{
                 color:
-                  filterBodyPart === bp ? COLORS.white : "rgba(255,255,255,0.6)",
+                  filterBodyPart === null
+                    ? COLORS.white
+                    : "rgba(255,255,255,0.6)",
               }}
             >
-              {bp}
+              전체
             </Text>
           </Pressable>
-        ))}
+          {BODY_PARTS.map((bp) => (
+            <Pressable
+              key={bp}
+              onPress={() =>
+                setFilterBodyPart(bp === filterBodyPart ? null : bp)
+              }
+              className="rounded-full px-4 py-2"
+              style={{
+                backgroundColor:
+                  filterBodyPart === bp
+                    ? COLORS.primary
+                    : "rgba(255,255,255,0.08)",
+              }}
+            >
+              <Text
+                className="text-sm font-medium"
+                style={{
+                  color:
+                    filterBodyPart === bp
+                      ? COLORS.white
+                      : "rgba(255,255,255,0.6)",
+                }}
+              >
+                {bp}
+              </Text>
+            </Pressable>
+          ))}
         </ScrollView>
       </View>
 
@@ -296,9 +321,6 @@ export default function SelectExercisesScreen() {
           data={filtered}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderItem}
-          ItemSeparatorComponent={() => (
-            <View className="mx-5" style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.05)' }} />
-          )}
           ListEmptyComponent={
             <View className="items-center py-20">
               <Search size={48} color="rgba(255,255,255,0.2)" />
@@ -314,7 +336,9 @@ export default function SelectExercisesScreen() {
               )}
             </View>
           }
-          contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
+          contentContainerStyle={{
+            paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16,
+          }}
         />
       )}
 
@@ -377,14 +401,18 @@ export default function SelectExercisesScreen() {
                   className="rounded-full px-3.5 py-2"
                   style={{
                     backgroundColor:
-                      newBodyPart === bp ? COLORS.primary : "rgba(255,255,255,0.08)",
+                      newBodyPart === bp
+                        ? COLORS.primary
+                        : "rgba(255,255,255,0.08)",
                   }}
                 >
                   <Text
                     className="text-sm font-medium"
                     style={{
                       color:
-                        newBodyPart === bp ? COLORS.white : "rgba(255,255,255,0.6)",
+                        newBodyPart === bp
+                          ? COLORS.white
+                          : "rgba(255,255,255,0.6)",
                     }}
                   >
                     {bp}
@@ -422,7 +450,9 @@ export default function SelectExercisesScreen() {
                 <Text
                   className="text-base font-semibold"
                   style={{
-                    color: newName.trim() ? COLORS.white : "rgba(255,255,255,0.3)",
+                    color: newName.trim()
+                      ? COLORS.white
+                      : "rgba(255,255,255,0.3)",
                   }}
                 >
                   추가하기
