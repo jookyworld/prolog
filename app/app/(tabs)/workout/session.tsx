@@ -1,27 +1,18 @@
+import { useWorkout } from "@/contexts/workout-context";
 import { routineApi } from "@/lib/api/routine";
 import { workoutApi } from "@/lib/api/workout";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatElapsedTime } from "@/lib/format";
-import { useWorkout } from "@/contexts/workout-context";
 import { getSelectedExercises } from "@/lib/store/exercise-selection";
+import type { RoutineItemRes } from "@/lib/types/routine";
 import type {
   ActiveExercise,
   ActiveSet,
   WorkoutSessionCompleteReq,
 } from "@/lib/types/workout";
-import type { RoutineItemRes } from "@/lib/types/routine";
-import {
-  Check,
-  ChevronRight,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Minus,
-  Plus,
-  Trash2,
-} from "lucide-react-native";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { Check, Clock, Minus, Plus } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useFocusEffect } from "expo-router";
 import {
   ActivityIndicator,
   Alert,
@@ -31,8 +22,10 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function WorkoutSessionScreen() {
   const router = useRouter();
@@ -44,7 +37,6 @@ export default function WorkoutSessionScreen() {
   const numericRoutineId = isFreeWorkout ? null : Number(routineId);
 
   const [exercises, setExercises] = useState<ActiveExercise[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [routineTitle, setRoutineTitle] = useState("");
@@ -53,9 +45,6 @@ export default function WorkoutSessionScreen() {
   const [originalRoutineItems, setOriginalRoutineItems] = useState<
     RoutineItemRes[] | null
   >(null);
-  const [collapsedExercises, setCollapsedExercises] = useState<Set<string>>(new Set());
-  const scrollViewRef = useRef<ScrollView>(null);
-  const exerciseRefs = useRef<Map<string, View>>(new Map());
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const setIdCounter = useRef(0);
   const initRef = useRef(false);
@@ -86,12 +75,7 @@ export default function WorkoutSessionScreen() {
         })),
       }));
 
-      setExercises((prev) => {
-        const updated = [...prev, ...newExercises];
-        // Move to first newly added exercise
-        setCurrentIndex(prev.length);
-        return updated;
-      });
+      setExercises((prev) => [...prev, ...newExercises]);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nextSetId]),
   );
@@ -126,13 +110,18 @@ export default function WorkoutSessionScreen() {
             currentSession.routineId === numericRoutineId
           ) {
             // Resume existing routine session
-            const routine = await routineApi.getRoutineDetail(numericRoutineId!);
+            const routine = await routineApi.getRoutineDetail(
+              numericRoutineId!,
+            );
             setRoutineTitle(routine.title);
             setSessionId(currentSession.sessionId);
             setOriginalRoutineItems(routine.routineItems);
 
             // Load last session data for pre-filling
-            let lastDataMap = new Map<number, { weight: number; reps: number }[]>();
+            let lastDataMap = new Map<
+              number,
+              { weight: number; reps: number }[]
+            >();
             try {
               const lastSession = await workoutApi.getLastSessionByRoutine(
                 numericRoutineId!,
@@ -184,7 +173,10 @@ export default function WorkoutSessionScreen() {
             startWorkout(session.id, numericRoutineId);
 
             // Load last session data for pre-filling
-            let lastDataMap = new Map<number, { weight: number; reps: number }[]>();
+            let lastDataMap = new Map<
+              number,
+              { weight: number; reps: number }[]
+            >();
             try {
               const lastSession = await workoutApi.getLastSessionByRoutine(
                 numericRoutineId!,
@@ -251,8 +243,6 @@ export default function WorkoutSessionScreen() {
     };
   }, [loading]);
 
-  const currentExercise = exercises[currentIndex];
-
   const updateSet = useCallback(
     (exerciseIdx: number, setId: string, updates: Partial<ActiveSet>) => {
       setExercises((prev) =>
@@ -271,27 +261,30 @@ export default function WorkoutSessionScreen() {
     [],
   );
 
-  const addSet = useCallback((exerciseIdx: number) => {
-    setExercises((prev) =>
-      prev.map((ex, i) =>
-        i === exerciseIdx
-          ? {
-              ...ex,
-              sets: [
-                ...ex.sets,
-                {
-                  id: nextSetId(),
-                  setNumber: ex.sets.length + 1,
-                  weight: "",
-                  reps: "",
-                  completed: false,
-                },
-              ],
-            }
-          : ex,
-      ),
-    );
-  }, [nextSetId]);
+  const addSet = useCallback(
+    (exerciseIdx: number) => {
+      setExercises((prev) =>
+        prev.map((ex, i) =>
+          i === exerciseIdx
+            ? {
+                ...ex,
+                sets: [
+                  ...ex.sets,
+                  {
+                    id: nextSetId(),
+                    setNumber: ex.sets.length + 1,
+                    weight: "",
+                    reps: "",
+                    completed: false,
+                  },
+                ],
+              }
+            : ex,
+        ),
+      );
+    },
+    [nextSetId],
+  );
 
   const removeSet = useCallback((exerciseIdx: number) => {
     setExercises((prev) =>
@@ -304,19 +297,8 @@ export default function WorkoutSessionScreen() {
   }, []);
 
   const removeExercise = useCallback((exerciseIdx: number) => {
-    setExercises((prev) => {
-      const updated = prev.filter((_, i) => i !== exerciseIdx);
-      // Adjust current index if needed
-      if (currentIndex >= updated.length && updated.length > 0) {
-        setCurrentIndex(updated.length - 1);
-      } else if (currentIndex === exerciseIdx && currentIndex > 0) {
-        setCurrentIndex(currentIndex - 1);
-      } else if (updated.length > 0 && currentIndex >= updated.length) {
-        setCurrentIndex(0);
-      }
-      return updated;
-    });
-  }, [currentIndex]);
+    setExercises((prev) => prev.filter((_, i) => i !== exerciseIdx));
+  }, []);
 
   const moveExerciseUp = useCallback((exerciseIdx: number) => {
     if (exerciseIdx === 0) return;
@@ -326,7 +308,6 @@ export default function WorkoutSessionScreen() {
         updated[exerciseIdx],
         updated[exerciseIdx - 1],
       ];
-      setCurrentIndex(exerciseIdx - 1);
       return updated;
     });
   }, []);
@@ -339,7 +320,6 @@ export default function WorkoutSessionScreen() {
         updated[exerciseIdx + 1],
         updated[exerciseIdx],
       ];
-      setCurrentIndex(exerciseIdx + 1);
       return updated;
     });
   }, []);
@@ -384,9 +364,7 @@ export default function WorkoutSessionScreen() {
     } catch (err) {
       Alert.alert(
         "오류",
-        err instanceof Error
-          ? err.message
-          : "운동 완료 처리에 실패했습니다.",
+        err instanceof Error ? err.message : "운동 완료 처리에 실패했습니다.",
       );
     } finally {
       setCompleting(false);
@@ -442,21 +420,17 @@ export default function WorkoutSessionScreen() {
 
     if (isFreeWorkout) {
       // Free workout: offer to record only or create a routine
-      Alert.alert(
-        "운동 완료",
-        `${completedSets.length}개 세트를 기록합니다.`,
-        [
-          { text: "취소", style: "cancel" },
-          {
-            text: "기록만 저장",
-            onPress: () => completeWithAction("RECORD_ONLY", completedSets),
-          },
-          {
-            text: "루틴으로 저장",
-            onPress: () => promptRoutineTitleAndCreate(completedSets),
-          },
-        ],
-      );
+      Alert.alert("운동 완료", `${completedSets.length}개 세트를 기록합니다.`, [
+        { text: "취소", style: "cancel" },
+        {
+          text: "기록만 저장",
+          onPress: () => completeWithAction("RECORD_ONLY", completedSets),
+        },
+        {
+          text: "루틴으로 저장",
+          onPress: () => promptRoutineTitleAndCreate(completedSets),
+        },
+      ]);
       return;
     }
 
@@ -479,90 +453,65 @@ export default function WorkoutSessionScreen() {
           {
             text: "루틴도 업데이트",
             onPress: () =>
-              completeWithAction(
-                "UPDATE_ROUTINE_AND_RECORD",
-                completedSets,
-              ),
+              completeWithAction("UPDATE_ROUTINE_AND_RECORD", completedSets),
           },
         ],
       );
       return;
     }
 
+    Alert.alert("운동 완료", `${completedSets.length}개 세트를 기록합니다.`, [
+      { text: "취소", style: "cancel" },
+      {
+        text: "완료",
+        onPress: () => completeWithAction("RECORD_ONLY", completedSets),
+      },
+    ]);
+  };
+
+  const handleCancel = () => {
     Alert.alert(
-      "운동 완료",
-      `${completedSets.length}개 세트를 기록합니다.`,
+      "운동 중단",
+      "운동을 중단하시겠습니까?\n기록이 저장되지 않습니다.",
       [
-        { text: "취소", style: "cancel" },
+        { text: "계속하기", style: "cancel" },
         {
-          text: "완료",
-          onPress: () => completeWithAction("RECORD_ONLY", completedSets),
+          text: "그만하기",
+          style: "destructive",
+          onPress: async () => {
+            if (sessionId) {
+              try {
+                await workoutApi.cancelSession(sessionId);
+              } catch {
+                // 취소 실패해도 로컬 상태는 정리
+              }
+            }
+            endWorkout();
+            initRef.current = false;
+            setLoading(true);
+            setElapsedTime(0);
+            router.back();
+          },
         },
       ],
     );
   };
 
-  const handleCancel = () => {
-    Alert.alert("운동 중단", "운동을 중단하시겠습니까?\n기록이 저장되지 않습니다.", [
-      { text: "계속하기", style: "cancel" },
-      {
-        text: "그만하기",
-        style: "destructive",
-        onPress: async () => {
-          if (sessionId) {
-            try {
-              await workoutApi.cancelSession(sessionId);
-            } catch {
-              // 취소 실패해도 로컬 상태는 정리
-            }
-          }
-          endWorkout();
-          initRef.current = false;
-          setLoading(true);
-          setElapsedTime(0);
-          router.back();
-        },
-      },
-    ]);
-  };
-
   const handleAddExercise = () => {
     const rid = isFreeWorkout ? "free" : routineId;
-    router.push(`/(tabs)/routine/select-exercises?returnTo=workout&routineId=${rid}`);
-  };
-
-  const toggleCollapseExercise = (exerciseId: string) => {
-    setCollapsedExercises((prev) => {
-      const next = new Set(prev);
-      if (next.has(exerciseId)) {
-        next.delete(exerciseId);
-      } else {
-        next.add(exerciseId);
-      }
-      return next;
-    });
+    router.push(
+      `/(tabs)/routine/select-exercises?returnTo=workout&routineId=${rid}`,
+    );
   };
 
   const isExerciseCompleted = (exercise: ActiveExercise) => {
     return exercise.sets.every((set) => set.completed);
   };
 
-  const scrollToCurrentExercise = () => {
-    if (exercises.length === 0) return;
-    const currentExercise = exercises[currentIndex];
-    const ref = exerciseRefs.current.get(currentExercise.id);
-    if (ref) {
-      ref.measureLayout(
-        scrollViewRef.current as any,
-        (x, y) => {
-          scrollViewRef.current?.scrollTo({ y: y - 20, animated: true });
-        },
-        () => {},
-      );
-    }
-  };
-
-  const handleExerciseLongPress = (exerciseIdx: number, exerciseName: string) => {
+  const handleExerciseLongPress = (
+    exerciseIdx: number,
+    exerciseName: string,
+  ) => {
     const buttons: any[] = [];
 
     if (exerciseIdx > 0) {
@@ -583,14 +532,14 @@ export default function WorkoutSessionScreen() {
       text: "삭제",
       style: "destructive",
       onPress: () => {
-        Alert.alert(
-          "종목 삭제",
-          `${exerciseName}을(를) 삭제하시겠습니까?`,
-          [
-            { text: "취소", style: "cancel" },
-            { text: "삭제", style: "destructive", onPress: () => removeExercise(exerciseIdx) },
-          ],
-        );
+        Alert.alert("종목 삭제", `${exerciseName}을(를) 삭제하시겠습니까?`, [
+          { text: "취소", style: "cancel" },
+          {
+            text: "삭제",
+            style: "destructive",
+            onPress: () => removeExercise(exerciseIdx),
+          },
+        ]);
       },
     });
 
@@ -633,26 +582,47 @@ export default function WorkoutSessionScreen() {
       </View>
 
       {/* Progress indicator */}
-      {exercises.length > 0 && (
-        <View className="border-b border-white/10 px-5 py-3">
-          <View className="mb-1 flex-row items-center justify-between">
-            <Text className="text-xs text-white/40">
-              진행률: {exercises.filter(isExerciseCompleted).length}/{exercises.length} 운동
-            </Text>
-            <Pressable onPress={handleAddExercise}>
-              <Text className="text-xs font-medium text-primary">+ 종목</Text>
-            </Pressable>
-          </View>
-          <View className="h-1 overflow-hidden rounded-full bg-white/10">
-            <View
-              className="h-full bg-primary"
-              style={{
-                width: `${(exercises.filter(isExerciseCompleted).length / exercises.length) * 100}%`,
-              }}
-            />
-          </View>
-        </View>
-      )}
+      {exercises.length > 0 &&
+        (() => {
+          const totalSets = exercises.reduce(
+            (sum, ex) => sum + ex.sets.length,
+            0,
+          );
+          const completedSets = exercises.reduce(
+            (sum, ex) => sum + ex.sets.filter((s) => s.completed).length,
+            0,
+          );
+          const progress =
+            totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
+
+          return (
+            <View className="border-b border-white/10 px-5 py-3">
+              <View className="flex-row items-center gap-3">
+                {/* Progress bar section */}
+                <View className="flex-1">
+                  <Text className="mb-1 text-xs text-white/40">
+                    진행률: {completedSets}/{totalSets} 세트
+                  </Text>
+                  <View className="h-1 overflow-hidden rounded-full bg-white/10">
+                    <View
+                      className="h-full bg-primary"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </View>
+                </View>
+
+                {/* Add exercise button */}
+                <Pressable
+                  onPress={handleAddExercise}
+                  className="flex-row items-center gap-1.5 rounded-xl bg-primary px-3 py-2.5 active:opacity-80"
+                >
+                  <Text className="text-sm font-semibold text-white">종목</Text>
+                  <Plus size={16} color={COLORS.white} />
+                </Pressable>
+              </View>
+            </View>
+          );
+        })()}
 
       {/* Exercise list */}
       {exercises.length === 0 ? (
@@ -674,118 +644,120 @@ export default function WorkoutSessionScreen() {
         </View>
       ) : (
         <ScrollView
-          ref={scrollViewRef}
           className="flex-1 pt-4"
-          contentContainerStyle={{ paddingBottom: 60 + TAB_BAR_HEIGHT + insets.bottom }}
+          contentContainerStyle={{
+            paddingBottom: 60 + TAB_BAR_HEIGHT + insets.bottom,
+          }}
           showsVerticalScrollIndicator={false}
         >
           {exercises.map((exercise, exerciseIdx) => {
             const isCompleted = isExerciseCompleted(exercise);
-            const isCollapsed = collapsedExercises.has(exercise.id);
-            const isCurrent = exerciseIdx === currentIndex;
+            const completedSets = exercise.sets.filter(
+              (s) => s.completed,
+            ).length;
 
             return (
-              <View
-                key={exercise.id}
-                ref={(ref) => {
-                  if (ref) exerciseRefs.current.set(exercise.id, ref);
-                }}
-                className={`mx-4 mb-4 rounded-2xl p-4 ${
-                  isCompleted
-                    ? "bg-green-500/10"
-                    : isCurrent
-                      ? "border-2 border-primary bg-primary/5"
-                      : "bg-card"
-                }`}
-              >
-                {/* Exercise header */}
-                <View className="mb-3 flex-row items-center justify-between">
-                  <Pressable
-                    onPress={() => {
-                      setCurrentIndex(exerciseIdx);
-                      if (isCollapsed) toggleCollapseExercise(exercise.id);
-                    }}
-                    className="flex-1 flex-row items-center gap-2"
+              <View key={exercise.id} className="mb-8 px-5">
+                <View className="flex-row">
+                  {/* Left: Number + Buttons */}
+                  <View
+                    className="mr-4 items-center gap-3"
+                    style={{ width: 48 }}
                   >
-                    <Text className="text-lg font-bold text-white">
-                      {exerciseIdx + 1}. {exercise.name}
-                    </Text>
-                    {isCompleted && (
-                      <View className="rounded-full bg-green-500/20 px-2 py-0.5">
-                        <Text className="text-[10px] font-bold text-green-400">
-                          완료
-                        </Text>
-                      </View>
-                    )}
-                  </Pressable>
-                  <View className="flex-row gap-1">
-                    {isCompleted && (
-                      <Pressable
-                        onPress={() => toggleCollapseExercise(exercise.id)}
-                        className="h-8 w-8 items-center justify-center rounded-lg bg-white/5 active:opacity-80"
-                      >
-                        {isCollapsed ? (
-                          <ChevronDown size={16} color={COLORS.mutedForeground} />
-                        ) : (
-                          <ChevronUp size={16} color={COLORS.mutedForeground} />
-                        )}
-                      </Pressable>
-                    )}
+                    {/* Exercise number */}
                     <Pressable
-                      onLongPress={() =>
+                      onPress={() =>
                         handleExerciseLongPress(exerciseIdx, exercise.name)
                       }
-                      className="h-8 w-8 items-center justify-center rounded-lg bg-white/5 active:opacity-80"
+                      className="h-10 w-10 items-center justify-center rounded-full bg-white/8 active:bg-white/10"
                     >
-                      <Text className="text-white/60">⋮</Text>
+                      <Text
+                        className="text-base font-bold"
+                        style={{
+                          color: isCompleted
+                            ? "#22c55e"
+                            : "rgba(255,255,255,0.6)",
+                        }}
+                      >
+                        {exerciseIdx + 1}
+                      </Text>
                     </Pressable>
-                  </View>
-                </View>
 
-                {/* Exercise sets (hidden if collapsed) */}
-                {!isCollapsed && (
-                  <>
-                    {/* Set table header */}
-                    <View className="mb-2 flex-row items-center px-1">
-                      <Text className="w-10 text-center text-xs font-medium text-white/40">
+                    {/* Add/Remove set buttons - vertical */}
+                    <View className="items-center gap-1 rounded-xl bg-white/5 px-2 py-2">
+                      <Pressable
+                        onPress={() => removeSet(exerciseIdx)}
+                        disabled={exercise.sets.length <= 1}
+                        className="h-7 w-7 items-center justify-center rounded-lg active:bg-white/10"
+                        style={{
+                          opacity: exercise.sets.length <= 1 ? 0.3 : 1,
+                        }}
+                      >
+                        <Minus size={14} color={COLORS.mutedForeground} />
+                      </Pressable>
+                      <Text className="text-[10px] font-medium text-white/40">
                         세트
                       </Text>
-                      <Text className="flex-1 text-center text-xs font-medium text-white/40">
-                        무게(kg)
+                      <Pressable
+                        onPress={() => addSet(exerciseIdx)}
+                        className="h-7 w-7 items-center justify-center rounded-lg active:bg-white/10"
+                      >
+                        <Plus size={14} color={COLORS.mutedForeground} />
+                      </Pressable>
+                    </View>
+                  </View>
+
+                  {/* Right: Header + Sets */}
+                  <View className="flex-1">
+                    {/* Header */}
+                    <View className="mb-3 h-10 flex-row items-center justify-between">
+                      <Text className="text-lg font-bold text-white">
+                        {exercise.name}
                       </Text>
-                      <Text className="flex-1 text-center text-xs font-medium text-white/40">
-                        횟수
-                      </Text>
-                      <View className="w-11" />
+                      <View className="flex-row items-center gap-2">
+                        {isCompleted && (
+                          <View className="rounded-full bg-green-500/20 px-2 py-0.5">
+                            <Text className="text-[10px] font-bold text-green-400">
+                              완료
+                            </Text>
+                          </View>
+                        )}
+                        <Text className="text-xs text-white/40">
+                          {completedSets}/{exercise.sets.length} 세트
+                        </Text>
+                      </View>
                     </View>
 
                     {/* Set rows */}
-                    <View className="gap-2">
+                    <View className="gap-2.5">
                       {exercise.sets.map((set) => (
                         <View
                           key={set.id}
-                          className={`flex-row items-center rounded-xl px-1 py-2 ${
-                            set.completed ? "bg-primary/10" : "bg-white/10"
-                          }`}
+                          className="flex-row items-center gap-2.5"
                         >
-                          <Text className="w-10 text-center text-sm font-bold text-white/60">
-                            {set.setNumber}
-                          </Text>
-                          <View className="mx-1 flex-1">
+                          <View style={{ width: 36 }}>
+                            <Text className="text-center text-base font-bold text-white/70">
+                              {set.setNumber}
+                            </Text>
+                          </View>
+                          <View className="flex-1 flex-row items-center gap-1 rounded-lg bg-white/5 px-3 py-2.5">
                             <TextInput
-                              className="rounded-lg bg-white/5 px-3 py-2.5 text-center text-sm text-white"
+                              className="flex-1 text-center text-sm font-medium text-white"
                               placeholder="0"
                               placeholderTextColor={COLORS.placeholder}
                               keyboardType="numeric"
                               value={set.weight}
                               onChangeText={(v) =>
-                                updateSet(exerciseIdx, set.id, { weight: v })
+                                updateSet(exerciseIdx, set.id, {
+                                  weight: v,
+                                })
                               }
                             />
+                            <Text className="text-sm text-white/40">kg</Text>
                           </View>
-                          <View className="mx-1 flex-1">
+                          <View className="flex-1 flex-row items-center gap-1 rounded-lg bg-white/5 px-3 py-2.5">
                             <TextInput
-                              className="rounded-lg bg-white/5 px-3 py-2.5 text-center text-sm text-white"
+                              className="flex-1 text-center text-sm font-medium text-white"
                               placeholder="0"
                               placeholderTextColor={COLORS.placeholder}
                               keyboardType="numeric"
@@ -794,6 +766,7 @@ export default function WorkoutSessionScreen() {
                                 updateSet(exerciseIdx, set.id, { reps: v })
                               }
                             />
+                            <Text className="text-sm text-white/40">회</Text>
                           </View>
                           <Pressable
                             onPress={() =>
@@ -801,53 +774,29 @@ export default function WorkoutSessionScreen() {
                                 completed: !set.completed,
                               })
                             }
-                            className={`ml-1 h-9 w-9 items-center justify-center rounded-lg ${
-                              set.completed ? "bg-primary" : "bg-white/5"
-                            }`}
+                            className="h-10 w-10 items-center justify-center rounded-lg"
+                            style={{
+                              backgroundColor: set.completed
+                                ? COLORS.primary
+                                : "rgba(255,255,255,0.08)",
+                            }}
                           >
                             <Check
                               size={16}
-                              color={set.completed ? COLORS.white : COLORS.iconMuted}
+                              color={
+                                set.completed ? COLORS.white : COLORS.iconMuted
+                              }
                             />
                           </Pressable>
                         </View>
                       ))}
                     </View>
-
-                    {/* Add / Remove set buttons */}
-                    <View className="mt-3 flex-row justify-center gap-3">
-                      <Pressable
-                        onPress={() => removeSet(exerciseIdx)}
-                        className="flex-row items-center gap-1.5 rounded-xl bg-white/5 px-4 py-2.5 active:opacity-80"
-                      >
-                        <Minus size={14} color={COLORS.mutedForeground} />
-                        <Text className="text-sm text-white/60">세트 삭제</Text>
-                      </Pressable>
-                      <Pressable
-                        onPress={() => addSet(exerciseIdx)}
-                        className="flex-row items-center gap-1.5 rounded-xl bg-white/5 px-4 py-2.5 active:opacity-80"
-                      >
-                        <Plus size={14} color={COLORS.mutedForeground} />
-                        <Text className="text-sm text-white/60">세트 추가</Text>
-                      </Pressable>
-                    </View>
-                  </>
-                )}
+                  </View>
+                </View>
               </View>
             );
           })}
         </ScrollView>
-      )}
-
-      {/* Floating button: Scroll to current exercise */}
-      {exercises.length > 1 && (
-        <Pressable
-          onPress={scrollToCurrentExercise}
-          className="absolute bottom-20 right-5 h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg active:opacity-80"
-          style={{ elevation: 5 }}
-        >
-          <ChevronRight size={24} color={COLORS.white} />
-        </Pressable>
       )}
 
       {/* Bottom timer bar */}
