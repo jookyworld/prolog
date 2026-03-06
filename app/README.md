@@ -24,30 +24,38 @@ prolog-app/
 │   │   ├── _layout.tsx
 │   │   ├── login.tsx
 │   │   └── signup.tsx
-│   └── (tabs)/             ← 로그인 후 탭 네비게이션 그룹
+│   ├── (tabs)/             ← 로그인 후 탭 네비게이션 그룹
+│   │   ├── _layout.tsx
+│   │   ├── index.tsx       ← 홈 탭 (통계 대시보드)
+│   │   ├── routine/
+│   │   │   ├── _layout.tsx
+│   │   │   ├── index.tsx   ← 루틴 목록
+│   │   │   ├── [id].tsx    ← 루틴 상세
+│   │   │   └── new.tsx     ← 루틴 생성
+│   │   ├── workout/
+│   │   │   ├── _layout.tsx
+│   │   │   ├── index.tsx   ← 운동 종목 리스트
+│   │   │   └── session.tsx ← 운동 세션 (핵심 기능)
+│   │   ├── community/
+│   │   │   ├── _layout.tsx
+│   │   │   ├── index.tsx   ← 공유 루틴 목록
+│   │   │   └── [id].tsx    ← 공유 루틴 상세
+│   │   └── profile/
+│   │       ├── _layout.tsx
+│   │       ├── index.tsx   ← 프로필 메인
+│   │       ├── edit.tsx    ← 프로필 수정
+│   │       ├── settings.tsx← 설정 (로그아웃/탈퇴)
+│   │       └── history/
+│   │           ├── _layout.tsx
+│   │           ├── index.tsx  ← 운동 기록 목록
+│   │           └── [id].tsx   ← 운동 기록 상세
+│   └── (modal)/            ← 모달 화면 그룹
 │       ├── _layout.tsx
-│       ├── index.tsx       ← 홈 탭 (플레이스홀더)
-│       ├── routine/
-│       │   ├── _layout.tsx
-│       │   ├── index.tsx   ← 루틴 목록
-│       │   ├── [id].tsx    ← 루틴 상세
-│       │   ├── new.tsx     ← 루틴 생성
-│       │   └── select-exercises.tsx ← 운동 종목 선택
-│       ├── workout/
-│       │   ├── _layout.tsx
-│       │   ├── index.tsx   ← 운동 탭 메인 (안내 카드)
-│       │   └── session.tsx ← 운동 세션 (핵심 기능)
-│       ├── community.tsx   ← 커뮤니티 탭 (플레이스홀더)
-│       └── profile/
-│           ├── _layout.tsx
-│           ├── index.tsx   ← 프로필 메인
-│           ├── settings.tsx← 설정 (로그아웃/탈퇴)
-│           └── history/
-│               ├── _layout.tsx
-│               ├── index.tsx  ← 운동 기록 목록
-│               └── [id].tsx   ← 운동 기록 상세
+│       └── select-exercises.tsx ← 운동 종목 선택
 ├── components/             ← 재사용 가능한 UI 컴포넌트
-│   ├── AuthGuard.tsx
+│   ├── AuthGuard.tsx       ← 인증 라우팅 보호
+│   ├── CustomTabBar.tsx    ← 커스텀 탭 바
+│   ├── WorkoutStartSheet.tsx ← 운동 시작 시트
 │   └── ui/
 │       ├── Button.tsx
 │       ├── Input.tsx
@@ -58,16 +66,23 @@ prolog-app/
 ├── lib/                    ← 비즈니스 로직, 유틸리티
 │   ├── constants.ts        ← 상수 (API URL, 색상)
 │   ├── utils.ts            ← 유틸리티 함수
+│   ├── format.ts           ← 포맷팅 유틸 (날짜, 숫자 등)
 │   ├── api.ts              ← HTTP 클라이언트 (토큰 관리 포함)
 │   ├── api/
 │   │   ├── auth.ts         ← 인증 API
+│   │   ├── community.ts    ← 커뮤니티 API
 │   │   ├── exercise.ts     ← 운동 종목 API
+│   │   ├── home.ts         ← 홈 화면 API
 │   │   ├── routine.ts      ← 루틴 API
+│   │   ├── user.ts         ← 사용자 API
 │   │   └── workout.ts      ← 운동 세션 API
 │   ├── types/
 │   │   ├── auth.ts         ← 인증 타입
+│   │   ├── community.ts    ← 커뮤니티 타입
 │   │   ├── exercise.ts     ← 운동 종목 타입
+│   │   ├── home.ts         ← 홈 화면 타입
 │   │   ├── routine.ts      ← 루틴 타입
+│   │   ├── user.ts         ← 사용자 타입
 │   │   └── workout.ts      ← 운동 세션 타입
 │   ├── store/
 │   │   └── exercise-selection.ts ← 운동 선택 임시 저장소

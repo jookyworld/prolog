@@ -32,7 +32,11 @@ src/main/java/com/back/
 │   ├── workout/
 │   │   ├── session/       # 운동 세션 (시작/완료/이력)
 │   │   └── set/           # 개별 세트 (무게/횟수)
-│   └── home/              # 헬스체크
+│   ├── community/
+│   │   ├── sharedRoutine/ # 공유 루틴 (조회, 생성, 삭제, 북마크)
+│   │   └── comment/       # 댓글 (조회, 작성, 삭제)
+│   ├── stats/             # 통계 (성장 추이, 볼륨 분석 등)
+│   └── home/              # 헬스체크, 홈 화면 통계
 └── global/
     ├── config/            # Swagger 설정
     ├── cookieManager/     # 쿠키 관리

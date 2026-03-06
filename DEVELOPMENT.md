@@ -17,9 +17,9 @@ prolog/
 
 | 프로젝트 | 기술 | 역할 | 상태 | 포트 |
 |---------|------|------|------|------|
-| **backend** | Spring Boot + MySQL + Redis | REST API 서버 | ✅ 배포 완료 | 8080 |
-| **app** | Expo + React Native + TypeScript | 사용자 모바일 앱 | 🚀 출시 준비 중 | Expo 앱 |
-| **admin** | Next.js (예정) | 관리자 웹 대시보드 | 📋 Phase 3 계획 | 3001 |
+| **backend** | Spring Boot 4.0.1 + MySQL + Redis | REST API 서버 | ✅ 배포 완료 | 8080 |
+| **app** | Expo 54 + React Native 0.81.5 | 사용자 모바일 앱 | 🚧 UI/UX 개선 중 | Expo 앱 |
+| **admin** | Next.js (예정) | 관리자 웹 대시보드 | 📋 Phase 3-2 계획 | 3001 |
 
 ---
 
@@ -94,23 +94,33 @@ backend/src/main/java/com/back/
 app/
 ├── app/                   ← 화면 (파일 기반 라우팅)
 │   ├── (auth)/            ← 로그인, 회원가입
-│   └── (tabs)/            ← 메인 앱 (5개 탭)
-│       ├── index.tsx      ← 홈 (통계 대시보드)
-│       ├── routine/       ← 루틴 관리
-│       ├── workout/       ← 운동 세션
-│       ├── community/     ← 커뮤니티 (Phase 3)
-│       └── profile/       ← 프로필, 기록 보관함
+│   ├── (tabs)/            ← 메인 앱 (5개 탭)
+│   │   ├── index.tsx      ← 홈 (통계 대시보드)
+│   │   ├── routine/       ← 루틴 관리 (목록, 상세, 추가)
+│   │   ├── workout/       ← 운동 세션 (목록, 진행)
+│   │   ├── community/     ← 커뮤니티 (공유 루틴, 댓글)
+│   │   └── profile/       ← 프로필, 기록 보관함, 설정
+│   └── (modal)/           ← 모달 화면
+│       └── select-exercises.tsx  ← 종목 선택
 ├── components/
 │   ├── AuthGuard.tsx      ← 인증 라우팅 보호
+│   ├── CustomTabBar.tsx   ← 커스텀 탭 바
+│   ├── WorkoutStartSheet.tsx  ← 운동 시작 시트
 │   └── ui/                ← 재사용 UI 컴포넌트
 ├── lib/
 │   ├── api/               ← API 호출 함수
 │   │   ├── auth.ts
+│   │   ├── community.ts
 │   │   ├── exercise.ts
+│   │   ├── home.ts
 │   │   ├── routine.ts
+│   │   ├── user.ts
 │   │   └── workout.ts
 │   ├── types/             ← TypeScript 타입
-│   └── validations/       ← Zod 스키마
+│   ├── validations/       ← Zod 스키마
+│   ├── constants.ts       ← 상수 정의
+│   ├── format.ts          ← 포맷팅 유틸
+│   └── utils.ts           ← 공통 유틸
 └── contexts/
     └── auth-context.tsx   ← 전역 인증 상태
 ```
@@ -365,23 +375,33 @@ EXPO_PUBLIC_API_URL=http://localhost:8080
 
 ---
 
-## 📊 현재 진행 상황 (2026-02-26)
+## 📊 현재 진행 상황 (2026-03-06)
 
 ### Phase 1: MVP Core ✅ (완료)
-- 인증/인가 (6 API)
-- 루틴 관리 (7 API)
-- 운동 세션 (8 API)
-- 기본 통계 (1 API)
+- ✅ 인증/인가 (6 API)
+- ✅ 루틴 관리 (7 API)
+- ✅ 운동 세션 (8 API)
+- ✅ 기본 통계 (1 API)
 
-### Phase 2: 성장 통계 🚧 (20% 완료)
+### Phase 2: 성장 통계 📋 (계획)
 - [ ] 종목별 볼륨 추이 API
 - [ ] 종목별 최고 중량 추이 API
 - [ ] 루틴별 회차 비교 API
 - [ ] 운동 요약 대시보드 API
 
-### Phase 3: 커뮤니티 📋 (계획)
-- 루틴 공유 (8 API)
-- Admin 웹 개발
+### Phase 3-1: 커뮤니티 기본 ✅ (완료)
+- ✅ 루틴 공유 API (6 API)
+- ✅ 댓글 API (1 API)
+
+### Phase 3-2: 커뮤니티 고급 📋 (계획)
+- [ ] 좋아요 기능
+- [ ] 북마크 기능
+
+### UI/UX 개선 🚧 (진행 중)
+- 🚧 운동 화면 디자인 개선
+- 🚧 루틴 상세 페이지 개선
+- 🚧 종목 선택 화면 개선
+- 🚧 모달 네비게이션 최적화
 
 ---
 

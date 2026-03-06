@@ -3,7 +3,7 @@
 **점진적 과부하 추적과 성장 분석을 통해 꾸준한 운동 습관 형성을 돕는 웹/앱 서비스**
 
 **버전:** v1.0.0
-**최종 업데이트:** 2026-02-26
+**최종 업데이트:** 2026-03-06
 
 ---
 
@@ -93,16 +93,17 @@ npx expo start
 - **Cache:** Redis 7.0+
 - **ORM:** Spring Data JPA (Hibernate)
 - **Security:** Spring Security + JWT
-- **API Docs:** Swagger (springdoc-openapi)
+- **API Docs:** Swagger (springdoc-openapi 2.8.9)
 - **Container:** Docker, Docker Compose
 
 ### Mobile App
-- **Framework:** Expo SDK + React Native
-- **Language:** TypeScript 5.9.3
-- **UI:** NativeWind (Tailwind for RN)
-- **Routing:** Expo Router (파일 기반)
-- **Forms:** React Hook Form + Zod
-- **Icons:** Lucide React Native
+- **Framework:** Expo SDK 54
+- **Language:** TypeScript 5.9.2
+- **Runtime:** React 19.1.0, React Native 0.81.5
+- **UI:** NativeWind 4.2.1 (Tailwind for RN)
+- **Routing:** Expo Router 6.0.23 (파일 기반)
+- **Forms:** React Hook Form 7.71.1 + Zod 4.3.6
+- **Icons:** Lucide React Native 0.564.0
 
 ### Admin (Phase 3 예정)
 - **Framework:** Next.js (예정)
@@ -150,6 +151,7 @@ npx expo start
 | **Phase 2: 성장 통계** | 🚧 진행 중 | 20% (1/5 API) | 2026-03-31 (예정) |
 | **Phase 3-1: 커뮤니티 기본** | ✅ 완료 | 100% (6/6 API) | 2026-03-01 |
 | **Phase 3-2: 커뮤니티 고급** | 📋 계획 | 0% (0/2 API) | 2026-04-30 (예정) |
+| **UI/UX 개선** | 🚧 진행 중 | - | 진행 중 |
 
 ### API 개발 현황
 
@@ -298,9 +300,9 @@ CREATE INDEX idx_routine_user_active ON routines (user_id, active);
 | Week 1-2 | 프로젝트 설정, 인증 시스템 | ✅ 완료 |
 | Week 3-4 | 루틴 및 운동 기록 핵심 기능 | ✅ 완료 |
 | Week 5-6 | 홈 통계 API, 도메인 리팩토링 | ✅ 완료 |
-| Week 7-8 | 성장 통계 API 개발 | 🚧 진행 중 |
-| Week 9-10 | 프론트엔드 통합 | 📋 예정 |
-| Week 11-12 | 통합 테스트, 버그 수정 | 📋 예정 |
+| Week 7-8 | 성장 통계 API 개발 | 📋 예정 |
+| Week 9-10 | UI/UX 개선 (운동 화면, 루틴 상세) | 🚧 진행 중 |
+| Week 11-12 | 프론트엔드 통합, 버그 수정 | 📋 예정 |
 
 ### 2026년 Q2 (4~6월)
 
@@ -340,4 +342,25 @@ CREATE INDEX idx_routine_user_active ON routines (user_id, active);
 
 ---
 
-**프로젝트 진행 중 | Phase 2 개발 중 🚧**
+## 🔄 최근 업데이트 (2026-03-06)
+
+### 완료된 작업
+- ✅ 루틴 공유 기능 구현 (Phase 3-1 완료)
+- ✅ 리프레시 토큰 처리 방식 개선
+- ✅ 운동 종목 한글화
+- ✅ 루틴 상세 페이지 디자인 개선
+
+### 진행 중인 작업
+- 🚧 운동 화면 UI/UX 개선
+  - 탭 방식 → 스크롤 방식 전환
+  - 종목 선택 화면 디자인 개선
+  - 모달 네비게이션 최적화
+
+### 다음 계획
+- 📋 성장 통계 API 개발 (Phase 2)
+- 📋 통합 테스트 및 버그 수정
+- 📋 베타 테스트 준비
+
+---
+
+**프로젝트 진행 중 | UI/UX 개선 및 Phase 2 준비 중 🚧**
