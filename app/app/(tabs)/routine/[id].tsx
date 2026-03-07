@@ -155,9 +155,16 @@ export default function RoutineDetailScreen() {
     });
 
     if (routine.active) {
+      // 활성 루틴: 보관만 가능 (삭제 불가)
       buttons.push({ text: "보관하기", onPress: handleArchive });
     } else {
+      // 보관 루틴: 활성화 또는 삭제 가능
       buttons.push({ text: "다시 활성화", onPress: handleActivate });
+      buttons.push({
+        text: "루틴 삭제",
+        style: "destructive",
+        onPress: handleDelete,
+      });
     }
 
     buttons.push({
@@ -165,12 +172,6 @@ export default function RoutineDetailScreen() {
       onPress: () => {
         router.push(`/(tabs)/routine/new?routineId=${id}`);
       },
-    });
-
-    buttons.push({
-      text: "루틴 삭제",
-      style: "destructive",
-      onPress: handleDelete,
     });
 
     Alert.alert(undefined as unknown as string, undefined, buttons);

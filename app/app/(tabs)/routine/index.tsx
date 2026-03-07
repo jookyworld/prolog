@@ -101,19 +101,16 @@ export default function RoutineScreen() {
 
   const handleLongPress = (routine: RoutineListItem) => {
     if (routine.active) {
-      Alert.alert(routine.title, undefined, [
+      // 활성 루틴: 보관만 가능
+      Alert.alert(routine.title, "루틴을 보관하시겠습니까?", [
         { text: "취소", style: "cancel" },
         {
           text: "보관하기",
           onPress: () => handleArchive(routine),
         },
-        {
-          text: "삭제",
-          style: "destructive",
-          onPress: () => handleDelete(routine),
-        },
       ]);
     } else {
+      // 보관 루틴: 활성화 또는 삭제
       Alert.alert(routine.title, undefined, [
         { text: "취소", style: "cancel" },
         {

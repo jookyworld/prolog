@@ -118,10 +118,16 @@ export interface WorkoutSessionDetail {
 export function toWorkoutSession(
   res: WorkoutSessionListItemRes,
 ): WorkoutSession {
+  // 제목: routineTitle이 있으면 사용, 없으면 "자유 운동"
+  const title = res.routineTitle ?? "자유 운동";
+
+  // 타입: routineTitle이 있으면 루틴 기반 (삭제되었어도)
+  const type = res.routineTitle ? "routine" : "free";
+
   return {
     id: String(res.sessionId),
-    title: res.routineTitle ?? "자유 운동",
-    type: res.routineId ? "routine" : "free",
+    title,
+    type,
     completedAt: res.completedAt,
   };
 }
@@ -157,10 +163,16 @@ export function toWorkoutSessionDetail(
     );
   }
 
+  // 제목: routineTitle이 있으면 사용, 없으면 "자유 운동"
+  const title = res.routineTitle ?? "자유 운동";
+
+  // 타입: routineTitle이 있으면 루틴 기반 (삭제되었어도)
+  const type = res.routineTitle ? "routine" : "free";
+
   return {
     id: String(res.sessionId),
-    title: res.routineTitle ?? "자유 운동",
-    type: res.routineId ? "routine" : "free",
+    title,
+    type,
     completedAt: res.completedAt,
     startedAt: res.startedAt,
     elapsedTime,

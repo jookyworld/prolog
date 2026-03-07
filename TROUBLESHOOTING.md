@@ -946,3 +946,409 @@ NativeWind 4.x
   1. `react-native-worklets` + `react-refresh` 설치
   2. `.env` 파일 IP 주소 및 포트 수정
 - **주의사항**: 이 문제는 에러 메시지만으로는 원인 파악이 어려우므로, Metro Bundler 전체 로그를 꼼꼼히 확인해야 함
+
+---
+
+## 🗑️ 루틴 삭제 불가 문제 (2026-03-07 해결)
+
+### 문제 상황
+
+루틴 삭제 시도 시 다음 에러 발생:
+
+```
+Cannot delete or update a parent row: a foreign key constraint fails
+(`prolog`.`workout_sessions`, CONSTRAINT `FK4q6pnw9nar0dxwb0qsofyefea`
+FOREIGN KEY (`routine_id`) REFERENCES `routines` (`id`))
+```
+
+**증상**:
+- 루틴을 한 번이라도 사용한 경우 삭제 불가
+- WorkoutSession이 Routine을 참조하고 있어서 외래 키 제약 위반
+- 데이터 무결성은 유지되지만 사용자 UX 저해
+
+---
+
+### 🔍 문제 원인
+
+#### 1. 외래 키 제약 조건
+
+```sql
+-- 기존 제약
+ALTER TABLE workout_sessions
+ADD CONSTRAINT fk_workout_sessions_routines
+FOREIGN KEY (routine_id) REFERENCES routines(id)
+ON DELETE RESTRICT;  -- ❌ 삭제 불가
+```
+
+**기본 동작**:
+- JPA/Hibernate 기본값: `ON DELETE RESTRICT`
+- Routine 삭제 시 참조하는 WorkoutSession이 있으면 에러
+- 데이터 정합성은 보장하지만 유연성 부족
+
+#### 2. 운동 기록 맥락 손실 우려
+
+루틴을 삭제하면:
+- 과거 운동 기록에서 "어떤 루틴으로 운동했는지" 정보 손실
+- 모두 "자유 운동"으로 표시될 가능성
+- 사용자 경험 저하
+
+---
+
+### ✅ 해결 방법
+
+#### 핵심 전략: 스냅샷 패턴 + ON DELETE SET NULL
+
+**1. 스냅샷 저장 (운동 기록 보존)**
+
+```sql
+-- workout_sessions 테이블에 컬럼 추가
+ALTER TABLE workout_sessions
+ADD COLUMN routine_title_snapshot VARCHAR(100) NULL;
+```
+
+```java
+// WorkoutSession.java
+@Column(name = "routine_title_snapshot", length = 100)
+private String routineTitleSnapshot;
+
+private WorkoutSession(User user, Routine routine, LocalDateTime startedAt) {
+    this.user = user;
+    this.routine = routine;
+    // 세션 시작 시 루틴 제목 스냅샷 저장
+    this.routineTitleSnapshot = routine != null ? routine.getTitle() : null;
+    this.startedAt = startedAt;
+}
+```
+
+**2. 외래 키 제약 변경**
+
+```sql
+-- 기존 외래 키 삭제
+ALTER TABLE workout_sessions
+DROP FOREIGN KEY FK4q6pnw9nar0dxwb0qsofyefea;
+
+-- 새로운 외래 키 추가 (ON DELETE SET NULL)
+ALTER TABLE workout_sessions
+ADD CONSTRAINT fk_workout_sessions_routines
+FOREIGN KEY (routine_id) REFERENCES routines(id)
+ON DELETE SET NULL;  -- ✅ routine_id만 NULL로 변경
+```
+
+**3. 서비스 로직 단순화**
+
+```java
+// RoutineService.java
+@Transactional
+public void deleteRoutine(Long userId, Long routineId) {
+    Routine routine = getRoutineAndValidateOwner(userId, routineId);
+
+    // 1. RoutineItem 삭제
+    routineItemRepository.deleteAll(
+        routineItemRepository.findByRoutineIdOrderByOrderInRoutineAsc(routineId)
+    );
+
+    // 2. Routine 삭제 (WorkoutSession의 routine_id는 자동으로 NULL)
+    routineRepository.delete(routine);
+}
+```
+
+---
+
+### 📊 동작 방식
+
+#### Before (삭제 불가)
+
+```
+Routine (id=1, title="상체 루틴")
+    ↑ FK (ON DELETE RESTRICT)
+WorkoutSession (id=100, routine_id=1)
+
+[루틴 삭제 시도]
+    ↓
+❌ 에러: Cannot delete parent row (외래 키 제약 위반)
+```
+
+#### After (삭제 가능)
+
+```
+[세션 시작 시]
+Routine (id=1, title="상체 루틴")
+    ↓
+WorkoutSession 생성
+    ├─ routine_id = 1
+    └─ routine_title_snapshot = "상체 루틴"  ← 스냅샷 저장
+
+[루틴 삭제 시]
+Routine 삭제
+    ↓ (ON DELETE SET NULL 트리거)
+WorkoutSession 자동 업데이트
+    ├─ routine_id = NULL  ← 외래 키만 제거
+    └─ routine_title_snapshot = "상체 루틴"  ← 보존됨!
+
+[운동 기록 조회 시]
+    ↓
+title: routine_title_snapshot → "상체 루틴" ✅
+type: "routine" ✅
+```
+
+---
+
+### 🛠️ 수동 마이그레이션
+
+```sql
+USE prolog;
+
+-- 1. 스냅샷 컬럼 추가
+ALTER TABLE workout_sessions
+ADD COLUMN routine_title_snapshot VARCHAR(100) NULL;
+
+-- 2. 기존 데이터 스냅샷 채우기
+UPDATE workout_sessions ws
+INNER JOIN routines r ON ws.routine_id = r.id
+SET ws.routine_title_snapshot = r.title
+WHERE ws.routine_title_snapshot IS NULL;
+
+-- 3. 외래 키 재설정
+ALTER TABLE workout_sessions
+DROP FOREIGN KEY FK4q6pnw9nar0dxwb0qsofyefea;
+
+ALTER TABLE workout_sessions
+ADD CONSTRAINT fk_workout_sessions_routines
+FOREIGN KEY (routine_id) REFERENCES routines(id)
+ON DELETE SET NULL;
+
+-- 4. 확인
+SHOW CREATE TABLE workout_sessions\G
+```
+
+---
+
+### 🚀 자동 마이그레이션 (Flyway)
+
+#### 1. 의존성 추가
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-mysql")
+}
+```
+
+#### 2. 설정 추가
+
+```yaml
+# application-local.yml
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate  # update → validate
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+```
+
+#### 3. 마이그레이션 파일
+
+**`backend/src/main/resources/db/migration/V2__add_routine_snapshot.sql`**
+
+```sql
+-- routine_title_snapshot 추가
+ALTER TABLE workout_sessions
+ADD COLUMN IF NOT EXISTS routine_title_snapshot VARCHAR(100) NULL;
+
+-- 기존 데이터 마이그레이션
+UPDATE workout_sessions ws
+INNER JOIN routines r ON ws.routine_id = r.id
+SET ws.routine_title_snapshot = r.title
+WHERE ws.routine_title_snapshot IS NULL;
+
+-- 외래 키 재설정
+ALTER TABLE workout_sessions DROP FOREIGN KEY IF EXISTS FK4q6pnw9nar0dxwb0qsofyefea;
+ALTER TABLE workout_sessions
+ADD CONSTRAINT fk_workout_sessions_routines
+FOREIGN KEY (routine_id) REFERENCES routines(id)
+ON DELETE SET NULL;
+```
+
+#### 4. 실행
+
+```bash
+cd backend
+./gradlew bootRun
+# Flyway가 자동으로 마이그레이션 실행
+```
+
+---
+
+### ✅ 검증 방법
+
+#### 1. 루틴 생성 및 운동
+
+```bash
+# 루틴 생성
+POST /api/routines
+{ "title": "테스트 루틴", "items": [...] }
+
+# 세션 시작
+POST /api/workouts/sessions
+{ "routineId": 1 }
+
+# 확인: routine_title_snapshot에 제목 저장됨
+```
+
+#### 2. 루틴 삭제 전 기록 조회
+
+```bash
+GET /api/workouts/sessions/{id}
+# 응답: { "routineId": 1, "routineTitle": "테스트 루틴" }
+```
+
+#### 3. 루틴 삭제
+
+```bash
+DELETE /api/routines/1
+# ✅ 성공 (에러 없음)
+```
+
+#### 4. 루틴 삭제 후 기록 조회
+
+```bash
+GET /api/workouts/sessions/{id}
+# 응답: { "routineId": null, "routineTitle": "테스트 루틴" }
+#       ↑ 삭제됨      ↑ 스냅샷으로 보존! ✅
+```
+
+---
+
+### 🎨 프론트엔드 개선
+
+#### 1. 안전한 삭제 플로우
+
+```
+활성 루틴 → [보관하기] → 보관 루틴 → [삭제] → 완료
+```
+
+**변경 사항**:
+- 활성 루틴: 보관 버튼만 표시 (삭제 불가)
+- 보관 루틴: 활성화 또는 삭제 가능
+- 2단계 프로세스로 실수 방지
+
+#### 2. 깔끔한 UI
+
+```typescript
+// lib/types/workout.ts
+export function toWorkoutSession(res: WorkoutSessionListItemRes) {
+  // 제목: routineTitle이 있으면 사용, 없으면 "자유 운동"
+  const title = res.routineTitle ?? "자유 운동";
+
+  // 타입: routineTitle이 있으면 루틴 기반 (삭제되었어도)
+  const type = res.routineTitle ? "routine" : "free";
+
+  return { id, title, type, completedAt };
+}
+```
+
+**화면 표시**:
+```
+운동 기록:
+┌──────────────────────┐
+│ 상체 루틴 A   [루틴] │  ← 루틴 삭제되었어도 동일하게 표시
+└──────────────────────┘
+```
+
+---
+
+### 🚫 하지 말아야 할 것
+
+#### ❌ 강제로 WorkoutSession 삭제
+
+```java
+// 잘못된 방법
+workoutSessionRepository.deleteByRoutineId(routineId);  // ❌
+routineRepository.delete(routine);
+```
+→ 사용자의 소중한 운동 기록 손실
+
+#### ❌ CASCADE DELETE 사용
+
+```sql
+-- 절대 하지 말 것
+ALTER TABLE workout_sessions
+ADD CONSTRAINT fk_workout_sessions_routines
+FOREIGN KEY (routine_id) REFERENCES routines(id)
+ON DELETE CASCADE;  -- ❌ 운동 기록도 함께 삭제됨
+```
+
+#### ❌ 스냅샷 없이 ON DELETE SET NULL만 사용
+
+```sql
+-- 스냅샷 없으면
+ALTER TABLE workout_sessions ... ON DELETE SET NULL;
+-- 결과: routine_id = null, routine_title_snapshot = null
+-- 화면: "자유 운동"으로 표시 (맥락 손실)
+```
+
+---
+
+### 📋 체크리스트
+
+#### 배포 전:
+- [ ] 데이터베이스 백업
+- [ ] Flyway 마이그레이션 테스트
+- [ ] 기존 세션 데이터 스냅샷 채우기 확인
+- [ ] 외래 키 제약 변경 확인 (`ON DELETE SET NULL`)
+
+#### 배포 후:
+- [ ] 루틴 삭제 동작 확인 (에러 없이 삭제됨)
+- [ ] 운동 기록 조회 정상 (제목 보존됨)
+- [ ] 필터링 정상 ("루틴" 필터에 포함)
+- [ ] 프론트엔드 UI 정상 (깔끔하게 표시)
+
+---
+
+### 🎯 핵심 교훈
+
+#### 1. 스냅샷 패턴의 중요성
+
+```
+운동 종목: exercise_name (스냅샷)
+운동 부위: body_part_snapshot (스냅샷)
+루틴 제목: routine_title_snapshot (스냅샷)  ← 추가
+```
+→ **일관된 데이터 영속성 전략**
+
+#### 2. 외래 키 제약 옵션
+
+```
+ON DELETE RESTRICT: 삭제 불가 (기본값)
+ON DELETE CASCADE: 연쇄 삭제 (위험)
+ON DELETE SET NULL: 참조만 제거 (안전) ✅
+```
+
+#### 3. UX 관점의 데이터 설계
+
+- 기술적으로는 `routine_id = null`
+- 사용자에게는 "상체 루틴 A"로 보임
+- 부정적 표현 없음 ("(삭제됨)" 표시 안 함)
+
+---
+
+### 📚 관련 문서
+
+- [ROUTINE_DELETE_FEATURE.md](./ROUTINE_DELETE_FEATURE.md) - 전체 구현 상세 문서
+- [REQUIREMENTS.md](./REQUIREMENTS.md) - 스냅샷 기반 영속성 원칙
+
+---
+
+### 📝 작성 정보
+
+- **작성일**: 2026-03-07
+- **문제 발생 환경**: Spring Boot 4.0.1, MySQL, JPA/Hibernate
+- **해결 시간**: 약 3시간
+- **핵심 해결책**:
+  1. `routine_title_snapshot` 컬럼 추가 (스냅샷)
+  2. `ON DELETE SET NULL` 외래 키 제약
+  3. 2단계 삭제 플로우 (활성 → 보관 → 삭제)
+  4. 깔끔한 UI (삭제 여부 표시 안 함)
