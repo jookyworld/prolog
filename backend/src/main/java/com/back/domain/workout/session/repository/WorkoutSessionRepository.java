@@ -69,4 +69,7 @@ public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, 
     """, nativeQuery = true)
     List<WorkoutSession> findRecentCompletedSessions(@Param("userId") Long userId,
                                                       @Param("limit") int limit);
+
+    // 특정 루틴을 참조하는 모든 세션 조회 (루틴 삭제 시 사용)
+    List<WorkoutSession> findByRoutine_Id(Long routineId);
 }

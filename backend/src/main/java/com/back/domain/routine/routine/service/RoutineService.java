@@ -11,6 +11,8 @@ import com.back.domain.routine.routineItem.entity.RoutineItem;
 import com.back.domain.routine.routineItem.repository.RoutineItemRepository;
 import com.back.domain.user.user.entity.User;
 import com.back.domain.user.user.repository.UserRepository;
+import com.back.domain.workout.session.entity.WorkoutSession;
+import com.back.domain.workout.session.repository.WorkoutSessionRepository;
 import com.back.global.exception.type.BadRequestException;
 import com.back.global.exception.type.ForbiddenException;
 import com.back.global.exception.type.NotFoundException;
@@ -27,6 +29,7 @@ public class RoutineService {
     private final UserRepository userRepository;
     private final ExerciseRepository exerciseRepository;
     private final RoutineItemRepository routineItemRepository;
+    private final WorkoutSessionRepository workoutSessionRepository;
 
     @Transactional
     public Routine createRoutine(Long userId, RoutineCreateRequest request) {
@@ -144,9 +147,15 @@ public class RoutineService {
     @Transactional
     public void deleteRoutine(Long userId, Long routineId) {
         Routine routine = getRoutineAndValidateOwner(userId, routineId);
+
+        // 1. RoutineItem 삭제
         routineItemRepository.deleteAll(
                 routineItemRepository.findByRoutineIdOrderByOrderInRoutineAsc(routineId)
         );
+
+        // 2. Routine 삭제
+        // WorkoutSession에 routineTitleSnapshot이 있으므로
+        // routine_id가 null이 되어도 과거 기록에 제목은 보존됨
         routineRepository.delete(routine);
     }
 

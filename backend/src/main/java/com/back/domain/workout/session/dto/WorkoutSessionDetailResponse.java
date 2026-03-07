@@ -17,10 +17,23 @@ public record WorkoutSessionDetailResponse(
         return new WorkoutSessionDetailResponse(
                 session.getId(),
                 session.getRoutine() != null ? session.getRoutine().getId() : null,
-                session.getRoutine() != null ? session.getRoutine().getTitle() : null,
+                getRoutineTitle(session),
                 session.getStartedAt(),
                 session.getCompletedAt(),
                 exercises
         );
+    }
+
+    private static String getRoutineTitle(WorkoutSession session) {
+        // 1순위: 스냅샷 (루틴 삭제되어도 보존됨)
+        if (session.getRoutineTitleSnapshot() != null) {
+            return session.getRoutineTitleSnapshot();
+        }
+        // 2순위: 현재 루틴 (하위 호환)
+        if (session.getRoutine() != null) {
+            return session.getRoutine().getTitle();
+        }
+        // 3순위: 자유 운동
+        return null;
     }
 }

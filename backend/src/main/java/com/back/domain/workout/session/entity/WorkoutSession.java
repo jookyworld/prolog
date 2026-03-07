@@ -34,8 +34,17 @@ public class WorkoutSession {
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "routine_id")
+    @JoinColumn(name = "routine_id",
+        foreignKey = @ForeignKey(
+            name = "fk_workout_sessions_routines",
+            foreignKeyDefinition = "FOREIGN KEY (routine_id) REFERENCES routines(id) ON DELETE SET NULL"
+        )
+    )
     private Routine routine;
+
+    // 스냅샷: 세션 시작 시점의 루틴 제목 (루틴 삭제 후에도 보존)
+    @Column(name = "routine_title_snapshot", length = 100)
+    private String routineTitleSnapshot;
 
     @Column(nullable = false)
     private LocalDateTime startedAt;
@@ -54,6 +63,7 @@ public class WorkoutSession {
     private WorkoutSession(User user, Routine routine, LocalDateTime startedAt) {
         this.user = user;
         this.routine = routine;
+        this.routineTitleSnapshot = routine != null ? routine.getTitle() : null;
         this.startedAt = startedAt;
     }
 
