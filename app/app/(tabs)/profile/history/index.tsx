@@ -17,12 +17,16 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
-type TypeFilter = "all" | "routine" | "free";
-
-const TYPE_FILTERS: { value: TypeFilter; label: string }[] = [
-  { value: "all", label: "전체" },
-  { value: "routine", label: "루틴" },
-  { value: "free", label: "자유 운동" },
+const BODY_PART_FILTERS: { value: string | null; label: string }[] = [
+  { value: null, label: "전체" },
+  { value: "가슴", label: "가슴" },
+  { value: "어깨", label: "어깨" },
+  { value: "등", label: "등" },
+  { value: "팔", label: "팔" },
+  { value: "하체", label: "하체" },
+  { value: "코어", label: "코어" },
+  { value: "유산소", label: "유산소" },
+  { value: "기타", label: "기타" },
 ];
 
 const PAGE_SIZE = 20;
@@ -34,16 +38,16 @@ export default function WorkoutHistoryScreen() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [bodyPart, setBodyPart] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const isLoadingRef = useRef(false);
 
-  const fetchSessions = useCallback(async (filter: TypeFilter) => {
+  const fetchSessions = useCallback(async (filter: string | null) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await workoutApi.getSessions(0, PAGE_SIZE, filter);
+      const data = await workoutApi.getSessions(0, PAGE_SIZE, filter ?? undefined);
       setSessions(data.content.map(toWorkoutSession));
       setPage(0);
       setHasMore(!data.last);
@@ -62,7 +66,7 @@ export default function WorkoutHistoryScreen() {
     setLoadingMore(true);
     try {
       const nextPage = page + 1;
-      const data = await workoutApi.getSessions(nextPage, PAGE_SIZE, typeFilter);
+      const data = await workoutApi.getSessions(nextPage, PAGE_SIZE, bodyPart ?? undefined);
       setSessions((prev) => [...prev, ...data.content.map(toWorkoutSession)]);
       setPage(nextPage);
       setHasMore(!data.last);
@@ -72,11 +76,11 @@ export default function WorkoutHistoryScreen() {
       setLoadingMore(false);
       isLoadingRef.current = false;
     }
-  }, [hasMore, page, typeFilter]);
+  }, [hasMore, page, bodyPart]);
 
   useEffect(() => {
-    fetchSessions(typeFilter);
-  }, [typeFilter]);
+    fetchSessions(bodyPart);
+  }, [bodyPart]);
 
   const handleScroll = useCallback(
     ({ nativeEvent }: { nativeEvent: any }) => {
@@ -101,26 +105,30 @@ export default function WorkoutHistoryScreen() {
         <Text className="text-2xl font-bold text-white">운동 기록</Text>
       </View>
 
-      {/* 필터 칩 */}
-      <View className="flex-row gap-2 px-5 pb-4">
-        {TYPE_FILTERS.map((f) => (
-          <Pressable
-            key={f.value}
-            onPress={() => setTypeFilter(f.value)}
-            className={`rounded-full px-4 py-2 ${
-              typeFilter === f.value ? "bg-primary" : "bg-card"
-            }`}
-          >
-            <Text
-              className={`text-sm font-medium ${
-                typeFilter === f.value ? "text-white" : "text-white/50"
-              }`}
+      {/* 부위 필터 칩 (가로 스크롤) */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
+        className="flex-grow-0 pb-4"
+      >
+        {BODY_PART_FILTERS.map((f) => {
+          const active = bodyPart === f.value;
+          return (
+            <Pressable
+              key={f.label}
+              onPress={() => setBodyPart(f.value)}
+              className={`rounded-full px-4 py-2 ${active ? "bg-primary" : "bg-card"}`}
             >
-              {f.label}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
+              <Text
+                className={`text-sm font-medium ${active ? "text-white" : "text-white/50"}`}
+              >
+                {f.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
 
       {/* 컨텐츠 */}
       <ScrollView
@@ -138,14 +146,13 @@ export default function WorkoutHistoryScreen() {
           <View className="items-center rounded-2xl bg-card p-8">
             <Text className="mb-4 text-sm text-white/60">{error}</Text>
             <Pressable
-              onPress={() => fetchSessions(typeFilter)}
+              onPress={() => fetchSessions(bodyPart)}
               className="rounded-full bg-white/10 px-5 py-2.5"
             >
               <Text className="text-sm font-medium text-white">다시 시도</Text>
             </Pressable>
           </View>
         ) : sessions.length === 0 ? (
-          /* 빈 상태 */
           <View className="rounded-2xl bg-card p-6">
             <View className="flex-row items-start gap-4">
               <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary/15">
@@ -153,51 +160,44 @@ export default function WorkoutHistoryScreen() {
               </View>
               <View className="flex-1">
                 <Text className="mb-1 text-base font-semibold text-white">
-                  아직 운동 기록이 없어요
+                  {bodyPart ? `${bodyPart} 운동 기록이 없어요` : "아직 운동 기록이 없어요"}
                 </Text>
                 <Text className="text-sm leading-5 text-white/50">
-                  운동을 시작하면 여기에 기록이 쌓여요.{"\n"}지금 바로 첫 운동을
-                  시작해보세요!
+                  {bodyPart
+                    ? "다른 부위를 선택하거나 전체를 확인해보세요."
+                    : "운동을 시작하면 여기에 기록이 쌓여요.\n지금 바로 첫 운동을 시작해보세요!"}
                 </Text>
               </View>
             </View>
           </View>
         ) : (
-          /* 세션 카드 리스트 */
           <View className="gap-3 pb-8">
             {sessions.map((session) => (
               <Pressable
                 key={session.id}
-                onPress={() =>
-                  router.push(`/(tabs)/profile/history/${session.id}`)
-                }
+                onPress={() => router.push(`/(tabs)/profile/history/${session.id}`)}
                 className="rounded-2xl bg-card p-5 active:opacity-80"
               >
                 <Text className="mb-2 text-xs text-white/40">
                   {formatRelativeDate(session.completedAt)}
                 </Text>
-                <View className="flex-row items-center gap-2">
-                  <Text className="text-base font-semibold text-white">
-                    {session.title}
-                  </Text>
-                  <View
-                    className={`rounded-md px-2 py-0.5 ${
-                      session.type === "routine"
-                        ? "bg-primary/15"
-                        : "bg-white/10"
-                    }`}
-                  >
-                    <Text
-                      className={`text-xs font-medium ${
-                        session.type === "routine"
-                          ? "text-primary"
-                          : "text-white/50"
-                      }`}
-                    >
-                      {session.type === "routine" ? "루틴" : "자유"}
-                    </Text>
+                <Text className="mb-2 text-base font-semibold text-white">
+                  {session.title}
+                </Text>
+                {session.bodyParts.length > 0 && (
+                  <View className="flex-row flex-wrap gap-1.5">
+                    {session.bodyParts.map((part) => (
+                      <View
+                        key={part}
+                        className="rounded-full bg-primary/10 px-2.5 py-0.5"
+                      >
+                        <Text className="text-xs font-medium text-primary">
+                          {part}
+                        </Text>
+                      </View>
+                    ))}
                   </View>
-                </View>
+                )}
               </Pressable>
             ))}
 

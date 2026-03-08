@@ -34,6 +34,10 @@ public interface WorkoutSetRepository extends JpaRepository<WorkoutSet, Long> {
 
     void deleteAllByWorkoutSession_User_Id(Long userId);
 
+    // 세션 ID 목록의 부위별 그룹 (목록 응답 body parts 구성용)
+    @Query("SELECT ws.workoutSession.id, ws.bodyPartSnapshot FROM WorkoutSet ws WHERE ws.workoutSession.id IN :sessionIds GROUP BY ws.workoutSession.id, ws.bodyPartSnapshot")
+    List<Object[]> findBodyPartsBySessionIds(@Param("sessionIds") List<Long> sessionIds);
+
     // 최근 1달 내 운동별 빈도 계산 (3회 이상, TOP 5)
     @Query(value = """
         SELECT e.id as exerciseId,

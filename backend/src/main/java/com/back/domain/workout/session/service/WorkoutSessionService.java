@@ -1,5 +1,6 @@
 package com.back.domain.workout.session.service;
 
+import com.back.domain.exercise.entity.BodyPart;
 import com.back.domain.exercise.entity.Exercise;
 import com.back.domain.exercise.repository.ExerciseRepository;
 import com.back.domain.routine.routine.dto.RoutineCreateRequest;
@@ -174,13 +175,29 @@ public class WorkoutSessionService {
     }
 
     @Transactional(readOnly = true)
-    public Page<WorkoutSessionListItemResponse> getWorkoutSessions(Long userId, String type, Pageable pageable) {
-        Page<WorkoutSession> sessions = switch (type == null ? "all" : type) {
-            case "routine" -> workoutSessionRepository.findByUser_IdAndCompletedAtIsNotNullAndRoutineIsNotNullOrderByCompletedAtDesc(userId, pageable);
-            case "free" -> workoutSessionRepository.findByUser_IdAndCompletedAtIsNotNullAndRoutineIsNullOrderByCompletedAtDesc(userId, pageable);
-            default -> workoutSessionRepository.findByUser_IdAndCompletedAtIsNotNullOrderByCompletedAtDesc(userId, pageable);
-        };
-        return sessions.map(WorkoutSessionListItemResponse::from);
+    public Page<WorkoutSessionListItemResponse> getWorkoutSessions(Long userId, String type, String bodyPart, Pageable pageable) {
+        Page<WorkoutSession> sessions;
+        if (bodyPart != null && !bodyPart.isBlank()) {
+            // 프론트에서 한글 레이블("가슴")로 전달 → DB enum name("CHEST")으로 변환
+            String bodyPartName = BodyPart.fromLabel(bodyPart).name();
+            sessions = workoutSessionRepository.findByUser_IdAndBodyPartOrderByCompletedAtDesc(userId, bodyPartName, pageable);
+        } else {
+            sessions = switch (type == null ? "all" : type) {
+                case "routine" -> workoutSessionRepository.findByUser_IdAndCompletedAtIsNotNullAndRoutineIsNotNullOrderByCompletedAtDesc(userId, pageable);
+                case "free" -> workoutSessionRepository.findByUser_IdAndCompletedAtIsNotNullAndRoutineIsNullOrderByCompletedAtDesc(userId, pageable);
+                default -> workoutSessionRepository.findByUser_IdAndCompletedAtIsNotNullOrderByCompletedAtDesc(userId, pageable);
+            };
+        }
+
+        List<Long> sessionIds = sessions.getContent().stream().map(WorkoutSession::getId).toList();
+        Map<Long, List<BodyPart>> bodyPartsMap = sessionIds.isEmpty() ? Map.of() :
+                workoutSetRepository.findBodyPartsBySessionIds(sessionIds).stream()
+                        .collect(Collectors.groupingBy(
+                                row -> (Long) row[0],
+                                Collectors.mapping(row -> (BodyPart) row[1], Collectors.toList())
+                        ));
+
+        return sessions.map(s -> WorkoutSessionListItemResponse.from(s, bodyPartsMap.getOrDefault(s.getId(), List.of())));
     }
 
     @Transactional(readOnly = true)

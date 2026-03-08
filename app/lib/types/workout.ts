@@ -6,6 +6,7 @@ export interface WorkoutSessionListItemRes {
   routineTitle: string | null;
   startedAt: string | null;
   completedAt: string;
+  bodyParts: string[];
 }
 
 export interface WorkoutSetRes {
@@ -85,6 +86,7 @@ export interface WorkoutSession {
   title: string;
   type: "routine" | "free";
   completedAt: string;
+  bodyParts: string[];
 }
 
 export interface WorkoutSet {
@@ -129,6 +131,7 @@ export function toWorkoutSession(
     title,
     type,
     completedAt: res.completedAt,
+    bodyParts: res.bodyParts ?? [],
   };
 }
 
