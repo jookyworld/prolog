@@ -1,7 +1,7 @@
 # PROLOG - 기능 요구사항 명세서
 
 **버전:** v1.0.0
-**최종 업데이트:** 2026-02-26
+**최종 업데이트:** 2026-03-08
 
 > 본 문서는 ProLog 서비스의 핵심 가치, 비즈니스 로직, 기능 요구사항을 정의합니다.
 > 기획자, PM, 개발자 모두 본 문서를 기준으로 작업합니다.
@@ -121,16 +121,17 @@ GET /api/workouts/sessions/routines/{routineId}/last
 - [ ] 부위별 통계
 - [ ] 월간/연간 통계
 
-### Phase 3: 커뮤니티 📋 (계획)
+### Phase 3: 커뮤니티
 
-#### Phase 3-1: 기본 공유 기능
-- [ ] 루틴 공유 (스냅샷 저장, title/description 커스터마이징)
-- [ ] 공유 루틴 조회 (목록/상세)
-- [ ] 루틴 가져오기
-- [ ] 댓글 작성/삭제
-- [ ] 조회수, 가져오기 횟수 추적
+#### Phase 3-1: 기본 공유 기능 ✅ (완료)
+- [x] 루틴 공유 (스냅샷 저장, title/description 커스터마이징)
+- [x] 공유 루틴 조회 (목록/상세)
+- [x] 루틴 가져오기 (import_history로 이력 관리)
+- [x] 댓글 작성/삭제
+- [x] 조회수, 가져오기 횟수 추적
+- [x] 가져오기 여부(isImported) 응답 포함
 
-#### Phase 3-2: 소셜 기능
+#### Phase 3-2: 소셜 기능 📋 (계획)
 - [ ] 댓글 좋아요 (comment_likes 테이블)
 - [ ] 공유 루틴 좋아요 (shared_routine_likes 테이블)
 - [ ] 루틴 추천 알고리즘
@@ -213,7 +214,7 @@ GET /api/workouts/sessions/routines/{routineId}/last
                    └─────────────┘
 ```
 
-### Phase 3 추가 테이블
+### Phase 3 추가 테이블 (✅ Phase 3-1 완료)
 
 ```
 ┌─────────┐         ┌──────────────────┐
@@ -221,13 +222,21 @@ GET /api/workouts/sessions/routines/{routineId}/last
 └─────────┘         │ (스냅샷, 읽기전용) │
      ▲              └────────┬─────────┘
      │                       │ 1:N
-     │                       ▼
+     │              ┌────────┴─────────┐
+     │              │    Comment       │
+     │              └──────────────────┘
+     │
      │              ┌──────────────────┐
-     └──────────────│ Comment          │
-                    └──────────────────┘
+     └──────────────│ ImportHistory    │◄────┐
+                    └──────────────────┘     │
+                    (user_id + shared_        │
+                     routine_id UNIQUE)       │
+                                   ──────────┘
+                                   SharedRoutine
 
-* CommentLike: Phase 3 후반 추가 예정
+* CommentLike: Phase 3-2 예정
 * SharedRoutine ↔ Routine: FK 없음 (스냅샷 독립성)
+* ImportHistory: 가져오기 중복 방지 및 isImported 계산용
 ```
 
 ---
@@ -320,7 +329,8 @@ GET /api/workouts/sessions/routines/{routineId}/last
 |------|------|------|------|
 | id | BIGINT | PK | 세션 ID |
 | user_id | BIGINT | FK (users), NOT NULL | 소유자 |
-| routine_id | BIGINT | FK (routines), NULLABLE | 루틴 ID (null이면 자유 운동) |
+| routine_id | BIGINT | FK (routines), NULLABLE, ON DELETE SET NULL | 루틴 ID (null이면 자유 운동) |
+| routine_title_snapshot | VARCHAR(100) | NULLABLE | 세션 시작 시점의 루틴 제목 스냅샷 |
 | started_at | TIMESTAMP | NOT NULL | 시작 시간 |
 | completed_at | TIMESTAMP | NULLABLE | 완료 시간 (null이면 진행 중) |
 
@@ -328,6 +338,7 @@ GET /api/workouts/sessions/routines/{routineId}/last
 - `routine_id = null` → 자유 운동
 - `completedAt = null` → 진행 중
 - 사용자당 동시 진행 세션 1개 제한
+- 루틴 삭제 시 `routine_id`는 NULL로 처리 (ON DELETE SET NULL), `routine_title_snapshot`으로 제목 보존
 
 ---
 
@@ -353,7 +364,7 @@ GET /api/workouts/sessions/routines/{routineId}/last
 
 ---
 
-#### SharedRoutine (공유 루틴) 🆕 Phase 3
+#### SharedRoutine (공유 루틴) ✅ Phase 3-1
 
 **테이블:** `shared_routines`
 
@@ -363,8 +374,7 @@ GET /api/workouts/sessions/routines/{routineId}/last
 | user_id | BIGINT | FK (users), NOT NULL | 작성자 |
 | title | VARCHAR(100) | NOT NULL | 공유 루틴 제목 (사용자 작성) |
 | description | TEXT | NULLABLE | 공유 루틴 설명 (사용자 작성) |
-| routine_snapshot_json | JSON | NOT NULL | 루틴 구조 스냅샷 (items만) |
-| last_session_snapshot_json | JSON | NULLABLE | 최근 수행 기록 스냅샷 |
+| routine_snapshot | JSON | NOT NULL | 루틴 구조 스냅샷 (items 배열, exerciseId 포함) |
 | view_count | INT | NOT NULL | 조회수 (기본값: 0) |
 | import_count | INT | NOT NULL | 가져오기 횟수 (기본값: 0) |
 | created_at | DATETIME | NOT NULL | 생성일시 |
@@ -374,12 +384,14 @@ GET /api/workouts/sessions/routines/{routineId}/last
 - 원본 루틴(routines)과 FK 관계 없음 (스냅샷 독립성)
 - title, description은 공유 시 사용자가 커스터마이징 가능
 - 원본 루틴 삭제/수정과 무관하게 공유 루틴 유지
+- 운동이 없는 루틴은 공유 불가
 
-**routine_snapshot_json 구조:**
+**routine_snapshot 구조:**
 ```json
 {
   "items": [
     {
+      "exerciseId": 1,
       "exerciseName": "벤치프레스",
       "bodyPart": "CHEST",
       "orderInRoutine": 1,
@@ -390,26 +402,23 @@ GET /api/workouts/sessions/routines/{routineId}/last
 }
 ```
 
-**last_session_snapshot_json 구조:**
-```json
-{
-  "exercises": [
-    {
-      "exerciseName": "벤치프레스",
-      "sets": [
-        { "setNumber": 1, "weight": 60.0, "reps": 12 },
-        { "setNumber": 2, "weight": 70.0, "reps": 10 },
-        { "setNumber": 3, "weight": 75.0, "reps": 8 }
-      ]
-    }
-  ]
-}
-```
+---
 
-**용도:**
-- 작성자가 이 루틴을 실제로 수행했을 때의 기록
-- 다른 사용자들이 무게/횟수 참고 가능
-- 신뢰도 및 동기부여 제공
+#### ImportHistory (가져오기 이력) ✅ Phase 3-1
+
+**테이블:** `import_history`
+
+| 컬럼 | 타입 | 제약 | 설명 |
+|------|------|------|------|
+| id | BIGINT | PK | 이력 ID |
+| user_id | BIGINT | FK (users), NOT NULL | 가져온 사용자 |
+| shared_routine_id | BIGINT | FK (shared_routines), NOT NULL | 공유 루틴 ID |
+| created_at | DATETIME | NOT NULL | 가져온 일시 |
+
+**비즈니스 규칙:**
+- `(user_id, shared_routine_id)` 복합 UNIQUE 제약 (중복 기록 방지)
+- 사용자별 공유 루틴당 1건만 기록 (최초 가져오기 시점)
+- `isImported` 필드 계산에 사용: 사용자가 해당 공유 루틴을 이미 가져왔는지 여부
 
 ---
 
@@ -652,7 +661,7 @@ ORDER BY date ASC
 
 ---
 
-### 4. 커뮤니티 정책 (Phase 3)
+### 4. 커뮤니티 정책 (Phase 3-1 ✅)
 
 #### 4.1 루틴 공유
 
@@ -661,11 +670,12 @@ ORDER BY date ASC
    - `title`: 공유 루틴 제목 (원본과 별도로 작성 가능)
    - `description`: 공유 루틴 설명 (원본과 별도로 작성 가능)
 
-2. 원본 루틴 구조를 JSON으로 스냅샷 (`routine_snapshot_json`):
+2. 원본 루틴 구조를 JSON으로 스냅샷 (`routine_snapshot`):
 ```json
 {
   "items": [
     {
+      "exerciseId": 1,
       "exerciseName": "벤치프레스",
       "bodyPart": "CHEST",
       "orderInRoutine": 1,
@@ -676,40 +686,32 @@ ORDER BY date ASC
 }
 ```
 
-3. 가장 최근 세션 기록을 JSON으로 스냅샷 (`last_session_snapshot_json`):
-```json
-{
-  "exercises": [
-    {
-      "exerciseName": "벤치프레스",
-      "sets": [
-        { "setNumber": 1, "weight": 60.0, "reps": 12 },
-        { "setNumber": 2, "weight": 70.0, "reps": 10 }
-      ]
-    }
-  ]
-}
-```
-
-4. `shared_routines` 테이블에 저장
+3. `shared_routines` 테이블에 저장
 
 **설계 특징:**
 - 원본 루틴(routines)과 FK 관계 없음 (스냅샷 독립성)
 - title, description 별도 컬럼으로 커스터마이징 가능
 - 원본 루틴 수정/삭제와 무관하게 공유 내용 유지
 - 커뮤니티에서 매력적인 제목/설명 작성 가능
+- 운동이 없는 루틴은 공유 불가 (빈 items 배열 거부)
 
 ---
 
 #### 4.2 루틴 가져오기
 
 **동작:**
-1. `routine_snapshot_json` 파싱
-2. 현재 사용자 소유의 새 루틴 생성
-3. `import_count` 증가
+1. `routine_snapshot` 파싱
+2. 현재 사용자 소유의 새 루틴 생성 (공유 루틴의 title, description 복사)
+3. 운동 종목 매칭 (우선순위):
+   - ① `exerciseId`로 공식 종목 조회
+   - ② 동일 이름+부위의 본인 커스텀 종목 조회
+   - ③ 새 커스텀 종목 자동 생성
+4. `import_count` 증가
+5. `import_history` 기록 (중복이면 건너뜀)
 
 **제약:**
 - 세션 기록은 복사하지 않음 (루틴 구조만)
+- `import_history`는 최초 1회만 기록 (중복 방지)
 
 ---
 
@@ -767,14 +769,20 @@ ORDER BY date ASC
 - 세트는 일괄 저장 (완료 시점에 전체 배열 전송)
 - weight: DECIMAL(5,2) 사용 (소수점 무게 지원: 67.5kg, 82.25kg 등)
 
-#### SharedRoutine (공유 루틴) - Phase 3
+#### SharedRoutine (공유 루틴) - Phase 3-1 ✅
 - 원본 routines와 FK 관계 없음 (스냅샷 독립성)
 - title, description은 공유 시 사용자가 커스터마이징
 - 원본 루틴 삭제/수정과 무관하게 유지
+- 운동이 없는 루틴은 공유 불가
 
-#### Comment (댓글) - Phase 3
+#### Comment (댓글) - Phase 3-1 ✅
 - 공유 루틴 삭제 시 CASCADE 삭제
 - 작성자만 삭제 가능
+
+#### ImportHistory (가져오기 이력) - Phase 3-1 ✅
+- (user_id, shared_routine_id) 복합 UNIQUE 제약
+- isImported 필드 계산에 사용
+- 가져오기 시 중복이면 신규 기록 건너뜀 (import_count는 별도로 증가)
 
 ---
 
