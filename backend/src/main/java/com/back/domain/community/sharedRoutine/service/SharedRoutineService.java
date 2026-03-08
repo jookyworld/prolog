@@ -4,7 +4,9 @@ import com.back.domain.community.comment.dto.CommentResponse;
 import com.back.domain.community.comment.entity.Comment;
 import com.back.domain.community.comment.repository.CommentRepository;
 import com.back.domain.community.sharedRoutine.dto.*;
+import com.back.domain.community.sharedRoutine.entity.ImportHistory;
 import com.back.domain.community.sharedRoutine.entity.SharedRoutine;
+import com.back.domain.community.sharedRoutine.repository.ImportHistoryRepository;
 import com.back.domain.community.sharedRoutine.repository.SharedRoutineRepository;
 import com.back.domain.exercise.entity.BodyPart;
 import com.back.domain.exercise.entity.Exercise;
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
 public class SharedRoutineService {
 
     private final SharedRoutineRepository sharedRoutineRepository;
+    private final ImportHistoryRepository importHistoryRepository;
     private final UserRepository userRepository;
     private final RoutineRepository routineRepository;
     private final RoutineItemRepository routineItemRepository;
@@ -127,11 +130,11 @@ public class SharedRoutineService {
 
         sharedRoutineRepository.save(sharedRoutine);
 
-        return SharedRoutineDetailResponse.from(sharedRoutine, List.of());
+        return SharedRoutineDetailResponse.from(sharedRoutine, false, List.of());
     }
 
     @Transactional(readOnly = true)
-    public Page<SharedRoutineResponse> getSharedRoutines(int page, int size, SharedRoutineSortType sortType) {
+    public Page<SharedRoutineResponse> getSharedRoutines(Long userId, int page, int size, SharedRoutineSortType sortType) {
         Sort sort = switch (sortType) {
             case RECENT -> Sort.by(Sort.Direction.DESC, "createdAt");
             case POPULAR -> Sort.by(Sort.Direction.DESC, "viewCount");
@@ -141,22 +144,26 @@ public class SharedRoutineService {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<SharedRoutine> sharedRoutines = sharedRoutineRepository.findAll(pageable);
 
-        return sharedRoutines.map(SharedRoutineResponse::from);
+        Set<Long> importedIds = importHistoryRepository.findImportedSharedRoutineIdsByUserId(userId);
+
+        return sharedRoutines.map(r -> SharedRoutineResponse.from(r, importedIds.contains(r.getId())));
     }
 
     @Transactional
-    public SharedRoutineDetailResponse getSharedRoutineDetail(Long sharedRoutineId) {
+    public SharedRoutineDetailResponse getSharedRoutineDetail(Long userId, Long sharedRoutineId) {
         SharedRoutine sharedRoutine = sharedRoutineRepository.findById(sharedRoutineId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 공유 루틴입니다."));
 
         sharedRoutine.incrementViewCount();
+
+        boolean isImported = importHistoryRepository.existsByUser_IdAndSharedRoutine_Id(userId, sharedRoutineId);
 
         List<Comment> comments = commentRepository.findBySharedRoutineIdOrderByCreatedAtAsc(sharedRoutineId);
         List<CommentResponse> commentResponses = comments.stream()
                 .map(CommentResponse::from)
                 .toList();
 
-        return SharedRoutineDetailResponse.from(sharedRoutine, commentResponses);
+        return SharedRoutineDetailResponse.from(sharedRoutine, isImported, commentResponses);
     }
 
     @Transactional
@@ -196,6 +203,15 @@ public class SharedRoutineService {
 
         // importCount 증가
         sharedRoutine.incrementImportCount();
+
+        // import 이력 저장 (중복이면 무시)
+        if (!importHistoryRepository.existsByUser_IdAndSharedRoutine_Id(userId, sharedRoutineId)) {
+            ImportHistory history = ImportHistory.builder()
+                    .user(user)
+                    .sharedRoutine(sharedRoutine)
+                    .build();
+            importHistoryRepository.save(history);
+        }
 
         return RoutineResponse.from(newRoutine);
     }
