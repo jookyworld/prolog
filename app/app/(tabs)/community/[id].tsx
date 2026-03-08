@@ -8,6 +8,7 @@ import {
   Eye,
   Download,
   ArrowLeft,
+  Check,
   Dumbbell,
   Clock,
   Send,
@@ -84,6 +85,7 @@ export default function CommunityDetailScreen() {
       setRoutine((prev) =>
         prev ? { ...prev, importCount: prev.importCount + 1 } : null
       );
+      setRoutine((prev) => prev ? { ...prev, isImported: true } : null);
       Alert.alert(
         "완료",
         `'${result.title}' 루틴을 내 루틴에 추가했습니다.`,
@@ -409,16 +411,22 @@ export default function CommunityDetailScreen() {
           {/* 가져오기 버튼 */}
           <Pressable
             onPress={handleImport}
-            disabled={importing}
-            className={`flex-row items-center justify-center gap-2 rounded-lg py-3 ${importing ? "bg-white/10" : "bg-primary"}`}
+            disabled={importing || routine.isImported}
+            className={`flex-row items-center justify-center gap-2 rounded-lg py-3 ${
+              routine.isImported ? "bg-primary/20" : importing ? "bg-white/10" : "bg-primary"
+            }`}
           >
             {importing ? (
               <ActivityIndicator size="small" color={COLORS.mutedForeground} />
+            ) : routine.isImported ? (
+              <Check size={20} color={COLORS.primary} />
             ) : (
               <Download size={20} color={COLORS.white} />
             )}
-            <Text className={`text-sm font-semibold ${importing ? "text-white/40" : "text-white"}`}>
-              {importing ? "가져오는 중..." : "내 루틴에 추가"}
+            <Text className={`text-sm font-semibold ${
+              routine.isImported ? "text-primary" : importing ? "text-white/40" : "text-white"
+            }`}>
+              {importing ? "가져오는 중..." : routine.isImported ? "내 루틴에 추가됨" : "내 루틴에 추가"}
             </Text>
           </Pressable>
         </View>

@@ -51,9 +51,10 @@ interface RoutineCardProps {
   onImport: (id: number) => void;
   onPress: (id: number) => void;
   importing: boolean;
+  imported: boolean;
 }
 
-function RoutineCard({ routine, onImport, onPress, importing }: RoutineCardProps) {
+function RoutineCard({ routine, onImport, onPress, importing, imported }: RoutineCardProps) {
   const bodyPartLabels = getBodyPartLabels(routine.bodyParts);
 
   return (
@@ -141,14 +142,20 @@ function RoutineCard({ routine, onImport, onPress, importing }: RoutineCardProps
             e.stopPropagation();
             onImport(routine.id);
           }}
-          disabled={importing}
-          className={`flex-row items-center gap-1.5 rounded-lg px-4 py-2 ${importing ? "bg-white/10" : "bg-primary active:opacity-80"}`}
+          disabled={importing || imported}
+          className={`flex-row items-center gap-1.5 rounded-lg px-4 py-2 ${
+            imported ? "bg-primary/20" : importing ? "bg-white/10" : "bg-primary active:opacity-80"
+          }`}
         >
           {importing ? (
             <ActivityIndicator size="small" color={COLORS.mutedForeground} />
+          ) : imported ? (
+            <Check size={13} color={COLORS.primary} />
           ) : null}
-          <Text className={`text-xs font-semibold ${importing ? "text-white/40" : "text-white"}`}>
-            {importing ? "가져오는 중..." : "가져오기"}
+          <Text className={`text-xs font-semibold ${
+            imported ? "text-primary" : importing ? "text-white/40" : "text-white"
+          }`}>
+            {importing ? "가져오는 중..." : imported ? "가져옴" : "가져오기"}
           </Text>
         </Pressable>
       </View>
@@ -209,7 +216,7 @@ export default function CommunityScreen() {
       const result = await communityApi.importRoutine(id);
       setRoutines((prev) =>
         prev.map((r) =>
-          r.id === id ? { ...r, importCount: r.importCount + 1 } : r,
+          r.id === id ? { ...r, importCount: r.importCount + 1, isImported: true } : r,
         ),
       );
       Alert.alert("완료", `'${result.title}' 루틴을 내 루틴에 추가했습니다.`);
@@ -359,6 +366,7 @@ export default function CommunityScreen() {
                   onImport={handleImport}
                   onPress={handlePress}
                   importing={importingId === routine.id}
+                  imported={routine.isImported}
                 />
               ))
             )}
