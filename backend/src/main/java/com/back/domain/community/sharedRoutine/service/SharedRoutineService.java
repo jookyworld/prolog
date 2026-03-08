@@ -6,7 +6,6 @@ import com.back.domain.community.comment.repository.CommentRepository;
 import com.back.domain.community.sharedRoutine.dto.*;
 import com.back.domain.community.sharedRoutine.entity.SharedRoutine;
 import com.back.domain.community.sharedRoutine.repository.SharedRoutineRepository;
-import com.back.domain.exercise.entity.BodyPart;
 import com.back.domain.exercise.entity.Exercise;
 import com.back.domain.exercise.repository.ExerciseRepository;
 import com.back.domain.routine.routine.dto.RoutineResponse;
@@ -22,13 +21,14 @@ import com.back.global.exception.type.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -86,14 +86,22 @@ public class SharedRoutineService {
 
     @Transactional(readOnly = true)
     public Page<SharedRoutineResponse> getSharedRoutines(int page, int size, SharedRoutineSortType sortType) {
+        Page<SharedRoutine> sharedRoutines;
         if (sortType == SharedRoutineSortType.POPULAR) {
-            Pageable pageable = PageRequest.of(page, size);
-            return sharedRoutineRepository.findAllOrderByPopularity(pageable)
-                    .map(SharedRoutineResponse::from);
+            sharedRoutines = sharedRoutineRepository.findAllOrderByPopularity(PageRequest.of(page, size));
+        } else {
+            sharedRoutines = sharedRoutineRepository.findAll(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
         }
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return sharedRoutineRepository.findAll(pageable).map(SharedRoutineResponse::from);
+        List<Long> ids = sharedRoutines.getContent().stream().map(SharedRoutine::getId).toList();
+        Map<Long, Integer> commentCounts = commentRepository.countBySharedRoutineIdIn(ids)
+                .stream().collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> ((Long) row[1]).intValue()
+                ));
+
+        return sharedRoutines.map(sr ->
+                SharedRoutineResponse.from(sr, commentCounts.getOrDefault(sr.getId(), 0)));
     }
 
     @Transactional

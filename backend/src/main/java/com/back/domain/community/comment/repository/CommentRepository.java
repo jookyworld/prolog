@@ -2,6 +2,8 @@ package com.back.domain.community.comment.repository;
 
 import com.back.domain.community.comment.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -10,4 +12,7 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     List<Comment> findBySharedRoutineIdOrderByCreatedAtAsc(Long sharedRoutineId);
+
+    @Query("SELECT c.sharedRoutine.id, COUNT(c) FROM Comment c WHERE c.sharedRoutine.id IN :ids GROUP BY c.sharedRoutine.id")
+    List<Object[]> countBySharedRoutineIdIn(@Param("ids") List<Long> ids);
 }

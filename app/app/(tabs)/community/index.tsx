@@ -11,8 +11,8 @@ import { useFocusEffect, useRouter } from "expo-router";
 import {
   ArrowLeft,
   Check,
-  Download,
   Eye,
+  MessageCircle,
   Share2,
   X,
 } from "lucide-react-native";
@@ -127,9 +127,9 @@ function RoutineCard({ routine, onPress }: RoutineCardProps) {
             </Text>
           </View>
           <View className="flex-row items-center gap-1">
-            <Download size={12} color={COLORS.mutedForeground} />
+            <MessageCircle size={12} color={COLORS.mutedForeground} />
             <Text className="text-xs text-white/40">
-              {formatNumber(routine.importCount)}
+              {formatNumber(routine.commentCount)}
             </Text>
           </View>
         </View>

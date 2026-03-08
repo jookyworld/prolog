@@ -79,9 +79,6 @@ export default function CommunityDetailScreen() {
     setImporting(true);
     try {
       const result = await communityApi.importRoutine(routineId);
-      setRoutine((prev) =>
-        prev ? { ...prev, importCount: prev.importCount + 1 } : null,
-      );
       Alert.alert("완료", `'${result.title}' 루틴을 내 루틴에 추가했습니다.`, [
         { text: "내 루틴 보기", onPress: () => router.push("/(tabs)/routine") },
         { text: "확인" },

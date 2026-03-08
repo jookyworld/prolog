@@ -19,7 +19,7 @@ public record SharedRoutineDetailResponse(
         List<String> exerciseNames, // 대표 운동 종목 이름 (최대 3개)
         RoutineSnapshotWrapper routineSnapshot,
         int viewCount,
-        int importCount,
+        int commentCount,
         LocalDateTime createdAt,
         List<CommentResponse> comments
 ) {
@@ -47,7 +47,7 @@ public record SharedRoutineDetailResponse(
                 exerciseNames,
                 sharedRoutine.getRoutineSnapshot(),
                 sharedRoutine.getViewCount(),
-                sharedRoutine.getImportCount(),
+                comments.size(),
                 sharedRoutine.getCreatedAt(),
                 comments
         );
