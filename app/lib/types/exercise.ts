@@ -23,6 +23,12 @@ export interface ExerciseResponse {
   id: number;
   name: string;
   bodyPart: BodyPart;
-  partDetail: string;
+  partDetail: string | null;
   custom: boolean;
+}
+
+export interface ExerciseUpdateRequest {
+  name: string;
+  bodyPart: BodyPart;
+  partDetail?: string;
 }

@@ -17,4 +17,12 @@ public interface RoutineItemRepository extends JpaRepository<RoutineItem, Long> 
     List<RoutineItem> findByRoutineIdOrderByOrderInRoutineAsc(Long routineId);
 
     void deleteAllByRoutine_User_Id(Long userId);
+
+    boolean existsByExercise_IdAndRoutine_ActiveTrueAndRoutine_User_Id(Long exerciseId, Long userId);
+
+    long countByExercise_IdAndRoutine_ActiveFalseAndRoutine_User_Id(Long exerciseId, Long userId);
+
+    @Modifying
+    @Query("delete from RoutineItem ri where ri.exercise.id = :exerciseId and ri.routine.active = false and ri.routine.user.id = :userId")
+    void deleteByExerciseInArchivedRoutines(Long exerciseId, Long userId);
 }

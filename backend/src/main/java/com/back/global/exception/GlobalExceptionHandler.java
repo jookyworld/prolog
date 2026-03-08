@@ -1,6 +1,7 @@
 package com.back.global.exception;
 
 import com.back.global.exception.type.BadRequestException;
+import com.back.global.exception.type.ConflictException;
 import com.back.global.exception.type.ForbiddenException;
 import com.back.global.exception.type.NotFoundException;
 import com.back.global.exception.type.UnauthorizedException;
@@ -48,6 +49,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException e) {
         ErrorResponse body = ErrorResponse.of("인가 오류", e.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflict(ConflictException e) {
+        ErrorResponse body = ErrorResponse.of("충돌", e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     @ExceptionHandler(NotFoundException.class)

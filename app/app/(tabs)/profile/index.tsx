@@ -7,6 +7,7 @@ import {
   Pencil,
   Ruler,
   Settings,
+  Swords,
   User,
   Weight,
 } from "lucide-react-native";
@@ -113,6 +114,21 @@ export default function ProfileScreen() {
             </View>
             <Text className="ml-3 flex-1 text-base text-white">
               운동 기록 보관함
+            </Text>
+            <ChevronRight size={18} color={COLORS.iconMuted} />
+          </Pressable>
+
+          <View className="mx-5 h-px bg-white/5" />
+
+          <Pressable
+            onPress={() => router.push("/(tabs)/profile/exercises")}
+            className="flex-row items-center px-5 py-4"
+          >
+            <View className="h-10 w-10 items-center justify-center rounded-xl bg-white/5">
+              <Swords size={18} color={COLORS.white} />
+            </View>
+            <Text className="ml-3 flex-1 text-base text-white">
+              종목 관리
             </Text>
             <ChevronRight size={18} color={COLORS.iconMuted} />
           </Pressable>

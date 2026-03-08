@@ -412,9 +412,9 @@ export default function SelectExercisesScreen() {
               ))}
             </ScrollView>
 
-            {/* 세부 타겟 (선택) */}
+            {/* 세부 부위 (선택) */}
             <Text className="mb-2 text-sm font-medium text-white/60">
-              세부 타겟 (선택)
+              세부 부위 (선택)
             </Text>
             <TextInput
               value={newPartDetail}

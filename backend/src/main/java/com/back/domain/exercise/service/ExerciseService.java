@@ -3,11 +3,16 @@ package com.back.domain.exercise.service;
 import com.back.domain.exercise.dto.AdminExerciseResponse;
 import com.back.domain.exercise.dto.ExerciseCreateRequest;
 import com.back.domain.exercise.dto.ExerciseResponse;
+import com.back.domain.exercise.dto.ExerciseUpdateRequest;
 import com.back.domain.exercise.entity.Exercise;
 import com.back.domain.exercise.repository.ExerciseRepository;
 import com.back.domain.routine.routineItem.repository.RoutineItemRepository;
 import com.back.domain.user.user.entity.User;
 import com.back.domain.user.user.repository.UserRepository;
+import com.back.global.exception.type.BadRequestException;
+import com.back.global.exception.type.ConflictException;
+import com.back.global.exception.type.ForbiddenException;
+import com.back.global.exception.type.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +59,60 @@ public class ExerciseService {
     }
 
 
+
+    @Transactional(readOnly = true)
+    public List<ExerciseResponse> getCustomExercises(Long userId) {
+        return exerciseRepository.findAllByCustomIsTrueAndCreatedBy_IdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(ExerciseResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public ExerciseResponse updateCustomExercise(Long userId, Long exerciseId, ExerciseUpdateRequest request) {
+        Exercise exercise = exerciseRepository.findById(exerciseId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 종목입니다."));
+
+        if (!exercise.isCustom() || !exercise.getCreatedBy().getId().equals(userId)) {
+            throw new ForbiddenException("수정 권한이 없습니다.");
+        }
+
+        if (exerciseRepository.existsByNameAndCustomIsFalse(request.name())) {
+            throw new IllegalArgumentException("기본 종목에 이미 존재하는 운동입니다.");
+        }
+
+        if (exerciseRepository.existsByNameAndCustomIsTrueAndCreatedBy_IdAndIdNot(request.name(), userId, exerciseId)) {
+            throw new IllegalArgumentException("이미 사용 중인 종목 이름입니다.");
+        }
+
+        exercise.update(request.name(), request.bodyPart(), request.partDetail());
+        return ExerciseResponse.from(exercise);
+    }
+
+    @Transactional
+    public void deleteCustomExercise(Long userId, Long exerciseId, boolean force) {
+        Exercise exercise = exerciseRepository.findById(exerciseId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 종목입니다."));
+
+        if (!exercise.isCustom() || !exercise.getCreatedBy().getId().equals(userId)) {
+            throw new ForbiddenException("삭제 권한이 없습니다.");
+        }
+
+        if (routineItemRepository.existsByExercise_IdAndRoutine_ActiveTrueAndRoutine_User_Id(exerciseId, userId)) {
+            throw new BadRequestException("활성 루틴에서 사용 중인 종목은 삭제할 수 없습니다.");
+        }
+
+        long archivedCount = routineItemRepository.countByExercise_IdAndRoutine_ActiveFalseAndRoutine_User_Id(exerciseId, userId);
+        if (archivedCount > 0 && !force) {
+            throw new ConflictException("보관된 루틴 " + archivedCount + "개에서 사용 중입니다. 삭제 시 해당 루틴에서 이 종목이 제거됩니다.");
+        }
+
+        if (archivedCount > 0) {
+            routineItemRepository.deleteByExerciseInArchivedRoutines(exerciseId, userId);
+        }
+
+        exerciseRepository.delete(exercise);
+    }
 
     @Transactional(readOnly = true)
     public List<AdminExerciseResponse> adminGetAllExercises() {

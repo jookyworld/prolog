@@ -45,4 +45,10 @@ public class Exercise {
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public void update(String name, BodyPart bodyPart, String partDetail) {
+        this.name = name;
+        this.bodyPart = bodyPart;
+        this.partDetail = partDetail;
+    }
 }
