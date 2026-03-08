@@ -60,4 +60,4 @@ export interface CreateSharedRoutineRequest {
   description: string;
 }
 
-export type SharedRoutineSortType = "RECENT" | "POPULAR" | "IMPORTED";
+export type SharedRoutineSortType = "POPULAR" | "RECENT";

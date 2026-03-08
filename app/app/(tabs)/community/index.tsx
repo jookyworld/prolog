@@ -41,9 +41,8 @@ const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SHEET_HEIGHT = SCREEN_HEIGHT * 0.75;
 
 const SORT_LABELS: Record<SharedRoutineSortType, string> = {
-  RECENT: "최신순",
   POPULAR: "인기순",
-  IMPORTED: "많이 가져간 순",
+  RECENT: "최신순",
 };
 
 function formatNumber(num: number): string {
@@ -142,7 +141,7 @@ function RoutineCard({ routine, onPress }: RoutineCardProps) {
 export default function CommunityScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [sortType, setSortType] = useState<SharedRoutineSortType>("RECENT");
+  const [sortType, setSortType] = useState<SharedRoutineSortType>("POPULAR");
   const [routines, setRoutines] = useState<SharedRoutineListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

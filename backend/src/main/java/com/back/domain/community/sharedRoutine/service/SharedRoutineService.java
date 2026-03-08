@@ -86,16 +86,14 @@ public class SharedRoutineService {
 
     @Transactional(readOnly = true)
     public Page<SharedRoutineResponse> getSharedRoutines(int page, int size, SharedRoutineSortType sortType) {
-        Sort sort = switch (sortType) {
-            case RECENT -> Sort.by(Sort.Direction.DESC, "createdAt");
-            case POPULAR -> Sort.by(Sort.Direction.DESC, "viewCount");
-            case IMPORTED -> Sort.by(Sort.Direction.DESC, "importCount");
-        };
+        if (sortType == SharedRoutineSortType.POPULAR) {
+            Pageable pageable = PageRequest.of(page, size);
+            return sharedRoutineRepository.findAllOrderByPopularity(pageable)
+                    .map(SharedRoutineResponse::from);
+        }
 
-        Pageable pageable = PageRequest.of(page, size, sort);
-        Page<SharedRoutine> sharedRoutines = sharedRoutineRepository.findAll(pageable);
-
-        return sharedRoutines.map(SharedRoutineResponse::from);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return sharedRoutineRepository.findAll(pageable).map(SharedRoutineResponse::from);
     }
 
     @Transactional
