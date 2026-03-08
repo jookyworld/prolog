@@ -6,7 +6,6 @@ import type { SharedRoutineDetail } from "@/lib/types/community";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ArrowLeft,
-  Check,
   Download,
   Eye,
   MessageCircle,
@@ -76,20 +75,15 @@ export default function CommunityDetailScreen() {
   };
 
   const handleImport = async () => {
-    if (!routine) return;
+    if (!routine || importing) return;
     setImporting(true);
     try {
       const result = await communityApi.importRoutine(routineId);
       setRoutine((prev) =>
-        prev
-          ? { ...prev, importCount: prev.importCount + 1, isImported: true }
-          : null,
+        prev ? { ...prev, importCount: prev.importCount + 1 } : null,
       );
       Alert.alert("완료", `'${result.title}' 루틴을 내 루틴에 추가했습니다.`, [
-        {
-          text: "내 루틴 보기",
-          onPress: () => router.push("/(tabs)/routine"),
-        },
+        { text: "내 루틴 보기", onPress: () => router.push("/(tabs)/routine") },
         { text: "확인" },
       ]);
     } catch (err) {
@@ -227,7 +221,7 @@ export default function CommunityDetailScreen() {
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 24,
+          paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 80,
         }}
       >
         {/* 작성자 행 */}
@@ -294,19 +288,10 @@ export default function CommunityDetailScreen() {
 
         {/* 액션 바 */}
         <View className="flex-row items-center gap-3 px-7 py-3">
-          {/* 조회수 */}
           <View className="flex-row items-center gap-1.5">
             <Eye size={16} color={COLORS.mutedForeground} />
             <Text className="text-sm text-white/40">{routine.viewCount}</Text>
           </View>
-
-          {/* 가져오기 수 */}
-          <View className="flex-row items-center gap-1.5">
-            <Download size={16} color={COLORS.mutedForeground} />
-            <Text className="text-sm text-white/40">{routine.importCount}</Text>
-          </View>
-
-          {/* 댓글 버튼 */}
           <Pressable
             onPress={openCommentSheet}
             className="flex-row items-center gap-1.5"
@@ -316,44 +301,33 @@ export default function CommunityDetailScreen() {
               {routine.comments.length > 0 ? routine.comments.length : ""}
             </Text>
           </Pressable>
-
-          {/* 가져오기 버튼 */}
-          <Pressable
-            onPress={handleImport}
-            disabled={importing || routine.isImported}
-            className={`ml-auto flex-row items-center gap-1.5 rounded-lg px-3.5 py-2 ${
-              routine.isImported
-                ? "bg-primary/20"
-                : importing
-                  ? "bg-white/10"
-                  : "bg-primary"
-            }`}
-          >
-            {importing ? (
-              <ActivityIndicator size="small" color={COLORS.mutedForeground} />
-            ) : routine.isImported ? (
-              <Check size={14} color={COLORS.primary} />
-            ) : (
-              <Download size={14} color={COLORS.white} />
-            )}
-            <Text
-              className={`text-xs font-semibold ${
-                routine.isImported
-                  ? "text-primary"
-                  : importing
-                    ? "text-white/40"
-                    : "text-white"
-              }`}
-            >
-              {importing
-                ? "가져오는 중..."
-                : routine.isImported
-                  ? "추가됨"
-                  : "내 루틴에 추가"}
-            </Text>
-          </Pressable>
         </View>
       </ScrollView>
+
+      {/* FAB - 가져오기 */}
+      <Pressable
+        onPress={handleImport}
+        disabled={importing}
+        className="absolute flex-row items-center gap-2 rounded-full bg-primary px-5 py-3.5 active:opacity-90"
+        style={{
+          bottom: TAB_BAR_HEIGHT + insets.bottom + 24,
+          right: 20,
+          shadowColor: COLORS.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          elevation: 8,
+        }}
+      >
+        {importing ? (
+          <ActivityIndicator size="small" color={COLORS.white} />
+        ) : (
+          <Download size={18} color={COLORS.white} />
+        )}
+        <Text className="text-base font-semibold text-white">
+          {importing ? "가져오는 중..." : "가져오기"}
+        </Text>
+      </Pressable>
 
       {/* 댓글 바텀시트 */}
       <Modal

@@ -29,18 +29,15 @@ public class SharedRoutineController {
 
     @GetMapping
     public PageResponse<SharedRoutineResponse> getSharedRoutines(
-            @AuthenticationPrincipal UserPrincipal principal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "RECENT") SharedRoutineSortType sort) {
-        return PageResponse.from(sharedRoutineService.getSharedRoutines(principal.getId(), page, size, sort));
+        return PageResponse.from(sharedRoutineService.getSharedRoutines(page, size, sort));
     }
 
     @GetMapping("/{id}")
-    public SharedRoutineDetailResponse getSharedRoutineDetail(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @PathVariable Long id) {
-        return sharedRoutineService.getSharedRoutineDetail(principal.getId(), id);
+    public SharedRoutineDetailResponse getSharedRoutineDetail(@PathVariable Long id) {
+        return sharedRoutineService.getSharedRoutineDetail(id);
     }
 
     @PostMapping("/{id}/import")

@@ -18,10 +18,9 @@ public record SharedRoutineResponse(
         List<String> exerciseNames, // 대표 운동 종목 이름 (최대 3개)
         int viewCount,
         int importCount,
-        boolean isImported,
         LocalDateTime createdAt
 ) {
-    public static SharedRoutineResponse from(SharedRoutine sharedRoutine, boolean isImported) {
+    public static SharedRoutineResponse from(SharedRoutine sharedRoutine) {
         RoutineSnapshotWrapper snapshot = sharedRoutine.getRoutineSnapshot();
 
         List<BodyPart> bodyParts = snapshot.items().stream()
@@ -45,7 +44,6 @@ public record SharedRoutineResponse(
                 exerciseNames,
                 sharedRoutine.getViewCount(),
                 sharedRoutine.getImportCount(),
-                isImported,
                 sharedRoutine.getCreatedAt()
         );
     }

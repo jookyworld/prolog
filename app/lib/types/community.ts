@@ -26,7 +26,6 @@ export interface SharedRoutineListItem {
   exerciseNames: string[]; // 대표 운동 종목 이름 (최대 3개)
   viewCount: number;
   importCount: number;
-  isImported: boolean;
   createdAt: string;
 }
 
@@ -43,7 +42,6 @@ export interface SharedRoutineDetail {
   routineSnapshot: RoutineSnapshot;
   viewCount: number;
   importCount: number;
-  isImported: boolean;
   createdAt: string;
   comments: Comment[];
 }

@@ -20,11 +20,10 @@ public record SharedRoutineDetailResponse(
         RoutineSnapshotWrapper routineSnapshot,
         int viewCount,
         int importCount,
-        boolean isImported,
         LocalDateTime createdAt,
         List<CommentResponse> comments
 ) {
-    public static SharedRoutineDetailResponse from(SharedRoutine sharedRoutine, boolean isImported, List<CommentResponse> comments) {
+    public static SharedRoutineDetailResponse from(SharedRoutine sharedRoutine, List<CommentResponse> comments) {
         RoutineSnapshotWrapper snapshot = sharedRoutine.getRoutineSnapshot();
 
         List<BodyPart> bodyParts = snapshot.items().stream()
@@ -49,7 +48,6 @@ public record SharedRoutineDetailResponse(
                 sharedRoutine.getRoutineSnapshot(),
                 sharedRoutine.getViewCount(),
                 sharedRoutine.getImportCount(),
-                isImported,
                 sharedRoutine.getCreatedAt(),
                 comments
         );
