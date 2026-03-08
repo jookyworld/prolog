@@ -85,12 +85,23 @@ public class SharedRoutineService {
     }
 
     @Transactional(readOnly = true)
-    public Page<SharedRoutineResponse> getSharedRoutines(int page, int size, SharedRoutineSortType sortType) {
+    public Page<SharedRoutineResponse> getSharedRoutines(int page, int size, SharedRoutineSortType sortType, String keyword) {
         Page<SharedRoutine> sharedRoutines;
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
+
         if (sortType == SharedRoutineSortType.POPULAR) {
-            sharedRoutines = sharedRoutineRepository.findAllOrderByPopularity(PageRequest.of(page, size));
+            if (hasKeyword) {
+                sharedRoutines = sharedRoutineRepository.findAllByKeywordOrderByPopularity(keyword, PageRequest.of(page, size));
+            } else {
+                sharedRoutines = sharedRoutineRepository.findAllOrderByPopularity(PageRequest.of(page, size));
+            }
         } else {
-            sharedRoutines = sharedRoutineRepository.findAll(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+            if (hasKeyword) {
+                sharedRoutines = sharedRoutineRepository.findAllByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                        keyword, keyword, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+            } else {
+                sharedRoutines = sharedRoutineRepository.findAll(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+            }
         }
 
         List<Long> ids = sharedRoutines.getContent().stream().map(SharedRoutine::getId).toList();

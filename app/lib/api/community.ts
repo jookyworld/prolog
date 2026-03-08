@@ -13,9 +13,12 @@ export const communityApi = {
     sort: SharedRoutineSortType = "POPULAR",
     page: number = 0,
     size: number = 20,
+    keyword?: string,
   ): Promise<PageResponse<SharedRoutineListItem>> => {
+    const params = new URLSearchParams({ page: String(page), size: String(size), sort });
+    if (keyword?.trim()) params.append("keyword", keyword.trim());
     return apiFetch<PageResponse<SharedRoutineListItem>>(
-      `/api/community/routines?page=${page}&size=${size}&sort=${sort}`,
+      `/api/community/routines?${params}`,
     );
   },
 

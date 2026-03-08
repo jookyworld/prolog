@@ -10,7 +10,6 @@ import {
   Eye,
   MessageCircle,
   MoreVertical,
-  X,
 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -370,12 +369,6 @@ export default function CommunityDetailScreen() {
                   댓글{" "}
                   {routine.comments.length > 0 ? routine.comments.length : ""}
                 </Text>
-                <Pressable
-                  onPress={closeCommentSheet}
-                  className="h-8 w-8 items-center justify-center rounded-full bg-white/10"
-                >
-                  <X size={16} color={COLORS.white} />
-                </Pressable>
               </View>
 
               {/* 댓글 목록 */}

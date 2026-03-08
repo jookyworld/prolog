@@ -180,6 +180,36 @@ export default function RoutineScreen() {
               <Text className="text-sm font-medium text-white">다시 시도</Text>
             </Pressable>
           </View>
+        ) : displayedRoutines.length === 0 && !showArchived && archivedRoutines.length > 0 ? (
+          <View className="gap-3 pb-8">
+            <View className="rounded-2xl bg-card p-6">
+              <View className="flex-row items-start gap-4">
+                <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary/15">
+                  <ClipboardList size={22} color={COLORS.primary} />
+                </View>
+                <View className="flex-1">
+                  <Text className="mb-1 text-base font-semibold text-white">
+                    아직 루틴이 없어요
+                  </Text>
+                  <Text className="text-sm leading-5 text-white/50">
+                    {"나만의 루틴을 만들어\n효율적으로 운동해보세요!"}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <Pressable
+              onPress={() => setShowArchived(true)}
+              className="flex-row items-center justify-between rounded-2xl bg-white/5 p-5 active:opacity-80"
+            >
+              <View className="flex-row items-center gap-3">
+                <Archive size={18} color="rgba(255,255,255,0.4)" />
+                <Text className="text-sm text-white/60">
+                  보관된 루틴 {archivedRoutines.length}개
+                </Text>
+              </View>
+              <ChevronRight size={16} color="rgba(255,255,255,0.3)" />
+            </Pressable>
+          </View>
         ) : displayedRoutines.length === 0 ? (
           <View className="rounded-2xl bg-card p-6">
             <View className="flex-row items-start gap-4">

@@ -13,10 +13,11 @@ import {
   Check,
   Eye,
   MessageCircle,
+  Search,
   Share2,
   X,
 } from "lucide-react-native";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -151,6 +152,8 @@ export default function CommunityScreen() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const isLoadingMoreRef = useRef(false);
+  const [searchText, setSearchText] = useState("");
+  const [keyword, setKeyword] = useState("");
 
   // 공유 모달 상태
   const [shareStep, setShareStep] = useState<"pick" | "form">("pick");
@@ -167,15 +170,23 @@ export default function CommunityScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      loadRoutines(sortType);
-    }, [sortType]),
+      loadRoutines(sortType, keyword);
+    }, [sortType, keyword]),
   );
 
-  const loadRoutines = async (sort: SharedRoutineSortType) => {
+  // 검색어 디바운스
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setKeyword(searchText);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchText]);
+
+  const loadRoutines = async (sort: SharedRoutineSortType, kw: string) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await communityApi.getSharedRoutines(sort, 0, PAGE_SIZE);
+      const response = await communityApi.getSharedRoutines(sort, 0, PAGE_SIZE, kw);
       setRoutines(response.content);
       setPage(0);
       setHasMore(!response.last);
@@ -193,7 +204,7 @@ export default function CommunityScreen() {
     setLoadingMore(true);
     try {
       const nextPage = page + 1;
-      const response = await communityApi.getSharedRoutines(sortType, nextPage, PAGE_SIZE);
+      const response = await communityApi.getSharedRoutines(sortType, nextPage, PAGE_SIZE, keyword);
       setRoutines((prev) => [...prev, ...response.content]);
       setPage(nextPage);
       setHasMore(!response.last);
@@ -203,11 +214,11 @@ export default function CommunityScreen() {
       setLoadingMore(false);
       isLoadingMoreRef.current = false;
     }
-  }, [hasMore, page, sortType]);
+  }, [hasMore, page, sortType, keyword]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await loadRoutines(sortType);
+    await loadRoutines(sortType, keyword);
     setRefreshing(false);
   };
 
@@ -272,7 +283,7 @@ export default function CommunityScreen() {
         description: shareDescription,
       });
       setShareModalVisible(false);
-      loadRoutines(sortType);
+      loadRoutines(sortType, keyword);
       Alert.alert("공유 완료", "루틴이 커뮤니티에 공유되었습니다!");
     } catch {
       Alert.alert("오류", "공유에 실패했습니다.");
@@ -337,6 +348,25 @@ export default function CommunityScreen() {
           </Text>
         </View>
 
+        {/* 검색바 */}
+        <View className="mx-5 mb-3 flex-row items-center gap-2 rounded-xl bg-card px-3 py-2.5">
+          <Search size={16} color={COLORS.mutedForeground} />
+          <TextInput
+            value={searchText}
+            onChangeText={setSearchText}
+            placeholder="루틴 이름, 설명으로 검색"
+            placeholderTextColor={COLORS.mutedForeground}
+            className="flex-1 text-sm text-white"
+            returnKeyType="search"
+            clearButtonMode="never"
+          />
+          {searchText.length > 0 && (
+            <Pressable onPress={() => setSearchText("")}>
+              <X size={16} color={COLORS.mutedForeground} />
+            </Pressable>
+          )}
+        </View>
+
         {/* 정렬 */}
         <View className="mb-4 flex-row gap-2 px-5">
           {(Object.keys(SORT_LABELS) as SharedRoutineSortType[]).map((sort) => (
@@ -377,7 +407,7 @@ export default function CommunityScreen() {
             {routines.length === 0 ? (
               <View className="items-center py-20">
                 <Text className="text-center text-white/40">
-                  아직 공유된 루틴이 없습니다
+                  {keyword ? `"${keyword}"에 대한 검색 결과가 없습니다` : "아직 공유된 루틴이 없습니다"}
                 </Text>
               </View>
             ) : (

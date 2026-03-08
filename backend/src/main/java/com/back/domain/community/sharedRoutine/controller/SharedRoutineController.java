@@ -31,8 +31,9 @@ public class SharedRoutineController {
     public PageResponse<SharedRoutineResponse> getSharedRoutines(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "POPULAR") SharedRoutineSortType sort) {
-        return PageResponse.from(sharedRoutineService.getSharedRoutines(page, size, sort));
+            @RequestParam(defaultValue = "POPULAR") SharedRoutineSortType sort,
+            @RequestParam(required = false) String keyword) {
+        return PageResponse.from(sharedRoutineService.getSharedRoutines(page, size, sort, keyword));
     }
 
     @GetMapping("/{id}")
