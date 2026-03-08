@@ -10,7 +10,7 @@ import type { PageResponse } from "../types/common";
 export const communityApi = {
   // 공유 루틴 목록 조회
   getSharedRoutines: async (
-    sort: SharedRoutineSortType = "RECENT",
+    sort: SharedRoutineSortType = "POPULAR",
     page: number = 0,
     size: number = 20,
   ): Promise<PageResponse<SharedRoutineListItem>> => {

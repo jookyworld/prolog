@@ -6,7 +6,7 @@ import {
   toWorkoutSession,
 } from "@/lib/types/workout";
 import { ArrowLeft, Dumbbell } from "lucide-react-native";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -25,20 +25,28 @@ const TYPE_FILTERS: { value: TypeFilter; label: string }[] = [
   { value: "free", label: "자유 운동" },
 ];
 
+const PAGE_SIZE = 20;
+
 export default function WorkoutHistoryScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const isLoadingRef = useRef(false);
 
-  const fetchSessions = useCallback(async () => {
+  const fetchSessions = useCallback(async (filter: TypeFilter) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await workoutApi.getSessions();
+      const data = await workoutApi.getSessions(0, PAGE_SIZE, filter);
       setSessions(data.content.map(toWorkoutSession));
+      setPage(0);
+      setHasMore(!data.last);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "데이터를 불러오지 못했습니다.",
@@ -48,20 +56,37 @@ export default function WorkoutHistoryScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions]);
+  const loadMore = useCallback(async () => {
+    if (isLoadingRef.current || !hasMore) return;
+    isLoadingRef.current = true;
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const data = await workoutApi.getSessions(nextPage, PAGE_SIZE, typeFilter);
+      setSessions((prev) => [...prev, ...data.content.map(toWorkoutSession)]);
+      setPage(nextPage);
+      setHasMore(!data.last);
+    } catch {
+      // 무시
+    } finally {
+      setLoadingMore(false);
+      isLoadingRef.current = false;
+    }
+  }, [hasMore, page, typeFilter]);
 
-  const filtered = useMemo(() => {
-    const list =
-      typeFilter === "all"
-        ? sessions
-        : sessions.filter((s) => s.type === typeFilter);
-    return [...list].sort(
-      (a, b) =>
-        new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime(),
-    );
-  }, [sessions, typeFilter]);
+  useEffect(() => {
+    fetchSessions(typeFilter);
+  }, [typeFilter]);
+
+  const handleScroll = useCallback(
+    ({ nativeEvent }: { nativeEvent: any }) => {
+      const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+      if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 300) {
+        loadMore();
+      }
+    },
+    [loadMore],
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
@@ -101,6 +126,8 @@ export default function WorkoutHistoryScreen() {
       <ScrollView
         className="flex-1 px-5"
         contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
+        onScroll={handleScroll}
+        scrollEventThrottle={400}
       >
         {loading ? (
           <View className="items-center py-20">
@@ -111,13 +138,13 @@ export default function WorkoutHistoryScreen() {
           <View className="items-center rounded-2xl bg-card p-8">
             <Text className="mb-4 text-sm text-white/60">{error}</Text>
             <Pressable
-              onPress={fetchSessions}
+              onPress={() => fetchSessions(typeFilter)}
               className="rounded-full bg-white/10 px-5 py-2.5"
             >
               <Text className="text-sm font-medium text-white">다시 시도</Text>
             </Pressable>
           </View>
-        ) : filtered.length === 0 ? (
+        ) : sessions.length === 0 ? (
           /* 빈 상태 */
           <View className="rounded-2xl bg-card p-6">
             <View className="flex-row items-start gap-4">
@@ -138,7 +165,7 @@ export default function WorkoutHistoryScreen() {
         ) : (
           /* 세션 카드 리스트 */
           <View className="gap-3 pb-8">
-            {filtered.map((session) => (
+            {sessions.map((session) => (
               <Pressable
                 key={session.id}
                 onPress={() =>
@@ -173,6 +200,12 @@ export default function WorkoutHistoryScreen() {
                 </View>
               </Pressable>
             ))}
+
+            {loadingMore && (
+              <View className="items-center py-4">
+                <ActivityIndicator size="small" color={COLORS.primary} />
+              </View>
+            )}
           </View>
         )}
       </ScrollView>

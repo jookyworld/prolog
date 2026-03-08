@@ -20,6 +20,10 @@ public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, 
 
     Page<WorkoutSession> findByUser_IdAndCompletedAtIsNotNullOrderByCompletedAtDesc(Long userId, Pageable pageable);
 
+    Page<WorkoutSession> findByUser_IdAndCompletedAtIsNotNullAndRoutineIsNotNullOrderByCompletedAtDesc(Long userId, Pageable pageable);
+
+    Page<WorkoutSession> findByUser_IdAndCompletedAtIsNotNullAndRoutineIsNullOrderByCompletedAtDesc(Long userId, Pageable pageable);
+
     java.util.Optional<WorkoutSession> findTopByUser_IdAndRoutine_IdAndCompletedAtIsNotNullOrderByCompletedAtDesc(Long userId, Long routineId);
 
     void deleteAllByUser_Id(Long userId);

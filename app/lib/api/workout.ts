@@ -8,8 +8,10 @@ import type {
 import type { PageResponse } from "../types/common";
 
 export const workoutApi = {
-  getSessions(): Promise<PageResponse<WorkoutSessionListItemRes>> {
-    return apiFetch("/api/workouts/sessions?page=0&size=100");
+  getSessions(page: number = 0, size: number = 20, type?: string): Promise<PageResponse<WorkoutSessionListItemRes>> {
+    const params = new URLSearchParams({ page: String(page), size: String(size) });
+    if (type && type !== "all") params.append("type", type);
+    return apiFetch(`/api/workouts/sessions?${params}`);
   },
 
   getSessionDetail(id: string): Promise<WorkoutSessionDetailRes> {

@@ -37,6 +37,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
+const PAGE_SIZE = 20;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SHEET_HEIGHT = SCREEN_HEIGHT * 0.75;
 
@@ -144,8 +145,12 @@ export default function CommunityScreen() {
   const [sortType, setSortType] = useState<SharedRoutineSortType>("POPULAR");
   const [routines, setRoutines] = useState<SharedRoutineListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const isLoadingMoreRef = useRef(false);
 
   // 공유 모달 상태
   const [shareStep, setShareStep] = useState<"pick" | "form">("pick");
@@ -162,17 +167,18 @@ export default function CommunityScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      loadRoutines();
+      loadRoutines(sortType);
     }, [sortType]),
   );
 
-  const loadRoutines = async () => {
+  const loadRoutines = async (sort: SharedRoutineSortType) => {
     try {
       setLoading(true);
       setError(null);
-
-      const response = await communityApi.getSharedRoutines(sortType);
+      const response = await communityApi.getSharedRoutines(sort, 0, PAGE_SIZE);
       setRoutines(response.content);
+      setPage(0);
+      setHasMore(!response.last);
     } catch (err) {
       console.error("Failed to load routines:", err);
       setError("루틴을 불러오는데 실패했습니다.");
@@ -181,11 +187,39 @@ export default function CommunityScreen() {
     }
   };
 
+  const loadMoreRoutines = useCallback(async () => {
+    if (isLoadingMoreRef.current || !hasMore) return;
+    isLoadingMoreRef.current = true;
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const response = await communityApi.getSharedRoutines(sortType, nextPage, PAGE_SIZE);
+      setRoutines((prev) => [...prev, ...response.content]);
+      setPage(nextPage);
+      setHasMore(!response.last);
+    } catch {
+      // 무시
+    } finally {
+      setLoadingMore(false);
+      isLoadingMoreRef.current = false;
+    }
+  }, [hasMore, page, sortType]);
+
   const handleRefresh = async () => {
     setRefreshing(true);
-    await loadRoutines();
+    await loadRoutines(sortType);
     setRefreshing(false);
   };
+
+  const handleScroll = useCallback(
+    ({ nativeEvent }: { nativeEvent: any }) => {
+      const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+      if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 300) {
+        loadMoreRoutines();
+      }
+    },
+    [loadMoreRoutines],
+  );
 
   const handlePress = (id: number) => {
     router.push(`/(tabs)/community/${id}`);
@@ -238,7 +272,7 @@ export default function CommunityScreen() {
         description: shareDescription,
       });
       setShareModalVisible(false);
-      loadRoutines();
+      loadRoutines(sortType);
       Alert.alert("공유 완료", "루틴이 커뮤니티에 공유되었습니다!");
     } catch {
       Alert.alert("오류", "공유에 실패했습니다.");
@@ -292,6 +326,8 @@ export default function CommunityScreen() {
             tintColor={COLORS.primary}
           />
         }
+        onScroll={handleScroll}
+        scrollEventThrottle={400}
       >
         {/* 헤더 */}
         <View className="px-5 py-4">
@@ -327,7 +363,7 @@ export default function CommunityScreen() {
           <View className="items-center px-5 py-10">
             <Text className="text-center text-white/60">{error}</Text>
             <Pressable
-              onPress={loadRoutines}
+              onPress={() => loadRoutines(sortType)}
               className="mt-4 rounded-lg bg-primary px-6 py-3"
             >
               <Text className="font-semibold text-white">다시 시도</Text>
@@ -352,6 +388,11 @@ export default function CommunityScreen() {
                   onPress={handlePress}
                 />
               ))
+            )}
+            {loadingMore && (
+              <View className="items-center py-4">
+                <ActivityIndicator size="small" color={COLORS.primary} />
+              </View>
             )}
           </View>
         )}

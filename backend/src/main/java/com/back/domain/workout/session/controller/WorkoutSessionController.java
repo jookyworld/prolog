@@ -55,9 +55,10 @@ public class WorkoutSessionController {
     @GetMapping
     public ResponseEntity<PageResponse<WorkoutSessionListItemResponse>> getMySessions(@AuthenticationPrincipal UserPrincipal principal,
                                                                                        @RequestParam(defaultValue = "0") int page,
-                                                                                       @RequestParam(defaultValue = "20") int size) {
+                                                                                       @RequestParam(defaultValue = "20") int size,
+                                                                                       @RequestParam(required = false) String type) {
         PageRequest pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(PageResponse.from(workoutSessionService.getWorkoutSessions(principal.getId(), pageable)));
+        return ResponseEntity.ok(PageResponse.from(workoutSessionService.getWorkoutSessions(principal.getId(), type, pageable)));
     }
 
     @GetMapping("/{sessionId}")

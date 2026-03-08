@@ -174,10 +174,12 @@ public class WorkoutSessionService {
     }
 
     @Transactional(readOnly = true)
-    public Page<WorkoutSessionListItemResponse> getWorkoutSessions(Long userId, Pageable pageable) {
-
-        Page<WorkoutSession> sessions = workoutSessionRepository.findByUser_IdAndCompletedAtIsNotNullOrderByCompletedAtDesc(userId, pageable);
-
+    public Page<WorkoutSessionListItemResponse> getWorkoutSessions(Long userId, String type, Pageable pageable) {
+        Page<WorkoutSession> sessions = switch (type == null ? "all" : type) {
+            case "routine" -> workoutSessionRepository.findByUser_IdAndCompletedAtIsNotNullAndRoutineIsNotNullOrderByCompletedAtDesc(userId, pageable);
+            case "free" -> workoutSessionRepository.findByUser_IdAndCompletedAtIsNotNullAndRoutineIsNullOrderByCompletedAtDesc(userId, pageable);
+            default -> workoutSessionRepository.findByUser_IdAndCompletedAtIsNotNullOrderByCompletedAtDesc(userId, pageable);
+        };
         return sessions.map(WorkoutSessionListItemResponse::from);
     }
 
