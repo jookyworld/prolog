@@ -50,4 +50,10 @@ export const workoutApi = {
   getLastSessionByRoutine(routineId: number): Promise<WorkoutSessionDetailRes> {
     return apiFetch(`/api/workouts/sessions/routines/${routineId}/last`);
   },
+
+  getActiveSession(): Promise<WorkoutSessionStartRes | null> {
+    return apiFetch<WorkoutSessionStartRes | null>("/api/workouts/sessions/active").catch(
+      () => null,
+    );
+  },
 };

@@ -8,10 +8,11 @@ import { useState } from "react";
 export default function TabsLayout() {
   const router = useRouter();
   const pathname = usePathname();
-  const { activeSession } = useWorkout();
+  const { activeSession, isRestoring } = useWorkout();
   const [sheetVisible, setSheetVisible] = useState(false);
 
   const handlePressFAB = () => {
+    if (isRestoring) return;
     if (activeSession) {
       const rid = activeSession.routineId ?? "free";
       const targetPath = `/(tabs)/workout/session`;

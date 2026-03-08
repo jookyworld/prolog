@@ -286,6 +286,59 @@ docker-compose down && docker-compose up -d
 
 ---
 
+### 앱 재시작 후 Context 상태가 사라지는 문제
+
+**원인:** React Context는 메모리 상태이므로 앱을 완전히 종료 후 재시작하면 초기화됨.
+서버에는 상태가 남아있어도 앱은 인식 못 함.
+
+**대표 사례:** 운동 세션 진행 중 앱 재시작 → `activeSession = null` → FAB이 세션으로 이동하지 않고 시작 시트를 띄움
+
+**원칙: Context의 단독 저장 금지 — 서버가 진실의 원천(Source of Truth)**
+
+앱 시작 시 서버에서 상태를 복원해야 하는 데이터는 Context에만 저장하지 않는다.
+
+```
+❌ 잘못된 방식
+앱 시작 → Context = null → 서버 상태 무시
+
+✅ 올바른 방식
+앱 시작 → 서버 API 호출 → Context 복원 → 이후 로직 실행
+```
+
+**구현 패턴:**
+
+```tsx
+// Context Provider 내부에서 mount 시 서버 상태 복원
+export function WorkoutProvider({ children }) {
+  const [activeSession, setActiveSession] = useState(null);
+  const [isRestoring, setIsRestoring] = useState(true); // 복원 완료 전 플래그
+
+  useEffect(() => {
+    workoutApi.getActiveSession()
+      .then((session) => {
+        if (session) setActiveSession({ sessionId: session.id, routineId: session.routineId });
+      })
+      .finally(() => setIsRestoring(false));
+  }, []);
+  // ...
+}
+```
+
+```tsx
+// 복원 완료 전에는 해당 기능 비활성화
+const handlePressFAB = () => {
+  if (isRestoring) return; // 복원 중이면 동작 차단
+  // ...
+};
+```
+
+**새로운 서버 상태를 Context에 담을 때 체크리스트:**
+- [ ] 앱 재시작 후 이 상태가 유실되면 UX가 깨지는가?
+- [ ] 깨진다면: 서버에서 복원하는 API가 있는가? → Provider mount 시 호출
+- [ ] `isRestoring` 플래그로 복원 완료 전 동작을 막았는가?
+
+---
+
 ## 📚 관련 문서
 
 | 문서 | 용도 |
