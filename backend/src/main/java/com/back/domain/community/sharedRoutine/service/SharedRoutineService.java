@@ -130,6 +130,34 @@ public class SharedRoutineService {
         return SharedRoutineDetailResponse.from(sharedRoutine, commentResponses);
     }
 
+    @Transactional(readOnly = true)
+    public Page<SharedRoutineResponse> getMySharedRoutines(Long userId, int page, int size) {
+        Page<SharedRoutine> sharedRoutines = sharedRoutineRepository
+                .findAllByUser_IdOrderByCreatedAtDesc(userId, PageRequest.of(page, size));
+
+        List<Long> ids = sharedRoutines.getContent().stream().map(SharedRoutine::getId).toList();
+        Map<Long, Integer> commentCounts = commentRepository.countBySharedRoutineIdIn(ids)
+                .stream().collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> ((Long) row[1]).intValue()
+                ));
+
+        return sharedRoutines.map(sr ->
+                SharedRoutineResponse.from(sr, commentCounts.getOrDefault(sr.getId(), 0)));
+    }
+
+    @Transactional
+    public void deleteSharedRoutine(Long userId, Long sharedRoutineId) {
+        SharedRoutine sharedRoutine = sharedRoutineRepository.findById(sharedRoutineId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 공유 루틴입니다."));
+
+        if (!sharedRoutine.getUser().getId().equals(userId)) {
+            throw new ForbiddenException("삭제 권한이 없습니다.");
+        }
+
+        sharedRoutineRepository.delete(sharedRoutine);
+    }
+
     @Transactional
     public RoutineResponse importRoutine(Long userId, Long sharedRoutineId) {
         User user = userRepository.findById(userId)

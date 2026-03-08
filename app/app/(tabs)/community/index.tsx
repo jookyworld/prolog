@@ -393,7 +393,7 @@ export default function CommunityScreen() {
           <View className="items-center px-5 py-10">
             <Text className="text-center text-white/60">{error}</Text>
             <Pressable
-              onPress={() => loadRoutines(sortType)}
+              onPress={() => loadRoutines(sortType, keyword)}
               className="mt-4 rounded-lg bg-primary px-6 py-3"
             >
               <Text className="font-semibold text-white">다시 시도</Text>

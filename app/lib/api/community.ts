@@ -67,6 +67,22 @@ export const communityApi = {
     });
   },
 
+  // 내가 공유한 루틴 목록
+  getMySharedRoutines: async (
+    page: number = 0,
+    size: number = 20,
+  ): Promise<PageResponse<SharedRoutineListItem>> => {
+    const params = new URLSearchParams({ page: String(page), size: String(size) });
+    return apiFetch<PageResponse<SharedRoutineListItem>>(
+      `/api/community/routines/my?${params}`,
+    );
+  },
+
+  // 공유 루틴 삭제
+  deleteSharedRoutine: async (id: number): Promise<void> => {
+    return apiFetch(`/api/community/routines/${id}`, { method: "DELETE" });
+  },
+
   // 댓글 삭제
   deleteComment: async (commentId: number): Promise<void> => {
     return apiFetch(`/api/community/comments/${commentId}`, {

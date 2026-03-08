@@ -19,6 +19,9 @@ public interface SharedRoutineRepository extends JpaRepository<SharedRoutine, Lo
     Page<SharedRoutine> findAllByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
             String titleKeyword, String descriptionKeyword, Pageable pageable);
 
+    @EntityGraph(attributePaths = "user")
+    Page<SharedRoutine> findAllByUser_IdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+
     @Query(
         value = "SELECT * FROM shared_routines sr " +
                 "ORDER BY (sr.import_count * 3.0 + sr.view_count) / " +

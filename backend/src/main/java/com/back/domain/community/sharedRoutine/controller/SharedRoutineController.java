@@ -41,6 +41,20 @@ public class SharedRoutineController {
         return sharedRoutineService.getSharedRoutineDetail(id);
     }
 
+    @GetMapping("/my")
+    public PageResponse<SharedRoutineResponse> getMySharedRoutines(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return PageResponse.from(sharedRoutineService.getMySharedRoutines(principal.getId(), page, size));
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteSharedRoutine(@AuthenticationPrincipal UserPrincipal principal,
+                                    @PathVariable Long id) {
+        sharedRoutineService.deleteSharedRoutine(principal.getId(), id);
+    }
+
     @PostMapping("/{id}/import")
     public RoutineResponse importRoutine(@AuthenticationPrincipal UserPrincipal principal,
                                          @PathVariable Long id) {

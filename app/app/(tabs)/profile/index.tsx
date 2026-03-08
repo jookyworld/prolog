@@ -7,6 +7,7 @@ import {
   Pencil,
   Ruler,
   Settings,
+  Share2,
   Swords,
   User,
   Weight,
@@ -129,6 +130,21 @@ export default function ProfileScreen() {
             </View>
             <Text className="ml-3 flex-1 text-base text-white">
               종목 관리
+            </Text>
+            <ChevronRight size={18} color={COLORS.iconMuted} />
+          </Pressable>
+
+          <View className="mx-5 h-px bg-white/5" />
+
+          <Pressable
+            onPress={() => router.push("/(tabs)/profile/shared")}
+            className="flex-row items-center px-5 py-4"
+          >
+            <View className="h-10 w-10 items-center justify-center rounded-xl bg-white/5">
+              <Share2 size={18} color={COLORS.white} />
+            </View>
+            <Text className="ml-3 flex-1 text-base text-white">
+              내가 공유한 루틴
             </Text>
             <ChevronRight size={18} color={COLORS.iconMuted} />
           </Pressable>
