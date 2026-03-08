@@ -1,10 +1,8 @@
 package com.back.domain.community.sharedRoutine.entity;
 
 import com.back.domain.community.sharedRoutine.dto.RoutineSnapshotWrapper;
-import com.back.domain.community.sharedRoutine.dto.SessionSnapshotWrapper;
 import com.back.domain.user.user.entity.User;
 import com.back.global.converter.RoutineSnapshotConverter;
-import com.back.global.converter.SessionSnapshotConverter;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -39,10 +37,6 @@ public class SharedRoutine {
     @Convert(converter = RoutineSnapshotConverter.class)
     @Column(nullable = false, columnDefinition = "JSON")
     private RoutineSnapshotWrapper routineSnapshot;
-
-    @Convert(converter = SessionSnapshotConverter.class)
-    @Column(columnDefinition = "JSON")
-    private SessionSnapshotWrapper lastSessionSnapshot;
 
     @Builder.Default
     @Column(nullable = false)

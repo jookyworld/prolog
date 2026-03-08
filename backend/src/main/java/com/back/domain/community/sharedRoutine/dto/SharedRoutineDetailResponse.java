@@ -18,7 +18,6 @@ public record SharedRoutineDetailResponse(
         List<BodyPart> bodyParts,
         List<String> exerciseNames, // 대표 운동 종목 이름 (최대 3개)
         RoutineSnapshotWrapper routineSnapshot,
-        SessionSnapshotWrapper lastSessionSnapshot,
         int viewCount,
         int importCount,
         boolean isImported,
@@ -48,7 +47,6 @@ public record SharedRoutineDetailResponse(
                 bodyParts,
                 exerciseNames,
                 sharedRoutine.getRoutineSnapshot(),
-                sharedRoutine.getLastSessionSnapshot(),
                 sharedRoutine.getViewCount(),
                 sharedRoutine.getImportCount(),
                 isImported,

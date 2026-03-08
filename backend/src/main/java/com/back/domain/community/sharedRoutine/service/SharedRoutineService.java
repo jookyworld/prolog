@@ -18,10 +18,6 @@ import com.back.domain.routine.routineItem.entity.RoutineItem;
 import com.back.domain.routine.routineItem.repository.RoutineItemRepository;
 import com.back.domain.user.user.entity.User;
 import com.back.domain.user.user.repository.UserRepository;
-import com.back.domain.workout.session.entity.WorkoutSession;
-import com.back.domain.workout.session.repository.WorkoutSessionRepository;
-import com.back.domain.workout.set.entity.WorkoutSet;
-import com.back.domain.workout.set.repository.WorkoutSetRepository;
 import com.back.global.exception.type.BadRequestException;
 import com.back.global.exception.type.ForbiddenException;
 import com.back.global.exception.type.NotFoundException;
@@ -33,7 +29,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,8 +43,6 @@ public class SharedRoutineService {
     private final UserRepository userRepository;
     private final RoutineRepository routineRepository;
     private final RoutineItemRepository routineItemRepository;
-    private final WorkoutSessionRepository workoutSessionRepository;
-    private final WorkoutSetRepository workoutSetRepository;
     private final ExerciseRepository exerciseRepository;
     private final CommentRepository commentRepository;
 
@@ -82,50 +78,11 @@ public class SharedRoutineService {
 
         RoutineSnapshotWrapper routineSnapshot = new RoutineSnapshotWrapper(snapshotItems);
 
-        // 마지막 완료 세션 조회
-        Optional<WorkoutSession> lastSessionOpt = workoutSessionRepository
-                .findTopByUser_IdAndRoutine_IdAndCompletedAtIsNotNullOrderByCompletedAtDesc(userId, request.routineId());
-
-        SessionSnapshotWrapper sessionSnapshot = null;
-        if (lastSessionOpt.isPresent()) {
-            WorkoutSession lastSession = lastSessionOpt.get();
-            List<WorkoutSet> workoutSets = workoutSetRepository.findByWorkoutSession_IdOrderByCreatedAtAsc(lastSession.getId());
-
-            // exerciseName 기준으로 그룹핑 (순서 유지)
-            Map<String, List<SessionSnapshotSet>> exerciseMap = new LinkedHashMap<>();
-            double totalVolume = 0;
-
-            for (WorkoutSet set : workoutSets) {
-                String exerciseName = set.getExercise().getName();
-                exerciseMap.computeIfAbsent(exerciseName, k -> new ArrayList<>())
-                        .add(new SessionSnapshotSet(set.getSetNumber(), set.getWeight(), set.getReps()));
-                totalVolume += set.getWeight() * set.getReps();
-            }
-
-            List<SessionSnapshotExercise> exercises = exerciseMap.entrySet().stream()
-                    .map(entry -> new SessionSnapshotExercise(entry.getKey(), entry.getValue()))
-                    .toList();
-
-            // 운동 시간 계산 (초)
-            int duration = (int) java.time.Duration.between(
-                    lastSession.getStartedAt(),
-                    lastSession.getCompletedAt()
-            ).getSeconds();
-
-            sessionSnapshot = new SessionSnapshotWrapper(
-                    lastSession.getCompletedAt(),
-                    duration,
-                    totalVolume,
-                    exercises
-            );
-        }
-
         SharedRoutine sharedRoutine = SharedRoutine.builder()
                 .user(user)
                 .title(request.title())
                 .description(request.description())
                 .routineSnapshot(routineSnapshot)
-                .lastSessionSnapshot(sessionSnapshot)
                 .build();
 
         sharedRoutineRepository.save(sharedRoutine);

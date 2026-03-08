@@ -9,8 +9,6 @@ import {
   Download,
   ArrowLeft,
   Check,
-  Dumbbell,
-  Clock,
   Send,
   Trash2,
 } from "lucide-react-native";
@@ -29,21 +27,6 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
-function formatVolume(kg: number): string {
-  if (kg >= 1000) {
-    return `${(kg / 1000).toFixed(1)}톤`;
-  }
-  return `${kg}kg`;
-}
-
-function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  if (hours > 0) {
-    return `${hours}시간 ${minutes}분`;
-  }
-  return `${minutes}분`;
-}
 
 export default function CommunityDetailScreen() {
   const router = useRouter();
@@ -271,67 +254,6 @@ export default function CommunityDetailScreen() {
             ))}
           </View>
         </View>
-
-        {/* 최근 수행 기록 */}
-        {routine.lastSessionSnapshot && (
-          <View className="border-b border-white/5 px-5 py-4">
-            <Text className="mb-3 text-lg font-semibold text-white">
-              최근 수행 기록
-            </Text>
-            <View className="rounded-xl bg-card p-4">
-              <View className="mb-3 flex-row items-center justify-between">
-                <Text className="text-sm text-white/60">
-                  {formatRelativeDate(routine.lastSessionSnapshot.completedAt)}
-                </Text>
-                <View className="flex-row items-center gap-3">
-                  <View className="flex-row items-center gap-1">
-                    <Clock size={14} color={COLORS.mutedForeground} />
-                    <Text className="text-sm text-white/50">
-                      {formatDuration(routine.lastSessionSnapshot.duration)}
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center gap-1">
-                    <Dumbbell size={14} color={COLORS.mutedForeground} />
-                    <Text className="text-sm text-white/50">
-                      {formatVolume(routine.lastSessionSnapshot.totalVolume)}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
-              <View className="gap-3">
-                {routine.lastSessionSnapshot.exercises.map((exercise, idx) => (
-                  <View key={idx}>
-                    <Text className="mb-1.5 text-sm font-medium text-white">
-                      {exercise.exerciseName}
-                    </Text>
-                    <View className="gap-1">
-                      {exercise.sets.map((set, setIdx) => (
-                        <View
-                          key={setIdx}
-                          className="flex-row items-center justify-between"
-                        >
-                          <Text className="w-6 text-xs text-white/40">
-                            {set.setNumber}
-                          </Text>
-                          <Text className="w-20 text-sm text-white">
-                            {set.weight}kg
-                          </Text>
-                          <Text className="w-16 text-sm text-white">
-                            ×{set.reps}
-                          </Text>
-                          <Text className="w-20 text-right text-xs text-white/40">
-                            {set.weight * set.reps}kg
-                          </Text>
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </View>
-          </View>
-        )}
 
         {/* 댓글 */}
         <View className="px-5 py-4">

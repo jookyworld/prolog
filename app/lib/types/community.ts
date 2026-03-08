@@ -14,25 +14,6 @@ export interface RoutineSnapshotItem {
   restSeconds: number;
 }
 
-// 세션 스냅샷 구조 (백엔드 SessionSnapshotWrapper)
-export interface SessionSnapshot {
-  completedAt: string;
-  duration: number; // 초
-  totalVolume: number;
-  exercises: SessionExerciseSnapshot[];
-}
-
-export interface SessionExerciseSnapshot {
-  exerciseName: string;
-  sets: SetSnapshot[];
-}
-
-export interface SetSnapshot {
-  setNumber: number;
-  weight: number;
-  reps: number;
-}
-
 // 공유 루틴 리스트 아이템 (백엔드 SharedRoutineResponse)
 export interface SharedRoutineListItem {
   id: number;
@@ -60,7 +41,6 @@ export interface SharedRoutineDetail {
   bodyParts: BodyPart[];
   exerciseNames: string[]; // 대표 운동 종목 이름 (최대 3개)
   routineSnapshot: RoutineSnapshot;
-  lastSessionSnapshot?: SessionSnapshot;
   viewCount: number;
   importCount: number;
   isImported: boolean;
