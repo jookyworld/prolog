@@ -2,6 +2,7 @@ import { communityApi } from "@/lib/api/community";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatRelativeDate } from "@/lib/format";
 import type { SharedRoutineDetail, Comment } from "@/lib/types/community";
+import { useAuth } from "@/contexts/auth-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Eye,
@@ -49,10 +50,12 @@ export default function CommunityDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const routineId = Number(id);
 
+  const { user } = useAuth();
   const [routine, setRoutine] = useState<SharedRoutineDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -75,21 +78,22 @@ export default function CommunityDetailScreen() {
 
   const handleImport = async () => {
     if (!routine) return;
-
+    setImporting(true);
     try {
       const result = await communityApi.importRoutine(routineId);
-
       setRoutine((prev) =>
         prev ? { ...prev, importCount: prev.importCount + 1 } : null
       );
-
-      // TODO: 성공 토스트 표시
-      console.log("루틴이 추가되었습니다:", result.title);
-
-      // 루틴 탭으로 이동
-      router.push("/(tabs)/routine");
+      Alert.alert(
+        "완료",
+        `'${result.title}' 루틴을 내 루틴에 추가했습니다.`,
+        [{ text: "내 루틴 보기", onPress: () => router.push("/(tabs)/routine") }, { text: "확인" }],
+      );
     } catch (err) {
       console.error("Failed to import routine:", err);
+      Alert.alert("오류", "루틴 가져오기에 실패했습니다.");
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -348,12 +352,14 @@ export default function CommunityDetailScreen() {
                       <Text className="text-xs text-white/40">
                         {formatRelativeDate(comment.createdAt)}
                       </Text>
-                      <Pressable
-                        onPress={() => handleCommentDelete(comment.id)}
-                        className="p-1"
-                      >
-                        <Trash2 size={14} color={COLORS.mutedForeground} />
-                      </Pressable>
+                      {user?.nickname === comment.nickname && (
+                        <Pressable
+                          onPress={() => handleCommentDelete(comment.id)}
+                          className="p-1"
+                        >
+                          <Trash2 size={14} color={COLORS.mutedForeground} />
+                        </Pressable>
+                      )}
                     </View>
                   </View>
                   <Text className="text-sm text-white/70">
@@ -403,11 +409,16 @@ export default function CommunityDetailScreen() {
           {/* 가져오기 버튼 */}
           <Pressable
             onPress={handleImport}
-            className="flex-row items-center justify-center gap-2 rounded-lg bg-primary py-3"
+            disabled={importing}
+            className={`flex-row items-center justify-center gap-2 rounded-lg py-3 ${importing ? "bg-white/10" : "bg-primary"}`}
           >
-            <Download size={20} color={COLORS.white} />
-            <Text className="text-sm font-semibold text-white">
-              내 루틴에 추가
+            {importing ? (
+              <ActivityIndicator size="small" color={COLORS.mutedForeground} />
+            ) : (
+              <Download size={20} color={COLORS.white} />
+            )}
+            <Text className={`text-sm font-semibold ${importing ? "text-white/40" : "text-white"}`}>
+              {importing ? "가져오는 중..." : "내 루틴에 추가"}
             </Text>
           </Pressable>
         </View>
