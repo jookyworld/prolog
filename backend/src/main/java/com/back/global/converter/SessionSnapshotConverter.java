@@ -3,13 +3,17 @@ package com.back.global.converter;
 import com.back.domain.community.sharedRoutine.dto.SessionSnapshotWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 @Converter
 public class SessionSnapshotConverter implements AttributeConverter<SessionSnapshotWrapper, String> {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     @Override
     public String convertToDatabaseColumn(SessionSnapshotWrapper attribute) {
