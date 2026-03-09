@@ -79,8 +79,8 @@ public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, 
 
     // 부위 필터
     @Query(
-        value = "SELECT * FROM workout_sessions WHERE user_id = :userId AND completed_at IS NOT NULL AND id IN (SELECT DISTINCT workout_session_id FROM workout_sets WHERE body_part_snapshot = :bodyPart) ORDER BY completed_at DESC",
-        countQuery = "SELECT COUNT(*) FROM workout_sessions WHERE user_id = :userId AND completed_at IS NOT NULL AND id IN (SELECT DISTINCT workout_session_id FROM workout_sets WHERE body_part_snapshot = :bodyPart)",
+        value = "SELECT * FROM workout_sessions WHERE user_id = :userId AND completed_at IS NOT NULL AND id IN (SELECT DISTINCT workout_session_id FROM workout_session_exercises WHERE body_part_snapshot = :bodyPart) ORDER BY completed_at DESC",
+        countQuery = "SELECT COUNT(*) FROM workout_sessions WHERE user_id = :userId AND completed_at IS NOT NULL AND id IN (SELECT DISTINCT workout_session_id FROM workout_session_exercises WHERE body_part_snapshot = :bodyPart)",
         nativeQuery = true
     )
     Page<WorkoutSession> findByUser_IdAndBodyPartOrderByCompletedAtDesc(@Param("userId") Long userId, @Param("bodyPart") String bodyPart, Pageable pageable);

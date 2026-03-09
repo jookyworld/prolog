@@ -2,7 +2,7 @@ package com.back.domain.workout.session.entity;
 
 import com.back.domain.routine.routine.entity.Routine;
 import com.back.domain.user.user.entity.User;
-import com.back.domain.workout.set.entity.WorkoutSet;
+import com.back.domain.workout.sessionexercise.entity.WorkoutSessionExercise;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -58,7 +58,7 @@ public class WorkoutSession {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "workoutSession", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<WorkoutSet> sets = new ArrayList<>();
+    private List<WorkoutSessionExercise> sessionExercises = new ArrayList<>();
 
 
     private WorkoutSession(User user, Routine routine, LocalDateTime startedAt) {

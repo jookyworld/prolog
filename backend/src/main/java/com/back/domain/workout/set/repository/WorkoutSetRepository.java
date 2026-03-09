@@ -12,46 +12,24 @@ import java.util.List;
 @Repository
 public interface WorkoutSetRepository extends JpaRepository<WorkoutSet, Long> {
 
-    @Query("""
-        select
-            ws.exercise.id as exerciseId,
-            max(ws.setNumber) as maxSetNumber,
-            min(ws.createdAt) as firstCreatedAt
-        from WorkoutSet ws
-        where ws.workoutSession.id = :sessionId
-        group by ws.exercise.id
-        order by firstCreatedAt asc
-    """)
-    List<RoutineExerciseSummary> summarizeBySession(Long sessionId);
+    List<WorkoutSet> findByWorkoutSessionExercise_IdInOrderBySetNumberAsc(List<Long> sessionExerciseIds);
 
-    interface RoutineExerciseSummary {
-        Long getExerciseId();
-        Integer getMaxSetNumber();
-        LocalDateTime getFirstCreatedAt();
-    }
-
-    List<WorkoutSet> findByWorkoutSession_IdOrderByCreatedAtAsc(Long sessionId);
-
-    void deleteAllByWorkoutSession_User_Id(Long userId);
-
-    // 세션 ID 목록의 부위별 그룹 (목록 응답 body parts 구성용)
-    @Query("SELECT ws.workoutSession.id, ws.bodyPartSnapshot FROM WorkoutSet ws WHERE ws.workoutSession.id IN :sessionIds GROUP BY ws.workoutSession.id, ws.bodyPartSnapshot")
-    List<Object[]> findBodyPartsBySessionIds(@Param("sessionIds") List<Long> sessionIds);
+    void deleteAllByWorkoutSessionExercise_WorkoutSession_User_Id(Long userId);
 
     // 최근 1달 내 운동별 빈도 계산 (3회 이상, TOP 5)
     @Query(value = """
         SELECT e.id as exerciseId,
                e.name as exerciseName,
                e.body_part as bodyPart,
-               COUNT(DISTINCT ws_set.workout_session_id) as frequency
-        FROM workout_sets ws_set
-        JOIN exercises e ON ws_set.exercise_id = e.id
-        JOIN workout_sessions ws ON ws_set.workout_session_id = ws.id
+               COUNT(DISTINCT wse.workout_session_id) as frequency
+        FROM workout_session_exercises wse
+        JOIN exercises e ON wse.exercise_id = e.id
+        JOIN workout_sessions ws ON wse.workout_session_id = ws.id
         WHERE ws.user_id = :userId
           AND ws.completed_at >= :since
           AND ws.completed_at IS NOT NULL
         GROUP BY e.id, e.name, e.body_part
-        HAVING COUNT(DISTINCT ws_set.workout_session_id) >= 3
+        HAVING COUNT(DISTINCT wse.workout_session_id) >= 3
         ORDER BY frequency DESC
         LIMIT 5
     """, nativeQuery = true)
@@ -70,11 +48,11 @@ public interface WorkoutSetRepository extends JpaRepository<WorkoutSet, Long> {
         SELECT ws.id as sessionId,
                ws.completed_at as completedAt,
                r.title as routineTitle
-        FROM workout_sets ws_set
-        JOIN workout_sessions ws ON ws_set.workout_session_id = ws.id
+        FROM workout_session_exercises wse
+        JOIN workout_sessions ws ON wse.workout_session_id = ws.id
         LEFT JOIN routines r ON ws.routine_id = r.id
         WHERE ws.user_id = :userId
-          AND ws_set.exercise_id = :exerciseId
+          AND wse.exercise_id = :exerciseId
           AND ws.completed_at IS NOT NULL
         GROUP BY ws.id, ws.completed_at, r.title
         ORDER BY ws.completed_at ASC
@@ -92,8 +70,8 @@ public interface WorkoutSetRepository extends JpaRepository<WorkoutSet, Long> {
     // 특정 세션 + 특정 운동의 모든 세트 조회
     @Query("""
         SELECT ws FROM WorkoutSet ws
-        WHERE ws.workoutSession.id = :sessionId
-          AND ws.exercise.id = :exerciseId
+        WHERE ws.workoutSessionExercise.workoutSession.id = :sessionId
+          AND ws.workoutSessionExercise.exercise.id = :exerciseId
         ORDER BY ws.setNumber ASC
     """)
     List<WorkoutSet> findBySessionAndExercise(@Param("sessionId") Long sessionId,

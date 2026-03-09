@@ -14,10 +14,11 @@ import com.back.domain.user.user.repository.UserRepository;
 import com.back.domain.workout.session.dto.*;
 import com.back.domain.workout.session.entity.WorkoutSession;
 import com.back.domain.workout.session.repository.WorkoutSessionRepository;
+import com.back.domain.workout.sessionexercise.entity.WorkoutSessionExercise;
+import com.back.domain.workout.sessionexercise.repository.WorkoutSessionExerciseRepository;
 import com.back.domain.workout.set.dto.WorkoutSetCompleteRequest;
 import com.back.domain.workout.set.entity.WorkoutSet;
 import com.back.domain.workout.set.repository.WorkoutSetRepository;
-import com.back.domain.workout.set.repository.WorkoutSetRepository.RoutineExerciseSummary;
 import com.back.global.exception.type.BadRequestException;
 import com.back.global.exception.type.ForbiddenException;
 import com.back.global.exception.type.NotFoundException;
@@ -42,6 +43,7 @@ public class WorkoutSessionService {
     private final RoutineRepository routineRepository;
     private final RoutineService routineService;
     private final WorkoutSetRepository workoutSetRepository;
+    private final WorkoutSessionExerciseRepository workoutSessionExerciseRepository;
     private final ExerciseRepository exerciseRepository;
 
     @Transactional
@@ -89,7 +91,7 @@ public class WorkoutSessionService {
             return WorkoutSessionCompleteResponse.from(workoutSession);
         }
 
-        if (request == null || request.sets() == null || request.sets().isEmpty()) {
+        if (request == null || request.exercises() == null || request.exercises().isEmpty()) {
             throw new BadRequestException("세트 기록이 없습니다.");
         }
 
@@ -98,29 +100,25 @@ public class WorkoutSessionService {
 
         boolean hasRoutine = workoutSession.getRoutine() != null;
 
-        // 자유 운동에서만 허용되는 액션
         if (!hasRoutine && action == WorkoutCompleteAction.CREATE_ROUTINE_AND_RECORD) {
             // OK: 자유 운동 → 새 루틴 생성
         } else if (hasRoutine && action == WorkoutCompleteAction.CREATE_ROUTINE_AND_RECORD) {
             throw new BadRequestException("루틴 기반 세션에서는 새로운 루틴을 생성할 수 없습니다.");
         }
 
-        // 루틴 기반에서만 허용되는 액션
         if (!hasRoutine && (action == WorkoutCompleteAction.DETACH_AND_RECORD
                 || action == WorkoutCompleteAction.UPDATE_ROUTINE_AND_RECORD)) {
             throw new BadRequestException("자유 운동 세션에서는 사용할 수 없는 액션입니다.");
         }
 
-        // 세트 저장
-        saveWorkoutSets(workoutSession, request.sets());
+        // 운동 + 세트 저장
+        saveWorkoutExercises(workoutSession, request.exercises());
 
         // 완료 처리
         workoutSession.complete(LocalDateTime.now());
 
         switch (action) {
-            case RECORD_ONLY -> {
-                // 기록만 저장 (루틴 링크 유지)
-            }
+            case RECORD_ONLY -> { }
             case CREATE_ROUTINE_AND_RECORD -> {
                 String routineTitle = request.routineTitle();
                 if (routineTitle == null || routineTitle.isBlank()) {
@@ -130,11 +128,9 @@ public class WorkoutSessionService {
                 workoutSession.setRoutine(newRoutine);
             }
             case DETACH_AND_RECORD -> {
-                // 루틴 연결 해제 → 자유 운동으로 전환
                 workoutSession.setRoutine(null);
             }
             case UPDATE_ROUTINE_AND_RECORD -> {
-                // 기존 루틴을 현재 운동 내용으로 업데이트
                 updateRoutineFromSession(workoutSession);
             }
         }
@@ -178,7 +174,6 @@ public class WorkoutSessionService {
     public Page<WorkoutSessionListItemResponse> getWorkoutSessions(Long userId, String type, String bodyPart, Pageable pageable) {
         Page<WorkoutSession> sessions;
         if (bodyPart != null && !bodyPart.isBlank()) {
-            // 프론트에서 한글 레이블("가슴")로 전달 → DB enum name("CHEST")으로 변환
             String bodyPartName = BodyPart.fromLabel(bodyPart).name();
             sessions = workoutSessionRepository.findByUser_IdAndBodyPartOrderByCompletedAtDesc(userId, bodyPartName, pageable);
         } else {
@@ -191,7 +186,7 @@ public class WorkoutSessionService {
 
         List<Long> sessionIds = sessions.getContent().stream().map(WorkoutSession::getId).toList();
         Map<Long, List<BodyPart>> bodyPartsMap = sessionIds.isEmpty() ? Map.of() :
-                workoutSetRepository.findBodyPartsBySessionIds(sessionIds).stream()
+                workoutSessionExerciseRepository.findBodyPartsBySessionIds(sessionIds).stream()
                         .collect(Collectors.groupingBy(
                                 row -> (Long) row[0],
                                 Collectors.mapping(row -> (BodyPart) row[1], Collectors.toList())
@@ -226,25 +221,27 @@ public class WorkoutSessionService {
     }
 
     private WorkoutSessionDetailResponse buildSessionDetailResponse(WorkoutSession session) {
-        List<WorkoutSet> sets = workoutSetRepository.findByWorkoutSession_IdOrderByCreatedAtAsc(session.getId());
+        List<WorkoutSessionExercise> sessionExercises =
+                workoutSessionExerciseRepository.findByWorkoutSession_IdOrderByOrderInSessionAsc(session.getId());
 
-        var grouped = sets.stream().collect(Collectors.groupingBy(
-                set -> set.getExercise().getId(),
-                java.util.LinkedHashMap::new,
-                Collectors.toList()
-        ));
+        List<Long> sessionExerciseIds = sessionExercises.stream().map(WorkoutSessionExercise::getId).toList();
 
-        List<WorkoutExerciseDetailResponse> exercises = grouped.values().stream()
-                .map(exerciseSets -> {
-                    WorkoutSet first = exerciseSets.get(0);
-                    List<WorkoutSetDetailResponse> setResponses = exerciseSets.stream()
+        Map<Long, List<WorkoutSet>> setsMap = sessionExerciseIds.isEmpty() ? Map.of() :
+                workoutSetRepository.findByWorkoutSessionExercise_IdInOrderBySetNumberAsc(sessionExerciseIds)
+                        .stream()
+                        .collect(Collectors.groupingBy(ws -> ws.getWorkoutSessionExercise().getId()));
+
+        List<WorkoutExerciseDetailResponse> exercises = sessionExercises.stream()
+                .map(se -> {
+                    List<WorkoutSetDetailResponse> sets = setsMap.getOrDefault(se.getId(), List.of())
+                            .stream()
                             .map(WorkoutSetDetailResponse::from)
                             .toList();
-
                     return new WorkoutExerciseDetailResponse(
-                            first.getExercise().getId(),
-                            first.getExerciseName(),
-                            setResponses
+                            se.getExercise().getId(),
+                            se.getExerciseName(),
+                            se.getBodyPartSnapshot().getLabel(),
+                            sets
                     );
                 })
                 .toList();
@@ -252,80 +249,85 @@ public class WorkoutSessionService {
         return WorkoutSessionDetailResponse.of(session, exercises);
     }
 
-    private void saveWorkoutSets(WorkoutSession session, List<WorkoutSetCompleteRequest> requests) {
-
+    private void saveWorkoutExercises(WorkoutSession session, List<WorkoutExerciseCompleteRequest> requests) {
         if (requests == null || requests.isEmpty()) {
             throw new BadRequestException("세트 기록이 없습니다.");
         }
 
-        // 1. 중복 (exerciseId, setNumber) 체크
-        Set<String> unique = new HashSet<>();
+        // exerciseId 중복 체크
+        Set<Long> uniqueExerciseIds = new HashSet<>();
         for (var r : requests) {
-            String key = r.exerciseId() + ":" + r.setNumber();
-            if (!unique.add(key)) {
-                throw new BadRequestException("같은 종목에서 세트 번호가 중복되었습니다.");
+            if (!uniqueExerciseIds.add(r.exerciseId())) {
+                throw new BadRequestException("같은 종목이 중복으로 포함되어 있습니다.");
             }
         }
 
-        // 2. exercise 일괄 조회 (N+1 방지)
-        List<Long> exerciseIds = requests.stream()
-                .map(WorkoutSetCompleteRequest::exerciseId)
-                .distinct()
-                .toList();
-
+        // exercise 일괄 조회
+        List<Long> exerciseIds = requests.stream().map(WorkoutExerciseCompleteRequest::exerciseId).toList();
         List<Exercise> exercises = exerciseRepository.findAllById(exerciseIds);
         if (exercises.size() != exerciseIds.size()) {
             throw new NotFoundException("존재하지 않는 운동 종목이 포함되어 있습니다.");
         }
-
         Map<Long, Exercise> exerciseMap = exercises.stream().collect(Collectors.toMap(Exercise::getId, e -> e));
 
-        // 3. 엔티티 생성
-        List<WorkoutSet> entities = requests.stream()
-                .map(r -> {
-                    Exercise ex = exerciseMap.get(r.exerciseId());
+        // 운동별로 순서에 따라 저장
+        for (int i = 0; i < requests.size(); i++) {
+            WorkoutExerciseCompleteRequest req = requests.get(i);
 
-                    return WorkoutSet.builder()
-                            .workoutSession(session)
-                            .exercise(ex)
-                            .exerciseName(ex.getName())       // snapshot
-                            .bodyPartSnapshot(ex.getBodyPart()) // 사용 중이면
-                            .setNumber(r.setNumber())
-                            .weight(r.weight())
-                            .reps(r.reps())
-                            .build();
-                })
-                .toList();
+            if (req.sets() == null || req.sets().isEmpty()) {
+                throw new BadRequestException("세트 기록이 없는 운동이 포함되어 있습니다.");
+            }
 
-        // 4. bulk insert
-        workoutSetRepository.saveAll(entities);
+            Exercise exercise = exerciseMap.get(req.exerciseId());
+
+            WorkoutSessionExercise sessionExercise = WorkoutSessionExercise.builder()
+                    .workoutSession(session)
+                    .exercise(exercise)
+                    .exerciseName(exercise.getName())
+                    .bodyPartSnapshot(exercise.getBodyPart())
+                    .orderInSession(i + 1)
+                    .build();
+
+            workoutSessionExerciseRepository.save(sessionExercise);
+
+            // 세트 번호 중복 체크
+            Set<Integer> setNumbers = new HashSet<>();
+            for (var s : req.sets()) {
+                if (!setNumbers.add(s.setNumber())) {
+                    throw new BadRequestException("같은 종목에서 세트 번호가 중복되었습니다.");
+                }
+            }
+
+            List<WorkoutSet> sets = req.sets().stream()
+                    .map(s -> WorkoutSet.builder()
+                            .workoutSessionExercise(sessionExercise)
+                            .setNumber(s.setNumber())
+                            .weight(s.weight())
+                            .reps(s.reps())
+                            .build())
+                    .toList();
+
+            workoutSetRepository.saveAll(sets);
+        }
     }
 
-
     private Routine createRoutineFromSession(Long userId, WorkoutSession workoutSession, String routineTitle) {
+        List<WorkoutSessionExerciseRepository.SessionExerciseSummary> summaries =
+                workoutSessionExerciseRepository.summarizeBySession(workoutSession.getId());
 
-        // 1. 세션 내 운동별 요약 집계
-        List<RoutineExerciseSummary> summaries = workoutSetRepository.summarizeBySession(workoutSession.getId());
         if (summaries.isEmpty()) {
             throw new BadRequestException("세트 기록이 없는 세션에는 루틴을 생성할 수 없습니다.");
         }
 
-        // 2. RoutineItemCreateRequest 로 변환
         List<RoutineItemCreateRequest> routineItems = summaries.stream()
                 .map(s -> new RoutineItemCreateRequest(
                         s.getExerciseId(),
-                        s.getMaxSetNumber(),
-                        0       // restSeconds 는 우선 0으로
+                        s.getSetCount().intValue(),
+                        0
                 ))
                 .toList();
 
-        // 3. RoutineCreateRequest 구성
-        RoutineCreateRequest req = new RoutineCreateRequest(
-                routineTitle,
-                null,   // description 은 null
-                routineItems
-        );
-
+        RoutineCreateRequest req = new RoutineCreateRequest(routineTitle, null, routineItems);
         return routineService.createRoutine(userId, req);
     }
 
@@ -333,8 +335,9 @@ public class WorkoutSessionService {
         Routine routine = workoutSession.getRoutine();
         Long userId = workoutSession.getUser().getId();
 
-        // 세션 내 운동별 요약 집계
-        List<RoutineExerciseSummary> summaries = workoutSetRepository.summarizeBySession(workoutSession.getId());
+        List<WorkoutSessionExerciseRepository.SessionExerciseSummary> summaries =
+                workoutSessionExerciseRepository.summarizeBySession(workoutSession.getId());
+
         if (summaries.isEmpty()) {
             throw new BadRequestException("세트 기록이 없는 세션으로는 루틴을 업데이트할 수 없습니다.");
         }
@@ -342,7 +345,7 @@ public class WorkoutSessionService {
         List<RoutineItemCreateRequest> routineItems = summaries.stream()
                 .map(s -> new RoutineItemCreateRequest(
                         s.getExerciseId(),
-                        s.getMaxSetNumber(),
+                        s.getSetCount().intValue(),
                         0
                 ))
                 .toList();

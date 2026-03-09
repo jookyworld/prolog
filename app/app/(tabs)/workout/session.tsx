@@ -8,6 +8,7 @@ import type { RoutineItemRes } from "@/lib/types/routine";
 import type {
   ActiveExercise,
   ActiveSet,
+  WorkoutExerciseCompleteReq,
   WorkoutSessionCompleteReq,
 } from "@/lib/types/workout";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
@@ -345,7 +346,7 @@ export default function WorkoutSessionScreen() {
 
   const completeWithAction = async (
     action: WorkoutSessionCompleteReq["action"],
-    completedSets: WorkoutSessionCompleteReq["sets"],
+    completedExercises: WorkoutExerciseCompleteReq[],
     newRoutineTitle?: string,
   ) => {
     if (!sessionId) return;
@@ -353,7 +354,7 @@ export default function WorkoutSessionScreen() {
     try {
       await workoutApi.completeSession(sessionId, {
         action,
-        sets: completedSets,
+        exercises: completedExercises,
         ...(newRoutineTitle ? { routineTitle: newRoutineTitle } : {}),
       });
       endWorkout();
@@ -372,7 +373,7 @@ export default function WorkoutSessionScreen() {
   };
 
   const promptRoutineTitleAndCreate = (
-    completedSets: WorkoutSessionCompleteReq["sets"],
+    completedExercises: WorkoutExerciseCompleteReq[],
   ) => {
     Alert.prompt(
       "루틴 이름 입력",
@@ -389,7 +390,7 @@ export default function WorkoutSessionScreen() {
             }
             completeWithAction(
               "CREATE_ROUTINE_AND_RECORD",
-              completedSets,
+              completedExercises,
               trimmed,
             );
           },
@@ -402,33 +403,37 @@ export default function WorkoutSessionScreen() {
   };
 
   const handleComplete = () => {
-    const completedSets = exercises.flatMap((ex) =>
-      ex.sets
-        .filter((s) => s.completed && s.reps) // Only require reps (weight can be 0 for bodyweight exercises)
-        .map((s) => ({
-          exerciseId: ex.exerciseId,
-          setNumber: s.setNumber,
-          weight: s.weight ? Number(s.weight) : 0, // Default to 0 for bodyweight exercises
-          reps: Number(s.reps),
-        })),
-    );
+    const completedExercises: WorkoutExerciseCompleteReq[] = exercises
+      .map((ex) => ({
+        exerciseId: ex.exerciseId,
+        sets: ex.sets
+          .filter((s) => s.completed && s.reps)
+          .map((s) => ({
+            setNumber: s.setNumber,
+            weight: s.weight ? Number(s.weight) : 0,
+            reps: Number(s.reps),
+          })),
+      }))
+      .filter((ex) => ex.sets.length > 0);
 
-    if (completedSets.length === 0) {
+    if (completedExercises.length === 0) {
       Alert.alert("알림", "완료된 세트가 없습니다.");
       return;
     }
 
+    const totalSets = completedExercises.reduce((sum, ex) => sum + ex.sets.length, 0);
+
     if (isFreeWorkout) {
       // Free workout: offer to record only or create a routine
-      Alert.alert("운동 완료", `${completedSets.length}개 세트를 기록합니다.`, [
+      Alert.alert("운동 완료", `${totalSets}개 세트를 기록합니다.`, [
         { text: "취소", style: "cancel" },
         {
           text: "기록만 저장",
-          onPress: () => completeWithAction("RECORD_ONLY", completedSets),
+          onPress: () => completeWithAction("RECORD_ONLY", completedExercises),
         },
         {
           text: "루틴으로 저장",
-          onPress: () => promptRoutineTitleAndCreate(completedSets),
+          onPress: () => promptRoutineTitleAndCreate(completedExercises),
         },
       ]);
       return;
@@ -443,28 +448,28 @@ export default function WorkoutSessionScreen() {
           { text: "취소", style: "cancel" },
           {
             text: "이대로 저장",
-            onPress: () => completeWithAction("RECORD_ONLY", completedSets),
+            onPress: () => completeWithAction("RECORD_ONLY", completedExercises),
           },
           {
             text: "자유 운동으로 저장",
             onPress: () =>
-              completeWithAction("DETACH_AND_RECORD", completedSets),
+              completeWithAction("DETACH_AND_RECORD", completedExercises),
           },
           {
             text: "루틴도 업데이트",
             onPress: () =>
-              completeWithAction("UPDATE_ROUTINE_AND_RECORD", completedSets),
+              completeWithAction("UPDATE_ROUTINE_AND_RECORD", completedExercises),
           },
         ],
       );
       return;
     }
 
-    Alert.alert("운동 완료", `${completedSets.length}개 세트를 기록합니다.`, [
+    Alert.alert("운동 완료", `${totalSets}개 세트를 기록합니다.`, [
       { text: "취소", style: "cancel" },
       {
         text: "완료",
-        onPress: () => completeWithAction("RECORD_ONLY", completedSets),
+        onPress: () => completeWithAction("RECORD_ONLY", completedExercises),
       },
     ]);
   };

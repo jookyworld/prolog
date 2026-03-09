@@ -19,6 +19,7 @@ export interface WorkoutSetRes {
 export interface WorkoutExerciseRes {
   exerciseId: number;
   exerciseName: string;
+  bodyPart: string;
   sets: WorkoutSetRes[];
 }
 
@@ -46,10 +47,14 @@ export interface WorkoutSessionStartRes {
 }
 
 export interface WorkoutSetCompleteReq {
-  exerciseId: number;
   setNumber: number;
   weight: number;
   reps: number;
+}
+
+export interface WorkoutExerciseCompleteReq {
+  exerciseId: number;
+  sets: WorkoutSetCompleteReq[];
 }
 
 export interface WorkoutSessionCompleteReq {
@@ -58,7 +63,7 @@ export interface WorkoutSessionCompleteReq {
     | "CREATE_ROUTINE_AND_RECORD"
     | "DETACH_AND_RECORD"
     | "UPDATE_ROUTINE_AND_RECORD";
-  sets: WorkoutSetCompleteReq[];
+  exercises: WorkoutExerciseCompleteReq[];
   routineTitle?: string;
 }
 

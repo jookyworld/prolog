@@ -13,7 +13,7 @@ prolog/
 ├── admin/             # Next.js 관리자 웹 (Phase 3-2 예정)
 ├── README.md
 └── docs/
-    ├── API.md
+    ├── ERD.png
     ├── REQUIREMENTS.md
     ├── DEVELOPMENT.md  ← 현재 문서
     └── USER_GUIDE.md
@@ -76,6 +76,7 @@ backend/src/main/java/com/back/
 │   │   └── routineItem/
 │   ├── workout/           ← 운동 세션 & 세트
 │   │   ├── session/
+│   │   ├── sessionexercise/  ← 세션 내 종목 (스냅샷)
 │   │   └── set/
 │   ├── community/         ← 커뮤니티 (Phase 3-1 ✅)
 │   │   ├── sharedRoutine/ ← 공유 루틴, 가져오기, ImportHistory
@@ -161,10 +162,9 @@ app/app/(tabs)/routine/[id].tsx  →  /routine/123
 ```
 1. backend API 수정
 2. Swagger 확인 (localhost:8080/swagger-ui)
-3. docs/API.md 업데이트
-4. app/lib/types/ 업데이트
-5. app/lib/api/ 업데이트
-6. 화면 코드 수정
+3. app/lib/types/ 업데이트
+4. app/lib/api/ 업데이트
+5. 화면 코드 수정
 ```
 
 ---

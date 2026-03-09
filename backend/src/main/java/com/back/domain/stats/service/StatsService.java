@@ -3,6 +3,7 @@ package com.back.domain.stats.service;
 import com.back.domain.stats.dto.HomeStatsResponse;
 import com.back.domain.workout.session.entity.WorkoutSession;
 import com.back.domain.workout.session.repository.WorkoutSessionRepository;
+import com.back.domain.workout.sessionexercise.entity.WorkoutSessionExercise;
 import com.back.domain.workout.set.entity.WorkoutSet;
 import com.back.domain.workout.set.repository.WorkoutSetRepository;
 import lombok.RequiredArgsConstructor;
@@ -99,8 +100,8 @@ public class StatsService {
 
             // 해당 날짜의 운동 부위 수집 (중복 제거)
             List<com.back.domain.exercise.entity.BodyPart> bodyParts = sessions.stream()
-                    .flatMap(session -> session.getSets().stream())
-                    .map(WorkoutSet::getBodyPartSnapshot)
+                    .flatMap(session -> session.getSessionExercises().stream())
+                    .map(WorkoutSessionExercise::getBodyPartSnapshot)
                     .distinct()
                     .toList();
 
@@ -172,14 +173,16 @@ public class StatsService {
 
         return sessions.stream()
                 .map(session -> {
-                    List<WorkoutSet> sets = session.getSets();
+                    List<WorkoutSessionExercise> sessionExercises = session.getSessionExercises();
 
-                    int exerciseCount = (int) sets.stream()
-                            .map(set -> set.getExercise().getId())
-                            .distinct()
-                            .count();
+                    int exerciseCount = sessionExercises.size();
 
-                    long totalVolume = sets.stream()
+                    int totalSetCount = sessionExercises.stream()
+                            .mapToInt(se -> se.getSets().size())
+                            .sum();
+
+                    long totalVolume = sessionExercises.stream()
+                            .flatMap(se -> se.getSets().stream())
                             .mapToLong(set -> (long) set.getWeight() * set.getReps())
                             .sum();
 
@@ -196,7 +199,7 @@ public class StatsService {
                             title,
                             com.back.global.util.DateTimeUtil.formatToIso(session.getCompletedAt()),
                             exerciseCount,
-                            sets.size(),
+                            totalSetCount,
                             totalVolume,
                             duration
                     );

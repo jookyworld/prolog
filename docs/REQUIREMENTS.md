@@ -1,7 +1,7 @@
 # PROLOG - 기능 요구사항 명세서
 
 **버전:** v1.0.0
-**최종 업데이트:** 2026-03-08
+**최종 업데이트:** 2026-03-09
 
 > 본 문서는 ProLog 서비스의 핵심 가치, 비즈니스 로직, 기능 요구사항을 정의합니다.
 > 기획자, PM, 개발자 모두 본 문서를 기준으로 작업합니다.
@@ -46,8 +46,8 @@
 - `workout_sessions.routine_id` 기준으로 루틴 단위 반복 추적
 - `GET /api/workouts/sessions/routines/{routineId}/last`
   - 해당 루틴의 **가장 최근 완료 세션 1건** 반환
-- 세트는 스냅샷(`exercise_name`, `body_part_snapshot`) 저장
-  - 루틴 수정/삭제 이후에도 과거 기록 불변
+- 종목은 스냅샷(`exercise_name`, `body_part_snapshot`) 저장 → `workout_session_exercises`
+  - 루틴/종목 수정·삭제 이후에도 과거 기록 불변
 
 #### 한계 및 개선 계획
 - 현재는 "직전 1회" 조회만 지원
@@ -80,18 +80,18 @@ GET /api/workouts/sessions/routines/{routineId}/last
 
 #### 구현 방식
 
-1. **스냅샷 저장**
-   - `workout_sets.exercise_name`
-   - `workout_sets.body_part_snapshot`
+1. **스냅샷 저장** — `workout_session_exercises` 테이블
+   - `exercise_name` — 종목명 스냅샷
+   - `body_part_snapshot` — 운동 부위 스냅샷
    - 운동 종목 수정/삭제 시에도 과거 기록 불변
 
-2. **Cascade 없음**
-   - `workout_sets.exercise_id`에 FK만 있음
-   - `ON DELETE RESTRICT` 또는 논리 삭제
+2. **종목-세트 분리 구조**
+   - `workout_session_exercises.exercise_id` — 원본 종목 FK (참조용)
+   - `workout_sets`는 `workout_session_exercise_id`만 참조 (세트 데이터에 종목 정보 없음)
 
 3. **루틴 독립성**
    - 루틴 수정/삭제해도 `workout_sessions` 데이터 유지
-   - `session.routine_id`는 참조용
+   - `session.routine_id` ON DELETE SET NULL, `routine_title_snapshot`으로 제목 보존
 
 ---
 
@@ -126,10 +126,9 @@ GET /api/workouts/sessions/routines/{routineId}/last
 #### Phase 3-1: 기본 공유 기능 ✅ (완료)
 - [x] 루틴 공유 (스냅샷 저장, title/description 커스터마이징)
 - [x] 공유 루틴 조회 (목록/상세)
-- [x] 루틴 가져오기 (import_history로 이력 관리)
+- [x] 루틴 가져오기
 - [x] 댓글 작성/삭제
 - [x] 조회수, 가져오기 횟수 추적
-- [x] 가져오기 여부(isImported) 응답 포함
 
 #### Phase 3-2: 소셜 기능 📋 (계획)
 - [ ] 댓글 좋아요 (comment_likes 테이블)
@@ -179,14 +178,19 @@ GET /api/workouts/sessions/routines/{routineId}/last
 - 공식 종목 (`custom=false`)
 - 사용자 커스텀 종목 (`custom=true`)
 
-#### 4단계: 세트 (Set)
-- 최소 기록 단위
+#### 4단계: 운동 기록 종목 (WorkoutSessionExercise)
+- 세션 내 수행한 종목 단위
 - 구성 요소:
-  - exercise_id
+  - exercise_id (원본 FK)
   - exercise_name (스냅샷)
   - body_part_snapshot (스냅샷)
+  - order_in_session
+
+#### 5단계: 세트 (WorkoutSet)
+- 최소 기록 단위
+- 구성 요소:
   - set_number
-  - weight (kg)
+  - weight (kg, 맨몸 운동은 0)
   - reps (반복 횟수)
 
 ---
@@ -203,15 +207,19 @@ GET /api/workouts/sessions/routines/{routineId}/last
      │ 1:N                                       │ N:1
      │                                           │
      ▼              ┌──────────────┐             ▼
-┌────────────┐     │WorkoutSession│      ┌──────────┐
-│  Exercise  │     └──────┬───────┘      │ Exercise │
-└─────┬──────┘            │              └──────────┘
-      │                   │ 1:N
-      │ N:1               │
-      │                   ▼
-      │            ┌─────────────┐
-      └───────────►│ WorkoutSet  │
-                   └─────────────┘
+┌────────────┐      │WorkoutSession│      ┌──────────┐
+│  Exercise  │      └──────┬───────┘      │ Exercise │
+└────────────┘             │ 1:N          └──────────┘
+                           │
+                           ▼
+                  ┌──────────────────────┐
+                  │WorkoutSessionExercise│ ← exercise_name, body_part_snapshot 스냅샷
+                  └──────────┬───────────┘
+                             │ 1:N
+                             ▼
+                      ┌─────────────┐
+                      │ WorkoutSet  │ ← set_number, weight, reps
+                      └─────────────┘
 ```
 
 ### Phase 3 추가 테이블 (✅ Phase 3-1 완료)
@@ -225,18 +233,9 @@ GET /api/workouts/sessions/routines/{routineId}/last
      │              ┌────────┴─────────┐
      │              │    Comment       │
      │              └──────────────────┘
-     │
-     │              ┌──────────────────┐
-     └──────────────│ ImportHistory    │◄────┐
-                    └──────────────────┘     │
-                    (user_id + shared_        │
-                     routine_id UNIQUE)       │
-                                   ──────────┘
-                                   SharedRoutine
 
 * CommentLike: Phase 3-2 예정
 * SharedRoutine ↔ Routine: FK 없음 (스냅샷 독립성)
-* ImportHistory: 가져오기 중복 방지 및 isImported 계산용
 ```
 
 ---
@@ -342,6 +341,25 @@ GET /api/workouts/sessions/routines/{routineId}/last
 
 ---
 
+#### WorkoutSessionExercise (운동 기록 종목)
+
+**테이블:** `workout_session_exercises`
+
+| 컬럼 | 타입 | 제약 | 설명 |
+|------|------|------|------|
+| id | BIGINT | PK | 운동 기록 종목 ID |
+| workout_session_id | BIGINT | FK (workout_sessions), NOT NULL | 세션 ID |
+| exercise_id | BIGINT | FK (exercises), NOT NULL | 운동 종목 ID (참조용) |
+| exercise_name | VARCHAR | NOT NULL | 종목명 스냅샷 |
+| body_part_snapshot | ENUM | NOT NULL | 부위 스냅샷 |
+| order_in_session | INT | NOT NULL | 세션 내 순서 (1부터) |
+
+**비즈니스 규칙:**
+- 스냅샷 패턴: `exercise_name`, `body_part_snapshot`으로 과거 기록 불변 보장
+- 세션 삭제 시 CASCADE 삭제
+
+---
+
 #### WorkoutSet (세트 기록)
 
 **테이블:** `workout_sets`
@@ -349,18 +367,15 @@ GET /api/workouts/sessions/routines/{routineId}/last
 | 컬럼 | 타입 | 제약 | 설명 |
 |------|------|------|------|
 | id | BIGINT | PK | 세트 ID |
-| workout_session_id | BIGINT | FK (workout_sessions), NOT NULL | 세션 ID |
-| exercise_id | BIGINT | FK (exercises), NOT NULL | 운동 종목 ID |
-| exercise_name | VARCHAR(100) | NOT NULL | 종목명 스냅샷 |
-| body_part_snapshot | ENUM | NOT NULL | 부위 스냅샷 |
+| workout_session_exercise_id | BIGINT | FK (workout_session_exercises), NOT NULL | 운동 기록 종목 ID |
 | set_number | INT | NOT NULL | 세트 번호 (1부터) |
-| weight | DECIMAL(5,2) | NOT NULL | 무게 (kg) |
+| weight | DECIMAL(5,2) | NOT NULL | 무게 (kg, 맨몸 운동은 0) |
 | reps | INT | NOT NULL | 반복 횟수 |
 
 **비즈니스 규칙:**
-- 스냅샷 패턴: 운동 종목 수정/삭제해도 기록 불변
-- `(workout_session_id, exercise_id, set_number)` 유일
+- weight = 0: 맨몸 운동 (풀업, 푸시업 등)
 - 세트는 일괄 저장 (완료 시점에 전체 배열 전송)
+- 운동 기록 종목 삭제 시 CASCADE 삭제
 
 ---
 
@@ -404,25 +419,7 @@ GET /api/workouts/sessions/routines/{routineId}/last
 
 ---
 
-#### ImportHistory (가져오기 이력) ✅ Phase 3-1
-
-**테이블:** `import_history`
-
-| 컬럼 | 타입 | 제약 | 설명 |
-|------|------|------|------|
-| id | BIGINT | PK | 이력 ID |
-| user_id | BIGINT | FK (users), NOT NULL | 가져온 사용자 |
-| shared_routine_id | BIGINT | FK (shared_routines), NOT NULL | 공유 루틴 ID |
-| created_at | DATETIME | NOT NULL | 가져온 일시 |
-
-**비즈니스 규칙:**
-- `(user_id, shared_routine_id)` 복합 UNIQUE 제약 (중복 기록 방지)
-- 사용자별 공유 루틴당 1건만 기록 (최초 가져오기 시점)
-- `isImported` 필드 계산에 사용: 사용자가 해당 공유 루틴을 이미 가져왔는지 여부
-
----
-
-#### Comment (댓글) 🆕 Phase 3
+#### Comment (댓글) ✅ Phase 3-1
 
 **테이블:** `comments`
 
@@ -558,29 +555,48 @@ GET /api/workouts/sessions/routines/{routineId}/last
 POST /api/workouts/sessions/{id}/complete
 {
   "action": "RECORD_ONLY",
-  "sets": [
-    { "exerciseId": 1, "setNumber": 1, "weight": 60, "reps": 12 },
-    { "exerciseId": 1, "setNumber": 2, "weight": 70, "reps": 10 }
+  "exercises": [
+    {
+      "exerciseId": 1,
+      "sets": [
+        { "setNumber": 1, "weight": 60, "reps": 12 },
+        { "setNumber": 2, "weight": 70, "reps": 10 }
+      ]
+    },
+    {
+      "exerciseId": 2,
+      "sets": [
+        { "setNumber": 1, "weight": 0, "reps": 15 }
+      ]
+    }
   ]
 }
 ```
 
 #### 검증 규칙
-1. `sets` 배열이 비어있으면 400 Bad Request
-2. `(exerciseId, setNumber)` 중복 검증
-3. 모든 `exerciseId`가 존재하는지 확인
-4. N+1 방지: exercise 일괄 조회
+1. `exercises` 배열이 비어있으면 400 Bad Request
+2. `exerciseId` 중복 검증 (같은 종목 2개 불가)
+3. 같은 종목 내 `setNumber` 중복 검증
+4. 모든 `exerciseId`가 존재하는지 확인
+5. N+1 방지: exercise 일괄 조회
 
-#### 스냅샷 저장
+#### 스냅샷 저장 흐름
 ```java
-WorkoutSet set = WorkoutSet.builder()
+// 1. WorkoutSessionExercise 먼저 저장 (스냅샷 포함)
+WorkoutSessionExercise sessionExercise = WorkoutSessionExercise.builder()
     .workoutSession(session)
     .exercise(exercise)
     .exerciseName(exercise.getName())           // 스냅샷
     .bodyPartSnapshot(exercise.getBodyPart())   // 스냅샷
-    .setNumber(request.setNumber())
-    .weight(request.weight())
-    .reps(request.reps())
+    .orderInSession(i + 1)
+    .build();
+
+// 2. WorkoutSet은 sessionExercise 참조
+WorkoutSet set = WorkoutSet.builder()
+    .workoutSessionExercise(sessionExercise)
+    .setNumber(s.setNumber())
+    .weight(s.weight())
+    .reps(s.reps())
     .build();
 ```
 
@@ -589,12 +605,12 @@ WorkoutSet set = WorkoutSet.builder()
 ### 3. 통계 계산 정책 (Phase 2)
 
 #### 공통 규칙
-- **데이터 소스**: `workout_sessions` + `workout_sets`
+- **데이터 소스**: `workout_sessions` + `workout_session_exercises` + `workout_sets`
 - **필터**: `completed_at IS NOT NULL`
 - **필수 인덱스**:
   ```sql
   INDEX idx_session_user_completed (user_id, completed_at)
-  INDEX idx_set_exercise_session (exercise_id, workout_session_id)
+  INDEX idx_session_exercise_session (workout_session_id)
   ```
 
 #### 3.1 종목별 볼륨 추이
@@ -605,9 +621,10 @@ SELECT
   DATE(ws.completed_at) as date,
   SUM(wset.weight * wset.reps) as totalVolume
 FROM workout_sessions ws
-JOIN workout_sets wset ON ws.id = wset.workout_session_id
+JOIN workout_session_exercises wse ON ws.id = wse.workout_session_id
+JOIN workout_sets wset ON wse.id = wset.workout_session_exercise_id
 WHERE ws.user_id = :userId
-  AND wset.exercise_id = :exerciseId
+  AND wse.exercise_id = :exerciseId
   AND ws.completed_at BETWEEN :from AND :to
   AND ws.completed_at IS NOT NULL
 GROUP BY DATE(ws.completed_at)
@@ -624,9 +641,10 @@ SELECT
   DATE(ws.completed_at) as date,
   MAX(wset.weight) as maxWeight
 FROM workout_sessions ws
-JOIN workout_sets wset ON ws.id = wset.workout_session_id
+JOIN workout_session_exercises wse ON ws.id = wse.workout_session_id
+JOIN workout_sets wset ON wse.id = wset.workout_session_exercise_id
 WHERE ws.user_id = :userId
-  AND wset.exercise_id = :exerciseId
+  AND wse.exercise_id = :exerciseId
   AND ws.completed_at BETWEEN :from AND :to
   AND ws.completed_at IS NOT NULL
 GROUP BY DATE(ws.completed_at)
@@ -707,11 +725,9 @@ ORDER BY date ASC
    - ② 동일 이름+부위의 본인 커스텀 종목 조회
    - ③ 새 커스텀 종목 자동 생성
 4. `import_count` 증가
-5. `import_history` 기록 (중복이면 건너뜀)
 
 **제약:**
 - 세션 기록은 복사하지 않음 (루틴 구조만)
-- `import_history`는 최초 1회만 기록 (중복 방지)
 
 ---
 
@@ -735,13 +751,14 @@ ORDER BY date ASC
 #### User (사용자)
 - username/email/nickname 중복 시 409 Conflict
 - gender 기본값: UNKNOWN
-- 탈퇴 시 cascade 삭제:
-  - routines
-  - workout_sessions
-  - workout_sets
-  - custom exercises
-  - shared_routines (Phase 3)
-  - comments (Phase 3)
+- 탈퇴 시 삭제 순서:
+  1. workout_sets
+  2. workout_session_exercises
+  3. workout_sessions
+  4. routine_items
+  5. routines
+  6. custom exercises
+  7. shared_routines 및 comments (Phase 3)
 
 #### Exercise (운동 종목)
 - 공식 종목: `custom=false`, `createdBy=null`
@@ -763,11 +780,13 @@ ORDER BY date ASC
 - 사용자당 동시 진행 세션 1개 제한
 - 완료 시 4가지 액션 중 1개 선택
 
+#### WorkoutSessionExercise (운동 기록 종목)
+- 스냅샷 패턴: `exercise_name`, `body_part_snapshot`으로 과거 기록 불변
+- 세션 삭제 시 CASCADE 삭제
+
 #### WorkoutSet (세트 기록)
-- 스냅샷 패턴: 운동 종목 수정/삭제해도 기록 불변
-- `(workout_session_id, exercise_id, set_number)` 유일
-- 세트는 일괄 저장 (완료 시점에 전체 배열 전송)
-- weight: DECIMAL(5,2) 사용 (소수점 무게 지원: 67.5kg, 82.25kg 등)
+- weight = 0으로 맨몸 운동 표현 (nullable 아님)
+- 세트는 일괄 저장 (완료 시점에 exercises 배열로 전송)
 
 #### SharedRoutine (공유 루틴) - Phase 3-1 ✅
 - 원본 routines와 FK 관계 없음 (스냅샷 독립성)
@@ -779,14 +798,9 @@ ORDER BY date ASC
 - 공유 루틴 삭제 시 CASCADE 삭제
 - 작성자만 삭제 가능
 
-#### ImportHistory (가져오기 이력) - Phase 3-1 ✅
-- (user_id, shared_routine_id) 복합 UNIQUE 제약
-- isImported 필드 계산에 사용
-- 가져오기 시 중복이면 신규 기록 건너뜀 (import_count는 별도로 증가)
-
 ---
 
 ## 관련 문서
 
 - [README.md](./README.md) - 프로젝트 개요, 진행 상황, 환경 설정
-- [API.md](./API.md) - API 명세서 (39개 엔드포인트)
+- Swagger UI - API 명세 (http://localhost:8080/swagger-ui)

@@ -1,13 +1,8 @@
 package com.back.domain.workout.set.entity;
 
-import com.back.domain.exercise.entity.BodyPart;
-import com.back.domain.exercise.entity.Exercise;
-import com.back.domain.workout.session.entity.WorkoutSession;
+import com.back.domain.workout.sessionexercise.entity.WorkoutSessionExercise;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -28,48 +23,24 @@ public class WorkoutSet {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "workout_session_id")
-    private WorkoutSession workoutSession;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "exercise_id")
-    private Exercise exercise;
-
-    @Column(nullable = false)
-    private String exerciseName;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private BodyPart bodyPartSnapshot;
+    @JoinColumn(name = "workout_session_exercise_id", nullable = false)
+    private WorkoutSessionExercise workoutSessionExercise;
 
     @Column(nullable = false)
     private int setNumber;
+
+    @Column(nullable = false)
     private double weight;
+
     @Column(nullable = false)
     private int reps;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    private WorkoutSet(WorkoutSession session, Exercise exercise, int setNumber, int weight, int reps) {
-        this.workoutSession = session;
-        this.exercise = exercise;
-        this.exerciseName = exercise.getName();
-        this.bodyPartSnapshot = exercise.getBodyPart();
-        this.setNumber = setNumber;
-        this.weight = weight;
-        this.reps = reps;
-    }
-
-    public static WorkoutSet create(WorkoutSession session, Exercise exercise, int setNumber, int weight, int reps) {
-        return new WorkoutSet(session, exercise, setNumber, weight, reps);
-    }
-
-    public void update(int weight, int reps) {
-        this.weight = weight;
-        this.reps = reps;
-    }
 }
