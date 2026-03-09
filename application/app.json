@@ -34,9 +34,11 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-router",
-      "expo-secure-store"
-    ]
+    "updates": {
+      "enabled": true,
+      "checkOnLaunch": "NEVER",
+      "fallbackToCacheTimeout": 0
+    },
+    "plugins": ["expo-router", "expo-secure-store"]
   }
 }
