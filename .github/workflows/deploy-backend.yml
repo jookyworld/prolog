@@ -51,13 +51,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Copy docker-compose.yml to EC2
+      - name: Copy docker-compose files to EC2
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "backend/docker-compose.yml"
+          source: "backend/docker-compose.yml,backend/docker-compose.prod.yml"
+          # EC2에서는 docker-compose.prod.yml만 사용
           target: "~/app"
           strip_components: 1
 
@@ -72,7 +73,7 @@ jobs:
             cd ~/app
 
             export IMAGE_TAG=${{ github.sha }}
-            sudo -E docker-compose --profile prod pull spring-app
-            sudo -E docker-compose --profile prod up -d --remove-orphans
+            sudo -E docker-compose -f docker-compose.prod.yml pull spring-app
+            sudo -E docker-compose -f docker-compose.prod.yml up -d --remove-orphans
 
             sudo docker image prune -f

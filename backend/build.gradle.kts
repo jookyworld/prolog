@@ -42,11 +42,7 @@ dependencies {
 
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
-	// Flyway for database migrations
-	implementation("org.flywaydb:flyway-core")
-	implementation("org.flywaydb:flyway-mysql")
-
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
