@@ -16,11 +16,13 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.prolog.app",
       "backgroundColor": "#101012",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
-        }
+        },
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -39,6 +41,15 @@
       "checkOnLaunch": "NEVER",
       "fallbackToCacheTimeout": 0
     },
-    "plugins": ["expo-router", "expo-secure-store"]
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "99e3012a-4870-47c2-be53-1a4a586de32d"
+      }
+    }
   }
 }
