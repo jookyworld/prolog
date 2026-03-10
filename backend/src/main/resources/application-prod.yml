@@ -11,7 +11,7 @@ spring:
       host: redis
 
   datasource:
-    url: jdbc:mysql://mysql:3306/prolog?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://mysql:3306/prolog?serverTimezone=Asia/Seoul&useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -24,12 +24,6 @@ spring:
     show-sql: false
 
   mandatory-file-encoding: UTF-8
-
-server:
-  servlet:
-    encoding:
-      charset: UTF-8
-      force: true
 
 logging:
   level:
