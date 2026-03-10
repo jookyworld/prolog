@@ -57,7 +57,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "backend/docker-compose.yml,backend/docker-compose.prod.yml"
+          source: "backend/docker-compose.yml,backend/docker-compose.prod.yml,backend/mysql"
           # EC2에서는 docker-compose.prod.yml만 사용
           target: "~/app"
           strip_components: 1
