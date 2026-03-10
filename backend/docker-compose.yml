@@ -17,7 +17,7 @@ services:
     restart: unless-stopped
 
   spring-app:
-    image: jookyworld/prolog-backend:latest
+    image: jookyworld/prolog-backend:${IMAGE_TAG:-latest}
     container_name: prolog-backend
     profiles: [prod]
     env_file: .env
