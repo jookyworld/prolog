@@ -16,7 +16,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.prolog.app",
+      "bundleIdentifier": "com.jooky.prolog",
       "backgroundColor": "#101012",
       "infoPlist": {
         "NSAppTransportSecurity": {
@@ -41,10 +41,7 @@
       "checkOnLaunch": "NEVER",
       "fallbackToCacheTimeout": 0
     },
-    "plugins": [
-      "expo-router",
-      "expo-secure-store"
-    ],
+    "plugins": ["expo-router", "expo-secure-store"],
     "extra": {
       "router": {},
       "eas": {
