@@ -72,7 +72,7 @@ jobs:
             cd ~/app
 
             export IMAGE_TAG=${{ github.sha }}
-            sudo -E docker-compose pull spring-app
-            sudo -E docker-compose up -d --remove-orphans
+            sudo -E docker-compose --profile prod pull spring-app
+            sudo -E docker-compose --profile prod up -d --remove-orphans
 
             sudo docker image prune -f
