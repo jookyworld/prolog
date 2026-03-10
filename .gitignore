@@ -73,7 +73,6 @@ Icon?
 **/credentials/
 *.token
 *.tokens
-**/token/
 **/tokens/
 oauth*.json
 auth*.json
