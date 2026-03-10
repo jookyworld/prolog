@@ -286,6 +286,30 @@ docker-compose down && docker-compose up -d
 
 ---
 
+### EC2 배포 후 API 응답에서 한글 깨짐
+
+**원인:** MySQL 컨테이너의 `character_set_client/connection/results`가 `latin1`으로 설정된 상태에서 seed SQL을 실행하면, UTF-8 한글이 latin1으로 잘못 변환되어 저장됨. MySQL CLI에서는 latin1로 읽어 우연히 정상으로 보이지만, JDBC(Spring Boot)는 UTF-8로 읽어 깨져 보임.
+
+**해결:**
+
+1. `backend/mysql/my.cnf` 파일로 MySQL charset을 utf8mb4로 강제 설정 (프로젝트에 포함)
+2. `docker-compose.prod.yml`에 my.cnf 볼륨 마운트 후 MySQL 컨테이너 재시작
+3. 잘못 삽입된 데이터 삭제 후 재삽입
+
+```bash
+# MySQL charset 확인
+docker exec prolog-mysql mysql -uroot -p비밀번호 prolog -e "SHOW VARIABLES LIKE 'character%';"
+# character_set_client/connection/results 가 모두 utf8mb4여야 함
+
+# 데이터 재삽입
+docker exec prolog-mysql mysql -uroot -p비밀번호 prolog -e "DELETE FROM exercises;"
+docker exec -i prolog-mysql mysql -uroot -p비밀번호 prolog < ~/app/exercises_seed.sql
+```
+
+**핵심 원칙:** seed SQL 실행 전 반드시 MySQL charset이 utf8mb4인지 확인할 것.
+
+---
+
 ### 앱 재시작 후 Context 상태가 사라지는 문제
 
 **원인:** React Context는 메모리 상태이므로 앱을 완전히 종료 후 재시작하면 초기화됨.
