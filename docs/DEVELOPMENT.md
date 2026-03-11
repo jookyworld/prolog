@@ -24,7 +24,7 @@ prolog/
 | 프로젝트 | 기술 | 역할 | 상태 | 포트 |
 |---------|------|------|------|------|
 | **backend** | Spring Boot 4.0.1 + MySQL + Redis | REST API 서버 | ✅ 배포 완료 | 8080 |
-| **app** | Expo 54 + React Native 0.81.5 | 사용자 모바일 앱 | 🚧 UI/UX 개선 중 | Expo 앱 |
+| **app** | Expo 54 + React Native 0.81.5 | 사용자 모바일 앱 (`application/`) | 🚧 UI/UX 개선 중 | Expo 앱 |
 | **admin** | Next.js (예정) | 관리자 웹 대시보드 | 📋 Phase 3-2 계획 | 3001 |
 
 ---
@@ -38,7 +38,7 @@ docker-compose up -d        # MySQL + Redis
 ./gradlew bootRun
 
 # 2. App (터미널 2)
-cd app
+cd application
 npm install
 npx expo start
 ```
@@ -51,7 +51,7 @@ JWT_SECRET=your_secret_key
 MYSQL_PASSWORD=your_password
 ```
 
-**app/.env**
+**application/.env**
 ```env
 EXPO_PUBLIC_API_URL=http://YOUR_MAC_IP:8080
 # iOS 시뮬레이터는 localhost 사용 불가 → Mac IP 직접 입력
@@ -79,7 +79,7 @@ backend/src/main/java/com/back/
 │   │   ├── sessionexercise/  ← 세션 내 종목 (스냅샷)
 │   │   └── set/
 │   ├── community/         ← 커뮤니티 (Phase 3-1 ✅)
-│   │   ├── sharedRoutine/ ← 공유 루틴, 가져오기, ImportHistory
+│   │   ├── sharedRoutine/ ← 공유 루틴, 가져오기
 │   │   └── comment/       ← 댓글 CRUD
 │   ├── stats/             ← 통계 (Phase 2)
 │   └── home/              ← 홈 화면 통계
@@ -94,10 +94,14 @@ backend/src/main/java/com/back/
 - `application.yml` / `application-local.yml` / `application-prod.yml`
 - `docker-compose.yml` — MySQL 8.0 + Redis 7
 
+**프로덕션 엔드포인트:**
+- API: `https://api.prolog.jooky.site`
+- Swagger: `https://api.prolog.jooky.site/swagger-ui/index.html`
+
 ### App
 
 ```
-app/
+application/
 ├── app/                   ← 화면 (파일 기반 라우팅)
 │   ├── _layout.tsx        ← Root Stack (Modal 지원 위해 Stack 필수)
 │   ├── (auth)/            ← 로그인, 회원가입
@@ -105,23 +109,30 @@ app/
 │   │   ├── index.tsx      ← 홈 (통계 대시보드)
 │   │   ├── routine/       ← 루틴 관리
 │   │   ├── workout/       ← 운동 세션
-│   │   ├── community/     ← 커뮤니티
+│   │   ├── community/     ← 커뮤니티 (목록/상세)
 │   │   └── profile/       ← 프로필, 기록, 설정
+│   │       ├── exercises/ ← 커스텀 종목 관리
+│   │       ├── history/   ← 운동 기록 목록/상세
+│   │       └── shared/    ← 내가 공유한 루틴 목록/상세
 │   └── (modal)/           ← 모달 화면
 │       └── select-exercises.tsx
 ├── components/
 │   ├── AuthGuard.tsx
 │   ├── CustomTabBar.tsx
+│   ├── WorkoutStartSheet.tsx       ← 운동 시작 바텀시트 (루틴 선택 또는 자유 운동)
+│   ├── SharedRoutineDetailScreen.tsx ← 공유 루틴 상세 (community/[id], profile/shared/[id] 공용)
 │   └── ui/
 ├── lib/
 │   ├── api/               ← API 호출 함수 (auth, routine, workout, community, home, exercise, user)
 │   ├── types/             ← TypeScript 타입
+│   ├── store/             ← 간단한 상태 브릿지 (exercise-selection.ts)
 │   ├── validations/       ← Zod 스키마
 │   ├── constants.ts
 │   ├── format.ts
 │   └── utils.ts
 └── contexts/
-    └── auth-context.tsx   ← 전역 인증 상태
+    ├── auth-context.tsx   ← 전역 인증 상태
+    └── workout-context.tsx ← 진행 중인 운동 세션 상태 (앱 재시작 시 서버에서 복원)
 ```
 
 ---
@@ -151,10 +162,10 @@ app/
 
 ```bash
 # 파일만 생성하면 자동 라우팅 등록 (Expo Router)
-app/app/(tabs)/{탭이름}/{화면이름}.tsx
+application/app/(tabs)/{탭이름}/{화면이름}.tsx
 
 # 동적 라우트
-app/app/(tabs)/routine/[id].tsx  →  /routine/123
+application/app/(tabs)/routine/[id].tsx  →  /routine/123
 ```
 
 ### API 변경 시 동기화 체크리스트
@@ -258,9 +269,9 @@ EXPO_PUBLIC_API_URL=http://192.168.x.x:8080
 ### Modal 네비게이션 안 될 때 (select-exercises 등)
 
 **원인:** Root Layout이 `Slot`이면 Modal 스택 관리 불가
-**해결:** `app/_layout.tsx`를 `Stack`으로, `(modal)` 그룹에 `presentation: "modal"` 설정
+**해결:** `application/app/_layout.tsx`를 `Stack`으로, `(modal)` 그룹에 `presentation: "modal"` 설정
 ```tsx
-// app/_layout.tsx
+// application/app/_layout.tsx
 <Stack screenOptions={{ headerShown: false }}>
   <Stack.Screen name="(tabs)" />
   <Stack.Screen name="(auth)" />

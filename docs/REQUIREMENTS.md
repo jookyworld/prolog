@@ -254,8 +254,8 @@ GET /api/workouts/sessions/routines/{routineId}/last
 | email | VARCHAR(100) | UNIQUE, NOT NULL | 이메일 |
 | nickname | VARCHAR(50) | UNIQUE, NOT NULL | 닉네임 (4~50자) |
 | gender | ENUM | NOT NULL | MALE, FEMALE, UNKNOWN |
-| height | INT | NULLABLE | 신장 (cm) |
-| weight | INT | NULLABLE | 체중 (kg) |
+| height | DOUBLE | NOT NULL | 신장 (cm) |
+| weight | DOUBLE | NOT NULL | 체중 (kg) |
 | role | ENUM | NOT NULL | USER, ADMIN |
 
 **비즈니스 규칙:**
@@ -552,7 +552,7 @@ GET /api/workouts/sessions/routines/{routineId}/last
 
 #### 일괄 저장 방식
 ```json
-POST /api/workouts/sessions/{id}/complete
+PATCH /api/workouts/sessions/{id}/complete
 {
   "action": "RECORD_ONLY",
   "exercises": [

@@ -22,7 +22,7 @@
 ```
 prolog/
 ├── backend/           # Spring Boot API Server
-├── app/               # Expo React Native App
+├── application/       # Expo React Native App
 ├── admin/             # Next.js 관리자 웹 (예정)
 └── docs/              # 프로젝트 문서
 ```
@@ -44,6 +44,17 @@ prolog/
 
 ---
 
+## 🌐 배포 현황
+
+| 항목 | 상태 | 주소 / 비고 |
+|------|------|-------------|
+| **Backend API** | ✅ 운영 중 | `https://api.prolog.jooky.site` |
+| **Swagger UI** | ✅ 운영 중 | `https://api.prolog.jooky.site/swagger-ui/index.html` |
+| **Mobile App** | 🚧 EAS 빌드 테스트 중 | TestFlight 배포 예정 |
+| **Admin Web** | 📋 미개발 | Phase 3-2 이후 예정 |
+
+---
+
 ## 🚀 빠른 시작
 
 ```bash
@@ -53,7 +64,7 @@ docker-compose up -d
 ./gradlew bootRun
 
 # App
-cd app
+cd application
 npm install
 npx expo start
 ```
@@ -71,3 +82,16 @@ npx expo start
 | **Phase 3-1** | 커뮤니티 기본 (공유, 가져오기, 댓글) | ✅ 완료 | 100% |
 | **Phase 3-2** | 커뮤니티 고급 (좋아요, 추천) | 📋 계획 | 0% |
 | **UI/UX 개선** | 운동 화면 개편, 모달 네비게이션 | 🚧 진행 중 | - |
+
+> **Phase 2 상세:** 홈 통계(`GET /api/stats/home`)만 완료. 종목별 볼륨 추이, 최고 중량 추이, 루틴별 회차 비교 등은 미구현.
+
+### 🎯 다음 작업 방향
+
+**TestFlight 배포 전**, 실 사용 시 필수적인 기능을 Phase 순서와 무관하게 우선 개발.
+
+| 우선순위 | 항목 | 비고 |
+|----------|------|------|
+| 🔴 1 | 비밀번호 재설정 (이메일) | 비번 분실 시 계정 복구 방법 없음, 백엔드 이메일 발송 필요 |
+| 🔴 2 | 이용약관 / 개인정보처리방침 | Apple 심사 필수, settings 화면에 링크 추가 |
+| 🟡 3 | 이메일 / 비밀번호 변경 | 현재 닉네임·신체정보만 수정 가능, 계정 정보 변경 API 없음 |
+| 🟡 4 | 세션 중 세트 데이터 임시저장 | 앱 강제 종료 시 입력 중 세트 기록 유실 위험 |
