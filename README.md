@@ -13,7 +13,7 @@
 | [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md) | 개발자 | 파일 구조, 작업 패턴, 배포, 트러블슈팅 |
 | [docs/REQUIREMENTS.md](./docs/REQUIREMENTS.md) | 개발자 | 비즈니스 로직, 데이터 모델 |
 | [docs/USER_GUIDE.md](./docs/USER_GUIDE.md) | 앱 사용자 | 앱 사용 방법 |
-| Swagger UI (로컬) | 개발자 | API 명세 (http://localhost:8080/swagger-ui) |
+| Swagger UI (로컬) | 개발자 | API 명세 (https://api.prolog.jooky.site/swagger-ui/index.html) |
 
 ---
 
