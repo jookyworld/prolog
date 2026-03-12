@@ -1,5 +1,9 @@
 import { apiFetch, clearTokens, setTokens } from "../api";
 import type {
+  CheckDuplicatesRequest,
+  CheckDuplicatesResponse,
+  EmailVerificationConfirmDto,
+  EmailVerificationSendDto,
   LoginRequest,
   LoginResponse,
   PasswordResetConfirmDto,
@@ -40,6 +44,27 @@ export const authApi = {
   async deleteMe(): Promise<void> {
     await apiFetch("/api/auth/deleteMe", { method: "DELETE" });
     await clearTokens();
+  },
+
+  checkDuplicates(data: CheckDuplicatesRequest): Promise<CheckDuplicatesResponse> {
+    return apiFetch("/api/auth/check-duplicates", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  sendEmailVerification(data: EmailVerificationSendDto): Promise<void> {
+    return apiFetch("/api/auth/email-verification/send", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  confirmEmailVerification(data: EmailVerificationConfirmDto): Promise<void> {
+    return apiFetch("/api/auth/email-verification/confirm", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   },
 
   requestPasswordReset(data: PasswordResetRequestDto): Promise<void> {

@@ -1,5 +1,9 @@
 package com.back.domain.user.auth.controller;
 
+import com.back.domain.user.auth.dto.CheckDuplicatesRequest;
+import com.back.domain.user.auth.dto.CheckDuplicatesResponse;
+import com.back.domain.user.auth.dto.EmailVerificationConfirmDto;
+import com.back.domain.user.auth.dto.EmailVerificationSendDto;
 import com.back.domain.user.auth.dto.LoginRequest;
 import com.back.domain.user.auth.dto.LoginResponse;
 import com.back.domain.user.auth.dto.PasswordResetConfirmDto;
@@ -107,6 +111,23 @@ public class AuthController {
     public ResponseEntity<Void> deleteMe(@AuthenticationPrincipal UserPrincipal principal) {
         authService.deleteMe(principal.getId());
         cookieManager.clearAuthCookies();
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/check-duplicates")
+    public ResponseEntity<CheckDuplicatesResponse> checkDuplicates(@Valid @RequestBody CheckDuplicatesRequest dto) {
+        return ResponseEntity.ok(authService.checkDuplicates(dto));
+    }
+
+    @PostMapping("/email-verification/send")
+    public ResponseEntity<Void> sendEmailVerification(@Valid @RequestBody EmailVerificationSendDto dto) {
+        authService.sendEmailVerification(dto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/email-verification/confirm")
+    public ResponseEntity<Void> confirmEmailVerification(@Valid @RequestBody EmailVerificationConfirmDto dto) {
+        authService.confirmEmailVerification(dto);
         return ResponseEntity.noContent().build();
     }
 

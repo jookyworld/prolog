@@ -45,6 +45,9 @@ public class SecurityConfig {
             "/api/auth/signup",
             "/api/auth/login",
             "/api/auth/refresh",
+            "/api/auth/check-duplicates",
+            "/api/auth/email-verification/send",
+            "/api/auth/email-verification/confirm",
             "/api/auth/password-reset/request",
             "/api/auth/password-reset/confirm"
     };

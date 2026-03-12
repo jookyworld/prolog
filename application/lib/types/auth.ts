@@ -40,6 +40,27 @@ export interface UpdateProfileRequest {
   weight: number;
 }
 
+export interface CheckDuplicatesRequest {
+  username: string;
+  email: string;
+  nickname: string;
+}
+
+export interface CheckDuplicatesResponse {
+  usernameAvailable: boolean;
+  emailAvailable: boolean;
+  nicknameAvailable: boolean;
+}
+
+export interface EmailVerificationSendDto {
+  email: string;
+}
+
+export interface EmailVerificationConfirmDto {
+  email: string;
+  code: string;
+}
+
 export interface PasswordResetRequestDto {
   email: string;
 }

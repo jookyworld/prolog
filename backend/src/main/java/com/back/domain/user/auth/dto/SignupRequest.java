@@ -22,8 +22,10 @@ public record SignupRequest(
 
         Gender gender,
 
+        @Positive
         double height,
 
+        @Positive
         double weight
 ) {
 }

@@ -3,6 +3,10 @@ package com.back.domain.user.auth.service;
 import com.back.domain.exercise.repository.ExerciseRepository;
 import com.back.domain.routine.routine.repository.RoutineRepository;
 import com.back.domain.routine.routineItem.repository.RoutineItemRepository;
+import com.back.domain.user.auth.dto.CheckDuplicatesRequest;
+import com.back.domain.user.auth.dto.CheckDuplicatesResponse;
+import com.back.domain.user.auth.dto.EmailVerificationConfirmDto;
+import com.back.domain.user.auth.dto.EmailVerificationSendDto;
 import com.back.domain.user.auth.dto.LoginRequest;
 import com.back.domain.user.auth.dto.PasswordResetConfirmDto;
 import com.back.domain.user.auth.dto.PasswordResetRequestDto;
@@ -18,6 +22,7 @@ import com.back.domain.workout.set.repository.WorkoutSetRepository;
 import com.back.global.exception.type.BadRequestException;
 import com.back.global.exception.type.NotFoundException;
 import com.back.global.mail.EmailService;
+import com.back.global.mail.EmailVerificationService;
 import com.back.global.security.token.PasswordResetTokenService;
 import com.back.global.security.token.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +38,7 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final PasswordResetTokenService passwordResetTokenService;
     private final EmailService emailService;
+    private final EmailVerificationService emailVerificationService;
     private final WorkoutSetRepository workoutSetRepository;
     private final WorkoutSessionExerciseRepository workoutSessionExerciseRepository;
     private final WorkoutSessionRepository workoutSessionRepository;
@@ -40,16 +46,42 @@ public class AuthService {
     private final RoutineRepository routineRepository;
     private final ExerciseRepository exerciseRepository;
 
+    @Transactional(readOnly = true)
+    public CheckDuplicatesResponse checkDuplicates(CheckDuplicatesRequest dto) {
+        return new CheckDuplicatesResponse(
+                !userRepository.existsByUsername(dto.username()),
+                !userRepository.existsByEmail(dto.email()),
+                !userRepository.existsByNickname(dto.nickname())
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public void sendEmailVerification(EmailVerificationSendDto dto) {
+        if (userRepository.existsByEmail(dto.email())) {
+            throw new BadRequestException("이미 사용 중인 이메일입니다.");
+        }
+        String code = emailVerificationService.generateAndSave(dto.email());
+        emailService.sendEmailVerificationCode(dto.email(), code);
+    }
+
+    public void confirmEmailVerification(EmailVerificationConfirmDto dto) {
+        emailVerificationService.verify(dto.email(), dto.code());
+    }
+
+    @Transactional
     public UserResponse signup(SignupRequest dto) {
 
+        if (!emailVerificationService.isVerified(dto.email())) {
+            throw new BadRequestException("이메일 인증이 완료되지 않았습니다.");
+        }
         if (userRepository.existsByUsername(dto.username())) {
-            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+            throw new BadRequestException("이미 사용 중인 아이디입니다.");
         }
         if (userRepository.existsByEmail(dto.email())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            throw new BadRequestException("이미 사용 중인 이메일입니다.");
         }
         if (userRepository.existsByNickname(dto.nickname())) {
-            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+            throw new BadRequestException("이미 사용 중인 닉네임입니다.");
         }
 
         String encodedPassword = passwordEncoder.encode(dto.password());
@@ -68,6 +100,7 @@ public class AuthService {
                 .build();
 
         User saved = userRepository.save(user);
+        emailVerificationService.deleteVerified(dto.email());
 
         return UserResponse.from(saved);
     }

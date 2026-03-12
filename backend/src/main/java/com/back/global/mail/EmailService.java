@@ -17,6 +17,29 @@ public class EmailService {
     @Value("${mail.from}")
     private String from;
 
+    public void sendEmailVerificationCode(String to, String code) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+            helper.setFrom(from, "ProLog");
+            helper.setTo(to);
+            helper.setSubject("[ProLog] 회원가입 이메일 인증 코드");
+            helper.setText("""
+                    안녕하세요, ProLog입니다.
+
+                    회원가입 이메일 인증 코드를 알려드립니다.
+
+                    인증 코드: %s
+
+                    해당 코드는 10분간 유효합니다.
+                    본인이 요청하지 않으셨다면 이 메일을 무시해주세요.
+                    """.formatted(code));
+            mailSender.send(message);
+        } catch (MessagingException | java.io.UnsupportedEncodingException e) {
+            throw new RuntimeException("이메일 전송에 실패했습니다.", e);
+        }
+    }
+
     public void sendPasswordResetCode(String to, String code) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
