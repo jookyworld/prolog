@@ -49,6 +49,9 @@ npx expo start
 ```env
 JWT_SECRET=your_secret_key
 MYSQL_PASSWORD=your_password
+MAIL_USERNAME=your_gmail@gmail.com
+MAIL_PASSWORD=your_app_password   # Gmail 앱 비밀번호
+MAIL_FROM=your_gmail@gmail.com
 ```
 
 **application/.env**
@@ -85,6 +88,8 @@ backend/src/main/java/com/back/
 │   └── home/              ← 홈 화면 통계
 └── global/
     ├── security/          ← JWT 필터, SecurityConfig
+    │   └── token/         ← RefreshTokenService, PasswordResetTokenService (Redis)
+    ├── mail/              ← EmailService (비밀번호 재설정 메일 발송)
     ├── exception/         ← 예외 처리
     ├── converter/         ← JSON 컨버터
     └── config/            ← Swagger 등 설정
@@ -104,7 +109,7 @@ backend/src/main/java/com/back/
 application/
 ├── app/                   ← 화면 (파일 기반 라우팅)
 │   ├── _layout.tsx        ← Root Stack (Modal 지원 위해 Stack 필수)
-│   ├── (auth)/            ← 로그인, 회원가입
+│   ├── (auth)/            ← 로그인, 회원가입, 비밀번호 재설정
 │   ├── (tabs)/            ← 메인 앱 (5개 탭)
 │   │   ├── index.tsx      ← 홈 (통계 대시보드)
 │   │   ├── routine/       ← 루틴 관리
@@ -194,7 +199,7 @@ docker build -t prolog-backend .
 # 배포는 git push origin main 으로 자동 처리
 ```
 
-**EC2 환경 변수:** `JWT_SECRET`, `MYSQL_PASSWORD`, `CORS_ALLOWED_ORIGINS`
+**EC2 환경 변수:** `JWT_SECRET`, `MYSQL_PASSWORD`, `CORS_ALLOWED_ORIGINS`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM`
 
 ### App
 
