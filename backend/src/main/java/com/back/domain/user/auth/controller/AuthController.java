@@ -2,6 +2,8 @@ package com.back.domain.user.auth.controller;
 
 import com.back.domain.user.auth.dto.LoginRequest;
 import com.back.domain.user.auth.dto.LoginResponse;
+import com.back.domain.user.auth.dto.PasswordResetConfirmDto;
+import com.back.domain.user.auth.dto.PasswordResetRequestDto;
 import com.back.domain.user.auth.dto.SignupRequest;
 import com.back.domain.user.auth.service.AuthService;
 import com.back.domain.user.user.dto.UserResponse;
@@ -105,6 +107,18 @@ public class AuthController {
     public ResponseEntity<Void> deleteMe(@AuthenticationPrincipal UserPrincipal principal) {
         authService.deleteMe(principal.getId());
         cookieManager.clearAuthCookies();
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/password-reset/request")
+    public ResponseEntity<Void> requestPasswordReset(@Valid @RequestBody PasswordResetRequestDto dto) {
+        authService.requestPasswordReset(dto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/password-reset/confirm")
+    public ResponseEntity<Void> confirmPasswordReset(@Valid @RequestBody PasswordResetConfirmDto dto) {
+        authService.confirmPasswordReset(dto);
         return ResponseEntity.noContent().build();
     }
 }

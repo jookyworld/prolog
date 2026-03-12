@@ -118,13 +118,18 @@ export default function LoginScreen() {
             </Button>
           </View>
 
-          <View className="flex-row justify-center gap-1">
-            <Text className="text-sm text-muted-foreground">
-              계정이 없으신가요?
-            </Text>
-            <Link href="/(auth)/signup">
-              <Text className="text-sm text-primary">회원가입</Text>
+          <View className="gap-3 items-center">
+            <Link href="/(auth)/forgot-password">
+              <Text className="text-sm text-muted-foreground">비밀번호를 잊으셨나요?</Text>
             </Link>
+            <View className="flex-row gap-1">
+              <Text className="text-sm text-muted-foreground">
+                계정이 없으신가요?
+              </Text>
+              <Link href="/(auth)/signup">
+                <Text className="text-sm text-primary">회원가입</Text>
+              </Link>
+            </View>
           </View>
         </View>
       </ScrollView>

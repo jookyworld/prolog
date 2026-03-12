@@ -2,6 +2,8 @@ import { apiFetch, clearTokens, setTokens } from "../api";
 import type {
   LoginRequest,
   LoginResponse,
+  PasswordResetConfirmDto,
+  PasswordResetRequestDto,
   SignupRequest,
   UserResponse,
 } from "../types/auth";
@@ -38,5 +40,19 @@ export const authApi = {
   async deleteMe(): Promise<void> {
     await apiFetch("/api/auth/deleteMe", { method: "DELETE" });
     await clearTokens();
+  },
+
+  requestPasswordReset(data: PasswordResetRequestDto): Promise<void> {
+    return apiFetch("/api/auth/password-reset/request", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  confirmPasswordReset(data: PasswordResetConfirmDto): Promise<void> {
+    return apiFetch("/api/auth/password-reset/confirm", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   },
 };

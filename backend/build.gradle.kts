@@ -41,6 +41,7 @@ dependencies {
 	runtimeOnly("com.h2database:h2")
 
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+	implementation("org.springframework.boot:spring-boot-starter-mail")
 
 implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 

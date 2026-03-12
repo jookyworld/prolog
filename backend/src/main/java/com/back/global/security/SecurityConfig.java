@@ -44,7 +44,9 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/api/auth/signup",
             "/api/auth/login",
-            "/api/auth/refresh"
+            "/api/auth/refresh",
+            "/api/auth/password-reset/request",
+            "/api/auth/password-reset/confirm"
     };
 
     @Bean

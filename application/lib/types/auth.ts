@@ -39,3 +39,13 @@ export interface UpdateProfileRequest {
   height: number;
   weight: number;
 }
+
+export interface PasswordResetRequestDto {
+  email: string;
+}
+
+export interface PasswordResetConfirmDto {
+  email: string;
+  code: string;
+  newPassword: string;
+}

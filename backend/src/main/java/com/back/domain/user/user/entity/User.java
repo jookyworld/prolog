@@ -59,4 +59,8 @@ public class User {
         this.height = height;
         this.weight = weight;
     }
+
+    public void resetPassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }
