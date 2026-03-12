@@ -107,6 +107,7 @@ public class AuthService {
 
         user.resetPassword(passwordEncoder.encode(dto.newPassword()));
         passwordResetTokenService.delete(dto.email());
+        refreshTokenService.deleteRefreshToken(user.getId());
     }
 
     @Transactional
