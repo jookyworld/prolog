@@ -66,8 +66,12 @@ export default function ResetPasswordScreen() {
         newPassword: data.newPassword,
       });
       setDone(true);
-    } catch {
-      setError("인증 코드가 올바르지 않거나 만료되었습니다.");
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 429) {
+        setError("입력 횟수를 초과했습니다. 코드를 재전송해주세요.");
+      } else {
+        setError("인증 코드가 올바르지 않거나 만료되었습니다.");
+      }
     }
   };
 

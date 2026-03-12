@@ -28,7 +28,7 @@ export default function ForgotPasswordScreen() {
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: FormValues) => {
@@ -94,8 +94,13 @@ export default function ForgotPasswordScreen() {
               <Text className="text-center text-sm text-red-400">{error}</Text>
             ) : null}
 
-            <Button onPress={handleSubmit(onSubmit)} className="w-full">
-              인증 코드 전송
+            <Button
+              onPress={handleSubmit(onSubmit)}
+              loading={isSubmitting}
+              disabled={isSubmitting}
+              className="w-full"
+            >
+              {isSubmitting ? "전송 중..." : "인증 코드 전송"}
             </Button>
           </View>
 

@@ -49,7 +49,7 @@ public class PasswordResetTokenService {
         if (attempts >= MAX_ATTEMPTS) {
             redisTemplate.delete(KEY_PREFIX + email);
             redisTemplate.delete(attemptKey);
-            return false;
+            throw new TooManyRequestsException("인증 코드 입력 횟수를 초과했습니다. 새 코드를 요청해주세요.");
         }
 
         String stored = redisTemplate.opsForValue().get(KEY_PREFIX + email);
