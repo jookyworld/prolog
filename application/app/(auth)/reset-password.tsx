@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
+import { ApiError } from "@/lib/api";
 import { authApi } from "@/lib/api/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -33,12 +34,28 @@ export default function ResetPasswordScreen() {
   const { email } = useLocalSearchParams<{ email: string }>();
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
 
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+  const onResend = async () => {
+    setResendMessage("");
+    setError("");
+    try {
+      await authApi.requestPasswordReset({ email });
+      setResendMessage("인증 코드를 재전송했습니다.");
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 429) {
+        setResendMessage("잠시 후 다시 시도해주세요. (10분에 최대 3회)");
+      } else {
+        setResendMessage("전송 중 오류가 발생했습니다.");
+      }
+    }
+  };
 
   const onSubmit = async (data: FormValues) => {
     setError("");
@@ -164,12 +181,19 @@ export default function ResetPasswordScreen() {
             </Button>
           </View>
 
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="items-center"
-          >
-            <Text className="text-sm text-muted-foreground">이전으로</Text>
-          </TouchableOpacity>
+          <View className="items-center gap-2">
+            {resendMessage ? (
+              <Text className="text-xs text-muted-foreground">{resendMessage}</Text>
+            ) : null}
+            <TouchableOpacity onPress={onResend}>
+              <Text className="text-sm text-muted-foreground">
+                코드를 받지 못하셨나요? <Text className="text-primary">재전송</Text>
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.back()}>
+              <Text className="text-sm text-muted-foreground">이전으로</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
