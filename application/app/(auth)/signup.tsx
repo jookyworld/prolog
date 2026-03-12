@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { ApiError } from "@/lib/api";
 import { authApi } from "@/lib/api/auth";
 import { COLORS } from "@/lib/constants";
-import { MARKETING_CONSENT, PRIVACY_POLICY, TERMS_OF_SERVICE } from "@/lib/constants/terms";
+import { MARKETING_CONSENT } from "@/lib/constants/terms";
 import type { SignupRequest } from "@/lib/types/auth";
 import {
   signupStep1Schema,
@@ -20,6 +20,7 @@ import { Link, useRouter } from "expo-router";
 import { ArrowLeft, CheckCircle2, Circle } from "lucide-react-native";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { Linking } from "react-native";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -31,6 +32,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
+const TERMS_URLS = {
+  terms: "https://prolog.jooky.site/terms",
+  privacy: "https://prolog.jooky.site/privacy",
+} as const;
 
 const STEP_LABELS: Record<number, string> = {
   1: "약관에 동의하세요",
@@ -167,9 +173,19 @@ function TermsStep({ onNext }: { onNext: (marketingConsent: boolean) => void }) 
   };
 
   const modalContent: Record<NonNullable<TermsModalContent>, { title: string; body: string }> = {
-    terms: { title: "서비스 이용약관", body: TERMS_OF_SERVICE },
-    privacy: { title: "개인정보 처리방침", body: PRIVACY_POLICY },
+    terms: { title: "서비스 이용약관", body: "" },
+    privacy: { title: "개인정보 처리방침", body: "" },
     marketing: { title: "마케팅 수신 동의", body: MARKETING_CONSENT },
+  };
+
+  const handleView = (type: NonNullable<TermsModalContent>) => {
+    if (type === "terms") {
+      Linking.openURL(TERMS_URLS.terms);
+    } else if (type === "privacy") {
+      Linking.openURL(TERMS_URLS.privacy);
+    } else {
+      setViewing(type);
+    }
   };
 
   return (
@@ -194,23 +210,21 @@ function TermsStep({ onNext }: { onNext: (marketingConsent: boolean) => void }) 
           required
           checked={termsAgreed}
           onToggle={() => setTermsAgreed((v) => !v)}
-          onView={() => setViewing("terms")}
+          onView={() => handleView("terms")}
         />
-        {/* 개인정보 처리방침 */}
         <TermsRow
           label="개인정보 처리방침 동의"
           required
           checked={privacyAgreed}
           onToggle={() => setPrivacyAgreed((v) => !v)}
-          onView={() => setViewing("privacy")}
+          onView={() => handleView("privacy")}
         />
-        {/* 마케팅 수신 동의 */}
         <TermsRow
           label="마케팅 수신 동의"
           required={false}
           checked={marketingAgreed}
           onToggle={() => setMarketingAgreed((v) => !v)}
-          onView={() => setViewing("marketing")}
+          onView={() => handleView("marketing")}
         />
       </View>
 
