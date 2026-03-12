@@ -41,6 +41,7 @@ export default function ResetPasswordScreen() {
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
@@ -53,6 +54,7 @@ export default function ResetPasswordScreen() {
       await authApi.requestPasswordReset({ email });
       setResendMessage("인증 코드를 재전송했습니다.");
       setIsLocked(false);
+      setValue("code", "");
     } catch (e) {
       if (e instanceof ApiError && e.status === 429) {
         setResendMessage("잠시 후 다시 시도해주세요. (10분에 최대 3회)");
