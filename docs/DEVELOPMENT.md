@@ -89,7 +89,7 @@ backend/src/main/java/com/back/
 └── global/
     ├── security/          ← JWT 필터, SecurityConfig
     │   └── token/         ← RefreshTokenService, PasswordResetTokenService (Redis)
-    ├── mail/              ← EmailService (비밀번호 재설정 메일 발송)
+    ├── mail/              ← EmailService (메일 발송), EmailVerificationService (가입 인증, Redis)
     ├── exception/         ← 예외 처리
     ├── converter/         ← JSON 컨버터
     └── config/            ← Swagger 등 설정
@@ -200,6 +200,21 @@ docker build -t prolog-backend .
 ```
 
 **EC2 환경 변수:** `JWT_SECRET`, `MYSQL_PASSWORD`, `CORS_ALLOWED_ORIGINS`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM`
+
+---
+
+## 🔴 Redis 키 현황
+
+| 키 패턴 | 용도 | TTL |
+|---------|------|-----|
+| `refresh-token:{userId}` | 리프레시 토큰 | 7일 |
+| `pwd-reset:{email}` | 비밀번호 재설정 코드 | 10분 |
+| `pwd-reset-attempt:{email}` | 비밀번호 재설정 코드 입력 실패 횟수 | 10분 |
+| `pwd-reset-rate:{email}` | 비밀번호 재설정 발송 횟수 (최대 3회/10분) | 10분 |
+| `email-verify:{email}` | 회원가입 이메일 인증 코드 | 10분 |
+| `email-verify-verified:{email}` | 이메일 인증 완료 상태 | 30분 |
+| `email-verify-attempts:{email}` | 인증 코드 입력 실패 횟수 (최대 5회) | 10분 |
+| `email-verify-rate:{email}` | 인증 코드 발송 횟수 (최대 3회/10분) | 10분 |
 
 ### App
 

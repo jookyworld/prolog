@@ -1,7 +1,7 @@
 # PROLOG - 기능 요구사항 명세서
 
 **버전:** v1.0.0
-**최종 업데이트:** 2026-03-12
+**최종 업데이트:** 2026-03-13
 
 > 본 문서는 ProLog 서비스의 핵심 가치, 비즈니스 로직, 기능 요구사항을 정의합니다.
 > 기획자, PM, 개발자 모두 본 문서를 기준으로 작업합니다.
@@ -98,7 +98,8 @@ GET /api/workouts/sessions/routines/{routineId}/last
 ## 핵심 기능
 
 ### Phase 1: MVP Core ✅ (완료)
-- [x] 회원가입 / 로그인 (JWT)
+- [x] 회원가입 (3단계 플로우 + 이메일 인증 + 중복 사전 확인)
+- [x] 로그인 (JWT)
 - [x] 비밀번호 재설정 (이메일 인증 코드)
 - [x] 프로필 관리 (닉네임, 신체 정보)
 - [x] 회원 탈퇴 (cascade 삭제)
@@ -250,17 +251,19 @@ GET /api/workouts/sessions/routines/{routineId}/last
 | 컬럼 | 타입 | 제약 | 설명 |
 |------|------|------|------|
 | id | BIGINT | PK | 사용자 ID |
-| username | VARCHAR(50) | UNIQUE, NOT NULL | 사용자명 (5~50자) |
+| username | VARCHAR(50) | UNIQUE, NOT NULL | 사용자명 (5~20자) |
 | password | VARCHAR(255) | NOT NULL | BCrypt 해시 |
 | email | VARCHAR(100) | UNIQUE, NOT NULL | 이메일 |
-| nickname | VARCHAR(50) | UNIQUE, NOT NULL | 닉네임 (4~50자) |
+| nickname | VARCHAR(50) | UNIQUE, NOT NULL | 닉네임 (4~30자) |
 | gender | ENUM | NOT NULL | MALE, FEMALE, UNKNOWN |
-| height | DOUBLE | NOT NULL | 신장 (cm) |
-| weight | DOUBLE | NOT NULL | 체중 (kg) |
+| height | DOUBLE | NOT NULL | 신장 (cm, > 0) |
+| weight | DOUBLE | NOT NULL | 체중 (kg, > 0) |
 | role | ENUM | NOT NULL | USER, ADMIN |
 
 **비즈니스 규칙:**
-- username/email/nickname 중복 시 409 Conflict
+- 가입 Step1 제출 시 username/email/nickname 중복 사전 확인 (`POST /api/auth/check-duplicates`)
+- 가입 전 이메일 인증 필수 — Redis에 인증 완료 상태 저장 (30분 TTL)
+- 최종 가입 시 서버에서도 이메일 인증 완료 여부 재확인
 - 탈퇴 시 cascade 삭제: routines, workout_sessions, workout_sets, custom exercises
 
 ---
@@ -549,7 +552,41 @@ GET /api/workouts/sessions/routines/{routineId}/last
 
 ---
 
-### 2. 세트 저장 규칙
+### 2. 회원가입 플로우
+
+#### 3단계 가입 절차
+
+```
+Step 1: 계정 정보 입력
+  → username (5~20자), password (8~30자), email, nickname (4~30자) 입력
+  → "다음" 클릭 시 중복 확인 API 호출 (POST /api/auth/check-duplicates)
+  → username/email/nickname 중복 시 해당 필드에 에러 표시, 진행 불가
+
+Step 2: 이메일 인증
+  → 인증 코드 발송 (POST /api/auth/email-verification/send)
+  → 6자리 코드 입력 후 확인 (POST /api/auth/email-verification/confirm)
+  → 인증 완료 상태 Redis에 저장 (TTL 30분)
+
+Step 3: 신체 정보 입력
+  → gender (MALE/FEMALE), height (cm), weight (kg) 입력
+  → 최종 가입 요청 (POST /api/auth/signup)
+  → 서버에서 이메일 인증 완료 여부 재확인 후 계정 생성
+```
+
+#### 이메일 인증 보안 정책
+
+| 항목 | 정책 |
+|------|------|
+| 코드 길이 | 6자리 숫자 |
+| 코드 생성 | SecureRandom |
+| 코드 TTL | 10분 |
+| 발송 횟수 제한 | 10분에 최대 3회 (429 응답) |
+| 코드 입력 실패 제한 | 5회 초과 시 코드 무효화, 재발송 필요 |
+| 인증 완료 상태 TTL | 30분 |
+
+---
+
+### 3. 세트 저장 규칙
 
 #### 일괄 저장 방식
 ```json
@@ -603,7 +640,7 @@ WorkoutSet set = WorkoutSet.builder()
 
 ---
 
-### 3. 통계 계산 정책 (Phase 2)
+### 4. 통계 계산 정책 (Phase 2)
 
 #### 공통 규칙
 - **데이터 소스**: `workout_sessions` + `workout_session_exercises` + `workout_sets`
@@ -680,7 +717,7 @@ ORDER BY date ASC
 
 ---
 
-### 4. 커뮤니티 정책 (Phase 3-1 ✅)
+### 5. 커뮤니티 정책 (Phase 3-1 ✅)
 
 #### 4.1 루틴 공유
 
@@ -747,7 +784,7 @@ ORDER BY date ASC
 
 ---
 
-### 5. 엔티티 비즈니스 규칙
+### 6. 엔티티 비즈니스 규칙
 
 #### User (사용자)
 - username/email/nickname 중복 시 409 Conflict
