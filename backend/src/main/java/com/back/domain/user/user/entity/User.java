@@ -42,6 +42,9 @@ public class User {
     @Column(nullable = false)
     private double weight;
 
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean marketingConsent;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role = Role.USER;

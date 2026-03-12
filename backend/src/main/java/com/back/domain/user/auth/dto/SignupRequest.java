@@ -26,6 +26,8 @@ public record SignupRequest(
         double height,
 
         @Positive
-        double weight
+        double weight,
+
+        boolean marketingConsent
 ) {
 }

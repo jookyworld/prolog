@@ -96,6 +96,7 @@ public class AuthService {
                 .gender(gender)
                 .height(dto.height())
                 .weight(dto.weight())
+                .marketingConsent(dto.marketingConsent())
                 .role(Role.USER)
                 .build();
 

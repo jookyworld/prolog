@@ -8,6 +8,7 @@ export interface SignupRequest {
   gender: Gender;
   height: number;
   weight: number;
+  marketingConsent: boolean;
 }
 
 export interface LoginRequest {

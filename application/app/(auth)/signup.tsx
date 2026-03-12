@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { ApiError } from "@/lib/api";
 import { authApi } from "@/lib/api/auth";
 import { COLORS } from "@/lib/constants";
+import { MARKETING_CONSENT, PRIVACY_POLICY, TERMS_OF_SERVICE } from "@/lib/constants/terms";
 import type { SignupRequest } from "@/lib/types/auth";
 import {
   signupStep1Schema,
@@ -16,29 +17,39 @@ import {
 } from "@/lib/validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
+import { ArrowLeft, CheckCircle2, Circle } from "lucide-react-native";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
+  SafeAreaView,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 
+const STEP_LABELS: Record<number, string> = {
+  1: "약관에 동의하세요",
+  2: "계정 정보를 입력하세요",
+  3: "이메일을 인증하세요",
+  4: "신체 정보를 입력하세요",
+};
+
 export default function SignupScreen() {
   const { signup } = useAuth();
   const router = useRouter();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [step1Data, setStep1Data] = useState<SignupStep1Values | null>(null);
   const [step3Data, setStep3Data] = useState<SignupStep3Values | null>(null);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [error, setError] = useState("");
 
-  const goToStep = (next: 1 | 2 | 3) => {
+  const goToStep = (next: 1 | 2 | 3 | 4) => {
     setError("");
     setStep(next);
   };
@@ -57,13 +68,13 @@ export default function SignupScreen() {
           <View className="items-center gap-2">
             <Text className="text-3xl font-bold text-white">회원가입</Text>
             <Text className="text-sm text-muted-foreground">
-              {step === 1 ? "계정 정보를 입력하세요" : step === 2 ? "이메일을 인증하세요" : "신체 정보를 입력하세요"}
+              {STEP_LABELS[step]}
             </Text>
             <View className="flex-row justify-center gap-2 pt-2">
-              {([1, 2, 3] as const).map((s) => (
+              {([1, 2, 3, 4] as const).map((s) => (
                 <View
                   key={s}
-                  className={`h-1 w-12 rounded-full ${step >= s ? "bg-primary" : "bg-border"}`}
+                  className={`h-1 w-8 rounded-full ${step >= s ? "bg-primary" : "bg-border"}`}
                 />
               ))}
             </View>
@@ -74,34 +85,46 @@ export default function SignupScreen() {
           ) : null}
 
           {step === 1 ? (
-            <Step1Form
-              defaultValues={step1Data ?? undefined}
-              onNext={(data) => {
-                setStep1Data(data);
+            <TermsStep
+              onNext={(mc) => {
+                setMarketingConsent(mc);
                 goToStep(2);
               }}
             />
           ) : step === 2 ? (
+            <Step1Form
+              defaultValues={step1Data ?? undefined}
+              onBack={() => goToStep(1)}
+              onNext={(data) => {
+                setStep1Data(data);
+                goToStep(3);
+              }}
+            />
+          ) : step === 3 ? (
             <Step2Form
               email={step1Data!.email}
               isVerified={isEmailVerified}
               onBack={() => {
                 setIsEmailVerified(false);
-                goToStep(1);
+                goToStep(2);
               }}
               onNext={() => {
                 setIsEmailVerified(true);
-                goToStep(3);
+                goToStep(4);
               }}
             />
           ) : (
             <Step3Form
               defaultValues={step3Data ?? undefined}
-              onBack={() => goToStep(2)}
+              onBack={() => goToStep(3)}
               onSubmit={async (data) => {
                 setStep3Data(data);
                 try {
-                  const req: SignupRequest = { ...step1Data!, ...data };
+                  const req: SignupRequest = {
+                    ...step1Data!,
+                    ...data,
+                    marketingConsent,
+                  };
                   await signup(req);
                   router.replace("/(tabs)");
                 } catch {
@@ -125,11 +148,149 @@ export default function SignupScreen() {
   );
 }
 
+type TermsModalContent = "terms" | "privacy" | "marketing" | null;
+
+function TermsStep({ onNext }: { onNext: (marketingConsent: boolean) => void }) {
+  const [termsAgreed, setTermsAgreed] = useState(false);
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [marketingAgreed, setMarketingAgreed] = useState(false);
+  const [viewing, setViewing] = useState<TermsModalContent>(null);
+
+  const allRequired = termsAgreed && privacyAgreed;
+  const allChecked = allRequired && marketingAgreed;
+
+  const toggleAll = () => {
+    const next = !allChecked;
+    setTermsAgreed(next);
+    setPrivacyAgreed(next);
+    setMarketingAgreed(next);
+  };
+
+  const modalContent: Record<NonNullable<TermsModalContent>, { title: string; body: string }> = {
+    terms: { title: "서비스 이용약관", body: TERMS_OF_SERVICE },
+    privacy: { title: "개인정보 처리방침", body: PRIVACY_POLICY },
+    marketing: { title: "마케팅 수신 동의", body: MARKETING_CONSENT },
+  };
+
+  return (
+    <View className="gap-4">
+      {/* 전체 동의 */}
+      <Pressable
+        onPress={toggleAll}
+        className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-4"
+      >
+        {allChecked ? (
+          <CheckCircle2 size={22} color={COLORS.primary} />
+        ) : (
+          <Circle size={22} color={COLORS.mutedForeground} />
+        )}
+        <Text className="text-base font-semibold text-white">전체 동의</Text>
+      </Pressable>
+
+      <View className="gap-3">
+        {/* 서비스 이용약관 */}
+        <TermsRow
+          label="서비스 이용약관 동의"
+          required
+          checked={termsAgreed}
+          onToggle={() => setTermsAgreed((v) => !v)}
+          onView={() => setViewing("terms")}
+        />
+        {/* 개인정보 처리방침 */}
+        <TermsRow
+          label="개인정보 처리방침 동의"
+          required
+          checked={privacyAgreed}
+          onToggle={() => setPrivacyAgreed((v) => !v)}
+          onView={() => setViewing("privacy")}
+        />
+        {/* 마케팅 수신 동의 */}
+        <TermsRow
+          label="마케팅 수신 동의"
+          required={false}
+          checked={marketingAgreed}
+          onToggle={() => setMarketingAgreed((v) => !v)}
+          onView={() => setViewing("marketing")}
+        />
+      </View>
+
+      <Button
+        onPress={() => onNext(marketingAgreed)}
+        disabled={!allRequired}
+        className="w-full"
+      >
+        다음
+      </Button>
+
+      {/* 약관 내용 모달 */}
+      <Modal
+        visible={viewing !== null}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setViewing(null)}
+      >
+        <SafeAreaView className="flex-1 bg-background">
+          <View className="flex-row items-center justify-between border-b border-border px-4 py-3">
+            <Text className="text-base font-semibold text-white">
+              {viewing ? modalContent[viewing].title : ""}
+            </Text>
+            <TouchableOpacity onPress={() => setViewing(null)}>
+              <Text className="text-primary">닫기</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView className="flex-1 px-4 py-4">
+            <Text className="text-sm leading-6 text-muted-foreground">
+              {viewing ? modalContent[viewing].body : ""}
+            </Text>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
+    </View>
+  );
+}
+
+function TermsRow({
+  label,
+  required,
+  checked,
+  onToggle,
+  onView,
+}: {
+  label: string;
+  required: boolean;
+  checked: boolean;
+  onToggle: () => void;
+  onView: () => void;
+}) {
+  return (
+    <View className="flex-row items-center gap-2">
+      <Pressable onPress={onToggle} className="flex-1 flex-row items-center gap-2">
+        {checked ? (
+          <CheckCircle2 size={20} color={COLORS.primary} />
+        ) : (
+          <Circle size={20} color={COLORS.mutedForeground} />
+        )}
+        <Text className="text-sm text-muted-foreground">
+          {label}{" "}
+          <Text className={required ? "text-primary" : "text-muted-foreground"}>
+            ({required ? "필수" : "선택"})
+          </Text>
+        </Text>
+      </Pressable>
+      <TouchableOpacity onPress={onView}>
+        <Text className="text-xs text-muted-foreground underline">보기</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 function Step1Form({
   defaultValues,
+  onBack,
   onNext,
 }: {
   defaultValues?: SignupStep1Values;
+  onBack: () => void;
   onNext: (data: SignupStep1Values) => void;
 }) {
   const {
@@ -262,14 +423,19 @@ function Step1Form({
         <Text className="text-center text-sm text-red-400">{submitError}</Text>
       ) : null}
 
-      <Button
-        onPress={handleSubmit(onSubmit)}
-        loading={isSubmitting}
-        disabled={isSubmitting}
-        className="w-full"
-      >
-        {isSubmitting ? "확인 중..." : "다음"}
-      </Button>
+      <View className="flex-row gap-3">
+        <Button variant="outline" size="icon" onPress={onBack}>
+          <ArrowLeft size={16} color={COLORS.white} />
+        </Button>
+        <Button
+          onPress={handleSubmit(onSubmit)}
+          loading={isSubmitting}
+          disabled={isSubmitting}
+          className="flex-1"
+        >
+          {isSubmitting ? "확인 중..." : "다음"}
+        </Button>
+      </View>
     </View>
   );
 }
