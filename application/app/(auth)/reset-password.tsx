@@ -35,6 +35,8 @@ export default function ResetPasswordScreen() {
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
   const [resendMessage, setResendMessage] = useState("");
+  const [isResending, setIsResending] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
 
   const {
     control,
@@ -43,17 +45,22 @@ export default function ResetPasswordScreen() {
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   const onResend = async () => {
+    if (isResending) return;
+    setIsResending(true);
     setResendMessage("");
     setError("");
     try {
       await authApi.requestPasswordReset({ email });
       setResendMessage("인증 코드를 재전송했습니다.");
+      setIsLocked(false);
     } catch (e) {
       if (e instanceof ApiError && e.status === 429) {
         setResendMessage("잠시 후 다시 시도해주세요. (10분에 최대 3회)");
       } else {
         setResendMessage("전송 중 오류가 발생했습니다.");
       }
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -69,6 +76,7 @@ export default function ResetPasswordScreen() {
     } catch (e) {
       if (e instanceof ApiError && e.status === 429) {
         setError("입력 횟수를 초과했습니다. 코드를 재전송해주세요.");
+        setIsLocked(true);
       } else {
         setError("인증 코드가 올바르지 않거나 만료되었습니다.");
       }
@@ -118,6 +126,7 @@ export default function ResetPasswordScreen() {
                     placeholder="6자리 코드"
                     keyboardType="number-pad"
                     maxLength={6}
+                    editable={!isLocked}
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
@@ -178,7 +187,7 @@ export default function ResetPasswordScreen() {
             <Button
               onPress={handleSubmit(onSubmit)}
               loading={isSubmitting}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLocked}
               className="w-full"
             >
               {isSubmitting ? "변경 중..." : "비밀번호 변경"}
@@ -189,9 +198,12 @@ export default function ResetPasswordScreen() {
             {resendMessage ? (
               <Text className="text-xs text-muted-foreground">{resendMessage}</Text>
             ) : null}
-            <TouchableOpacity onPress={onResend}>
+            <TouchableOpacity onPress={onResend} disabled={isResending}>
               <Text className="text-sm text-muted-foreground">
-                코드를 받지 못하셨나요? <Text className="text-primary">재전송</Text>
+                코드를 받지 못하셨나요?{" "}
+                <Text className="text-primary">
+                  {isResending ? "전송 중..." : "재전송"}
+                </Text>
               </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.back()}>
