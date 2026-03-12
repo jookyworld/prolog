@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
+import { ApiError } from "@/lib/api";
 import { authApi } from "@/lib/api/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
@@ -22,14 +24,23 @@ type FormValues = z.infer<typeof schema>;
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
+  const [error, setError] = useState("");
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
-  const onSubmit = (data: FormValues) => {
-    authApi.requestPasswordReset({ email: data.email }).catch(() => {});
+  const onSubmit = async (data: FormValues) => {
+    setError("");
+    try {
+      await authApi.requestPasswordReset({ email: data.email });
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 429) {
+        setError("잠시 후 다시 시도해주세요. (10분에 최대 3회)");
+        return;
+      }
+    }
     router.push({
       pathname: "/(auth)/reset-password",
       params: { email: data.email },
@@ -78,6 +89,10 @@ export default function ForgotPasswordScreen() {
                 </Text>
               )}
             </View>
+
+            {error ? (
+              <Text className="text-center text-sm text-red-400">{error}</Text>
+            ) : null}
 
             <Button onPress={handleSubmit(onSubmit)} className="w-full">
               인증 코드 전송

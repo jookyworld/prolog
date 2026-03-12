@@ -4,6 +4,7 @@ import com.back.global.exception.type.BadRequestException;
 import com.back.global.exception.type.ConflictException;
 import com.back.global.exception.type.ForbiddenException;
 import com.back.global.exception.type.NotFoundException;
+import com.back.global.exception.type.TooManyRequestsException;
 import com.back.global.exception.type.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,6 +62,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException e) {
         ErrorResponse body = ErrorResponse.of("대상 없음", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ErrorResponse> handleTooManyRequests(TooManyRequestsException e) {
+        ErrorResponse body = ErrorResponse.of("요청 횟수 초과", e.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(body);
     }
 
     @ExceptionHandler(Exception.class)
