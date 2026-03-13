@@ -16,7 +16,7 @@ services:
     restart: unless-stopped
 
   spring-app:
-    image: jookyworld/prolog-backend:${IMAGE_TAG:-latest}
+    image: jookyworld/prolog-backend:latest
     container_name: prolog-backend
     env_file: .env
     depends_on:
@@ -40,7 +40,6 @@ services:
       - --collation-server=utf8mb4_general_ci
     volumes:
       - prolog-mysql-data:/var/lib/mysql
-      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
     networks:
       - prolog-network
     healthcheck:
