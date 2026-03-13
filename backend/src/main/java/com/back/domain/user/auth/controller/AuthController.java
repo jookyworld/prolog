@@ -83,13 +83,11 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refreshAuth(HttpServletRequest request) {
-        // 요청 refreshToken 조회 및 위변조 확인
         String refreshToken = jwtTokenResolver.resolveRefreshToken(request);
         if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
             throw new UnauthorizedException("리프레시 토큰이 유효하지 않습니다.");
         }
 
-        // 저장 refreshToken 과 비교 검증
         Long userId = jwtTokenProvider.getUserId(refreshToken);
         if (!refreshTokenService.validateRefreshToken(userId, refreshToken)) {
             throw new UnauthorizedException("리프레시 토큰이 만료되었습니다.");

@@ -190,16 +190,26 @@ application/app/(tabs)/routine/[id].tsx  →  /routine/123
 ### Backend
 
 **플랫폼:** AWS EC2
-**CI/CD:** GitHub Actions — `main` 브랜치 push 시 자동 배포
+**CI/CD:** GitHub Actions — `main` 브랜치에서 `backend/**` 파일 변경 시 자동 배포
+
+**배포 흐름:**
+1. Gradle 빌드 (`bootJar -x test`) — 의존성 캐시 적용
+2. Docker 이미지 빌드 & Docker Hub 푸시 (`latest` 태그)
+3. EC2에 `docker-compose.prod.yml` SCP 전송
+4. EC2 SSH 접속 → `docker-compose up -d --pull always`로 컨테이너 교체
+
+**EC2 필수 파일:**
+- `~/app/docker-compose.prod.yml` — 배포 시 자동 동기화
+- `~/app/.env` — 수동 관리 (배포 시 건드리지 않음)
 
 ```bash
-# 로컬 Docker 빌드 확인
-docker build -t prolog-backend .
-
 # 배포는 git push origin main 으로 자동 처리
+# EC2에서 수동 재시작이 필요한 경우 (.env 변경 등)
+cd ~/app
+sudo docker-compose -f docker-compose.prod.yml up -d
 ```
 
-**EC2 환경 변수:** `JWT_SECRET`, `MYSQL_PASSWORD`, `CORS_ALLOWED_ORIGINS`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM`
+**EC2 환경 변수 (~/app/.env):** `JWT_SECRET`, `MYSQL_PASSWORD`, `CORS_ALLOWED_ORIGINS`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM`
 
 ---
 
@@ -207,7 +217,7 @@ docker build -t prolog-backend .
 
 | 키 패턴 | 용도 | TTL |
 |---------|------|-----|
-| `refresh-token:{userId}` | 리프레시 토큰 | 7일 |
+| `refresh:{userId}` | 리프레시 토큰 | 7일 |
 | `pwd-reset:{email}` | 비밀번호 재설정 코드 | 10분 |
 | `pwd-reset-attempt:{email}` | 비밀번호 재설정 코드 입력 실패 횟수 | 10분 |
 | `pwd-reset-rate:{email}` | 비밀번호 재설정 발송 횟수 (최대 3회/10분) | 10분 |
@@ -226,6 +236,30 @@ npx eas build --platform ios
 npx eas build --platform android
 npx eas submit --platform ios
 npx eas submit --platform android
+```
+
+---
+
+## 🔐 인증 / 보안
+
+### HTTP 상태 코드 구분
+
+| 코드 | 의미 | 발생 상황 |
+|------|------|----------|
+| **401** | 인증 실패 | 토큰 없음, 만료, 유효하지 않음 |
+| **403** | 권한 없음 | 일반 유저가 `/api/admin/**` 접근 |
+
+- 401 수신 시 앱에서 자동으로 refresh 토큰으로 재발급 후 원래 요청 재시도
+- `SecurityConfig`에 `AuthenticationEntryPoint`를 명시적으로 설정해 인증 실패 시 401 반환 (Spring Security 기본값은 403)
+
+### 토큰 갱신 흐름
+
+```
+앱 API 요청
+  → 401 응답
+  → POST /api/auth/refresh (Authorization: Bearer {refreshToken})
+  → 새 accessToken + refreshToken 발급 (토큰 로테이션)
+  → 원래 요청 재시도
 ```
 
 ---
@@ -323,9 +357,7 @@ docker-compose down && docker-compose up -d
 
 **해결:**
 
-1. `backend/mysql/my.cnf` 파일로 MySQL charset을 utf8mb4로 강제 설정 (프로젝트에 포함)
-2. `docker-compose.prod.yml`에 my.cnf 볼륨 마운트 후 MySQL 컨테이너 재시작
-3. 잘못 삽입된 데이터 삭제 후 재삽입
+`docker-compose.prod.yml`의 MySQL `command`로 charset이 이미 강제 설정되어 있음. 잘못 삽입된 데이터만 재삽입하면 됨.
 
 ```bash
 # MySQL charset 확인
