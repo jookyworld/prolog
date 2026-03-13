@@ -39,41 +39,22 @@ jobs:
         with:
           context: backend
           push: true
-          tags: |
-            jookyworld/prolog-backend:latest
-            jookyworld/prolog-backend:${{ github.sha }}
+          tags: jookyworld/prolog-backend:latest
 
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Copy docker-compose files to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "backend/docker-compose.yml,backend/docker-compose.prod.yml,backend/mysql"
-          # EC2에서는 docker-compose.prod.yml만 사용
-          target: "~/app"
-          strip_components: 1
-
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: IMAGE_TAG
           script: |
             cd ~/app
 
-            export IMAGE_TAG=${{ github.sha }}
-            sudo -E docker-compose -f docker-compose.prod.yml pull spring-app
-            sudo -E docker-compose -f docker-compose.prod.yml up -d --remove-orphans
+            sudo docker-compose -f docker-compose.prod.yml up -d --remove-orphans --pull always
 
             sudo docker image prune -f
