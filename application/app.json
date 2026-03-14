@@ -20,7 +20,7 @@
       "backgroundColor": "#101012",
       "infoPlist": {
         "NSAppTransportSecurity": {
-          "NSAllowsArbitraryLoads": true
+          "NSAllowsArbitraryLoads": false
         },
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -31,7 +31,7 @@
         "backgroundColor": "#101012"
       },
       "edgeToEdgeEnabled": true,
-      "usesCleartextTraffic": true
+      "usesCleartextTraffic": false
     },
     "web": {
       "favicon": "./assets/icon.png"
