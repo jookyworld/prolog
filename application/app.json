@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "backgroundColor": "#101012",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#101012"
     },
@@ -27,14 +27,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#101012"
       },
       "edgeToEdgeEnabled": true,
       "usesCleartextTraffic": true
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/icon.png"
     },
     "updates": {
       "enabled": true,
