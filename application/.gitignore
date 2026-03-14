@@ -41,7 +41,6 @@ expo-env.d.ts
 
 # EAS (Expo Application Services)
 .eas/
-eas.json
 
 # ==============================
 # Environment & Secrets
