@@ -180,7 +180,9 @@ export default function RoutineScreen() {
               <Text className="text-sm font-medium text-white">다시 시도</Text>
             </Pressable>
           </View>
-        ) : displayedRoutines.length === 0 && !showArchived && archivedRoutines.length > 0 ? (
+        ) : displayedRoutines.length === 0 &&
+          !showArchived &&
+          archivedRoutines.length > 0 ? (
           <View className="gap-3 pb-8">
             <View className="rounded-2xl bg-card p-6">
               <View className="flex-row items-start gap-4">
@@ -239,7 +241,7 @@ export default function RoutineScreen() {
                 key={routine.id}
                 onPress={() => router.push(`/(tabs)/routine/${routine.id}`)}
                 onLongPress={() => handleLongPress(routine)}
-                className="rounded-2xl bg-card p-5 active:opacity-80"
+                className="rounded-2xl bg-card p-4 active:opacity-80"
               >
                 <View className="mb-2 flex-row items-center justify-between">
                   <Text className="flex-1 text-lg font-semibold text-white">

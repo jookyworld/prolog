@@ -12,7 +12,7 @@ import type {
   WorkoutSessionCompleteReq,
 } from "@/lib/types/workout";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { Check, Minus, Plus } from "lucide-react-native";
+import { Check, ChevronLeft, Minus, Plus } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -421,7 +421,10 @@ export default function WorkoutSessionScreen() {
       return;
     }
 
-    const totalSets = completedExercises.reduce((sum, ex) => sum + ex.sets.length, 0);
+    const totalSets = completedExercises.reduce(
+      (sum, ex) => sum + ex.sets.length,
+      0,
+    );
 
     if (isFreeWorkout) {
       // Free workout: offer to record only or create a routine
@@ -448,7 +451,8 @@ export default function WorkoutSessionScreen() {
           { text: "취소", style: "cancel" },
           {
             text: "이대로 저장",
-            onPress: () => completeWithAction("RECORD_ONLY", completedExercises),
+            onPress: () =>
+              completeWithAction("RECORD_ONLY", completedExercises),
           },
           {
             text: "자유 운동으로 저장",
@@ -458,7 +462,10 @@ export default function WorkoutSessionScreen() {
           {
             text: "루틴도 업데이트",
             onPress: () =>
-              completeWithAction("UPDATE_ROUTINE_AND_RECORD", completedExercises),
+              completeWithAction(
+                "UPDATE_ROUTINE_AND_RECORD",
+                completedExercises,
+              ),
           },
         ],
       );
@@ -504,9 +511,7 @@ export default function WorkoutSessionScreen() {
 
   const handleAddExercise = () => {
     const rid = isFreeWorkout ? "free" : routineId;
-    router.push(
-      `/select-exercises?returnTo=workout&routineId=${rid}`,
-    );
+    router.push(`/select-exercises?returnTo=workout&routineId=${rid}`);
   };
 
   const isExerciseCompleted = (exercise: ActiveExercise) => {
@@ -564,29 +569,20 @@ export default function WorkoutSessionScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
-      {/* Header - Unified top bar */}
-      <View className="border-b border-white/10 px-5 py-4">
-        {/* Top row: Back, Title, Timer, Complete */}
-        <View className="mb-3 flex-row items-center">
+      {/* Header */}
+      <View className="border-b border-white/10 px-5 py-3">
+        {/* Row 1: Back, Timer, Complete */}
+        <View className="flex-row items-center">
           <Pressable
             onPress={handleCancel}
-            className="mr-3 h-9 w-9 items-center justify-center rounded-xl bg-white/5 active:bg-white/10"
+            className="h-10 w-10 items-center justify-center"
           >
-            <Text className="text-lg text-white/70">←</Text>
+            <ChevronLeft size={24} color={COLORS.white} />
           </Pressable>
 
-          <Text
-            className="flex-1 text-base font-bold text-white"
-            numberOfLines={1}
-          >
-            {routineTitle}
+          <Text className="flex-1 text-center text-3xl font-bold text-white">
+            {formatElapsedTime(elapsedTime)}
           </Text>
-
-          <View className="mx-3 rounded-lg bg-white/10 px-3 py-1.5">
-            <Text className="font-mono text-lg font-bold text-white">
-              {formatElapsedTime(elapsedTime)}
-            </Text>
-          </View>
 
           <Pressable
             onPress={handleComplete}
@@ -601,7 +597,15 @@ export default function WorkoutSessionScreen() {
           </Pressable>
         </View>
 
-        {/* Bottom row: Progress bar and add button */}
+        {/* Row 2: Routine title */}
+        <Text
+          className="mt-4 pb-1 text-2xl font-bold text-white"
+          numberOfLines={1}
+        >
+          {routineTitle}
+        </Text>
+
+        {/* Row 3: Progress bar */}
         {exercises.length > 0 &&
           (() => {
             const totalSets = exercises.reduce(
@@ -616,33 +620,21 @@ export default function WorkoutSessionScreen() {
               totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
 
             return (
-              <View className="flex-row items-center gap-3">
-                {/* Progress bar */}
-                <View className="flex-1">
-                  <View className="mb-1.5 flex-row items-center justify-between">
-                    <Text className="text-xs font-medium text-white/50">
-                      진행률
-                    </Text>
-                    <Text className="text-xs font-semibold text-white/70">
-                      {completedSets}/{totalSets}
-                    </Text>
-                  </View>
-                  <View className="h-1.5 overflow-hidden rounded-full bg-white/10">
-                    <View
-                      className="h-full rounded-full bg-primary"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </View>
+              <View className="mt-3">
+                <View className="mb-1.5 flex-row items-center justify-between">
+                  <Text className="text-xs font-medium text-white/50">
+                    진행률
+                  </Text>
+                  <Text className="text-xs font-semibold text-white/70">
+                    {completedSets}/{totalSets}
+                  </Text>
                 </View>
-
-                {/* Add exercise button */}
-                <Pressable
-                  onPress={handleAddExercise}
-                  className="flex-row items-center gap-1.5 rounded-xl bg-white/8 px-3 py-2 active:opacity-80"
-                >
-                  <Plus size={14} color={COLORS.white} />
-                  <Text className="text-xs font-semibold text-white">종목</Text>
-                </Pressable>
+                <View className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                  <View
+                    className="h-full rounded-full bg-primary"
+                    style={{ width: `${progress}%` }}
+                  />
+                </View>
               </View>
             );
           })()}
@@ -655,7 +647,7 @@ export default function WorkoutSessionScreen() {
             종목을 추가해주세요
           </Text>
           <Text className="mb-6 text-sm text-white/40">
-            상단의 종목 버튼을 눌러 운동을 추가하세요
+            하단의 버튼을 눌러 운동을 추가하세요
           </Text>
           <Pressable
             onPress={handleAddExercise}
@@ -766,7 +758,9 @@ export default function WorkoutSessionScreen() {
                           </View>
                           <View
                             className="flex-1 flex-row items-center gap-1 rounded-lg px-3 py-2.5"
-                            style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+                            style={{
+                              backgroundColor: "rgba(255,255,255,0.08)",
+                            }}
                           >
                             <TextInput
                               className="flex-1 text-center text-sm font-semibold text-white"
@@ -780,11 +774,15 @@ export default function WorkoutSessionScreen() {
                                 })
                               }
                             />
-                            <Text className="text-sm font-medium text-white/50">kg</Text>
+                            <Text className="text-sm font-medium text-white/50">
+                              kg
+                            </Text>
                           </View>
                           <View
                             className="flex-1 flex-row items-center gap-1 rounded-lg px-3 py-2.5"
-                            style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+                            style={{
+                              backgroundColor: "rgba(255,255,255,0.08)",
+                            }}
                           >
                             <TextInput
                               className="flex-1 text-center text-sm font-semibold text-white"
@@ -796,7 +794,9 @@ export default function WorkoutSessionScreen() {
                                 updateSet(exerciseIdx, set.id, { reps: v })
                               }
                             />
-                            <Text className="text-sm font-medium text-white/50">회</Text>
+                            <Text className="text-sm font-medium text-white/50">
+                              회
+                            </Text>
                           </View>
                           <Pressable
                             onPress={() =>
@@ -826,6 +826,15 @@ export default function WorkoutSessionScreen() {
               </View>
             );
           })}
+
+          {/* 종목 추가 버튼 */}
+          <Pressable
+            onPress={handleAddExercise}
+            className="mx-5 mb-4 flex-row items-center justify-center gap-2 rounded-2xl bg-white/8 py-4 active:opacity-80"
+          >
+            <Plus size={18} color={COLORS.white} />
+            <Text className="text-sm font-semibold text-white">종목 추가</Text>
+          </Pressable>
         </ScrollView>
       )}
     </SafeAreaView>
