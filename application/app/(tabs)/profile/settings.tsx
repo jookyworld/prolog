@@ -2,6 +2,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { COLORS } from "@/lib/constants";
 import { TERMS_URLS } from "@/lib/constants/terms";
 import { userApi } from "@/lib/api/user";
+import Constants from "expo-constants";
 import { ChevronLeft, ChevronRight, FileText, Pencil, Shield, UserCog } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Linking, Pressable, Switch, Text, View } from "react-native";
@@ -115,6 +116,11 @@ export default function SettingsScreen() {
             <ChevronRight size={18} color={COLORS.mutedForeground} />
           </Pressable>
         </View>
+
+        {/* 앱 버전 */}
+        <Text className="mt-8 text-center text-xs text-white/20">
+          버전 {Constants.expoConfig?.version ?? "1.0.0"}
+        </Text>
       </View>
     </SafeAreaView>
   );
