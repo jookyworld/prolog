@@ -66,6 +66,7 @@ jobs:
           source: "backend/docker-compose.prod.yml,backend/mysql/my.cnf"
           target: "~/app"
           strip_components: 1
+          overwrite: true
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@master
