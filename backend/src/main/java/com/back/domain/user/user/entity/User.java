@@ -45,6 +45,9 @@ public class User {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean marketingConsent;
 
+    @Column
+    private Integer birthYear;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role = Role.USER;
@@ -56,11 +59,12 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    public void updateProfile(String nickname, Gender gender, double height, double weight) {
+    public void updateProfile(String nickname, Gender gender, double height, double weight, Integer birthYear) {
         this.nickname = nickname;
         this.gender = gender;
         this.height = height;
         this.weight = weight;
+        this.birthYear = birthYear;
     }
 
     public void resetPassword(String encodedPassword) {

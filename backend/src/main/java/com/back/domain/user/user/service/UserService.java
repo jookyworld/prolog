@@ -27,7 +27,7 @@ public class UserService {
             throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
         }
 
-        user.updateProfile(dto.nickname(), dto.gender(), dto.height(), dto.weight());
+        user.updateProfile(dto.nickname(), dto.gender(), dto.height(), dto.weight(), dto.birthYear());
 
         return UserResponse.from(user);
     }

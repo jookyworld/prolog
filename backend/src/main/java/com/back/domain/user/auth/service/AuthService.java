@@ -94,6 +94,7 @@ public class AuthService {
                 .email(dto.email())
                 .nickname(dto.nickname())
                 .gender(gender)
+                .birthYear(dto.birthYear())
                 .height(dto.height())
                 .weight(dto.weight())
                 .marketingConsent(dto.marketingConsent())

@@ -15,5 +15,7 @@ public record UpdateProfileRequest(
 
         double height,
 
-        double weight
+        double weight,
+
+        Integer birthYear
 ) {}

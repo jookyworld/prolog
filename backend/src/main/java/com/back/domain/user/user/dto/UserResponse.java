@@ -15,7 +15,8 @@ public record UserResponse(
         double height,
         double weight,
         Role role,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        Integer birthYear
 ) {
 
     public static UserResponse from(User user) {
@@ -28,7 +29,8 @@ public record UserResponse(
                 user.getHeight(),
                 user.getWeight(),
                 user.getRole(),
-                user.getCreatedAt()
+                user.getCreatedAt(),
+                user.getBirthYear()
         );
     }
 }

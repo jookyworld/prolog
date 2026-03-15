@@ -28,6 +28,10 @@ public record SignupRequest(
         @Positive
         double weight,
 
-        boolean marketingConsent
+        boolean marketingConsent,
+
+        @Min(1930)
+        @Max(2016)
+        Integer birthYear
 ) {
 }
