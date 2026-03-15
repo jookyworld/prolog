@@ -153,7 +153,7 @@ export default function ExerciseManageScreen() {
   const handleSubmit = async () => {
     const trimmedName = form.name.trim();
     if (!trimmedName) {
-      Alert.alert("입력 오류", "종목 이름을 입력해주세요.");
+      Alert.alert("종목 이름을 입력해주세요.");
       return;
     }
     setSubmitting(true);
@@ -202,10 +202,7 @@ export default function ExerciseManageScreen() {
             },
           ]);
         } else {
-          Alert.alert(
-            "오류",
-            err instanceof Error ? err.message : "삭제에 실패했습니다.",
-          );
+          Alert.alert("종목을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
         }
       }
     };

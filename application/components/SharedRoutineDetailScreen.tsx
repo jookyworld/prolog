@@ -144,7 +144,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
                   await communityApi.deleteSharedRoutine(routineId);
                   router.back();
                 } catch {
-                  Alert.alert("오류", "삭제에 실패했습니다.");
+                  Alert.alert("삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
                 }
               },
             },
@@ -212,7 +212,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
       ]);
     } catch (err) {
       console.error("Failed to import routine:", err);
-      Alert.alert("오류", "루틴 가져오기에 실패했습니다.");
+      Alert.alert("루틴을 가져오지 못했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setImporting(false);
     }
@@ -268,7 +268,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
     } catch (err) {
       console.error("Failed to create comment:", err);
       setCommentText(text);
-      Alert.alert("오류", "댓글 작성에 실패했습니다.");
+      Alert.alert("댓글을 작성하지 못했습니다. 잠시 후 다시 시도해주세요.");
     }
   };
 
@@ -285,7 +285,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
       );
     } catch (err) {
       console.error("Failed to delete comment:", err);
-      Alert.alert("오류", "댓글 삭제에 실패했습니다.");
+      Alert.alert("댓글을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
     }
   };
 

@@ -72,10 +72,7 @@ export default function ProfileEditScreen() {
       updateUser(updated);
       router.back();
     } catch (err) {
-      Alert.alert(
-        "오류",
-        err instanceof Error ? err.message : "프로필 수정에 실패했습니다.",
-      );
+      Alert.alert(err instanceof Error ? err.message : "저장하지 못했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setSaving(false);
     }

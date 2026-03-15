@@ -69,7 +69,7 @@ export default function RoutineDetailScreen() {
             await routineApi.deleteRoutine(Number(id));
             router.back();
           } catch {
-            Alert.alert("오류", "삭제에 실패했습니다.");
+            Alert.alert("루틴을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
           } finally {
             setActionLoading(false);
           }
@@ -84,7 +84,7 @@ export default function RoutineDetailScreen() {
       await routineApi.archiveRoutine(Number(id));
       router.back();
     } catch {
-      Alert.alert("오류", "보관에 실패했습니다.");
+      Alert.alert("루틴을 보관하지 못했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setActionLoading(false);
     }
@@ -96,7 +96,7 @@ export default function RoutineDetailScreen() {
       await routineApi.activateRoutine(Number(id));
       router.back();
     } catch {
-      Alert.alert("오류", "활성화에 실패했습니다.");
+      Alert.alert("루틴을 활성화하지 못했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setActionLoading(false);
     }
@@ -111,7 +111,7 @@ export default function RoutineDetailScreen() {
 
   const handleShareSubmit = async () => {
     if (!shareTitle.trim()) {
-      Alert.alert("오류", "제목을 입력해주세요.");
+      Alert.alert("제목을 입력해주세요.");
       return;
     }
 
@@ -133,7 +133,7 @@ export default function RoutineDetailScreen() {
         },
       ]);
     } catch (err) {
-      Alert.alert("오류", "공유에 실패했습니다.");
+      Alert.alert("공유하지 못했습니다. 잠시 후 다시 시도해주세요.");
       console.error("Failed to share routine:", err);
     } finally {
       setActionLoading(false);

@@ -72,7 +72,7 @@ export default function NewRoutineScreen() {
         );
       })
       .catch(() => {
-        Alert.alert("오류", "루틴 데이터를 불러오지 못했습니다.");
+        Alert.alert("루틴 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
         router.back();
       })
       .finally(() => setLoadingRoutine(false));
@@ -116,7 +116,7 @@ export default function NewRoutineScreen() {
       }
       router.back();
     } catch {
-      Alert.alert("오류", "루틴 저장에 실패했습니다.");
+      Alert.alert("루틴을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setSaving(false);
     }

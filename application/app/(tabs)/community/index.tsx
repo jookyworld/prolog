@@ -262,7 +262,7 @@ export default function CommunityScreen() {
       const data = await routineApi.getRoutines("ACTIVE");
       setMyRoutines(data);
     } catch {
-      Alert.alert("오류", "루틴 목록을 불러오지 못했습니다.");
+      Alert.alert("루틴 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
       closeShareModal();
     } finally {
       setMyRoutinesLoading(false);
@@ -289,7 +289,7 @@ export default function CommunityScreen() {
       loadRoutines(sortType, keyword);
       Alert.alert("공유 완료", "루틴이 커뮤니티에 공유되었습니다!");
     } catch {
-      Alert.alert("오류", "공유에 실패했습니다.");
+      Alert.alert("공유하지 못했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setShareLoading(false);
     }

@@ -170,7 +170,7 @@ export default function MySharedRoutinesScreen() {
       setPage(0);
       setHasMore(!response.last);
     } catch {
-      Alert.alert("오류", "목록을 불러오는데 실패했습니다.");
+      Alert.alert("목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setLoading(false);
     }
@@ -227,7 +227,7 @@ export default function MySharedRoutinesScreen() {
             await communityApi.deleteSharedRoutine(id);
             setRoutines((prev) => prev.filter((r) => r.id !== id));
           } catch {
-            Alert.alert("오류", "삭제에 실패했습니다.");
+            Alert.alert("삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
           }
         },
       },

@@ -14,7 +14,7 @@ export default function AccountScreen() {
       await logout();
       router.replace("/(auth)/login");
     } catch {
-      Alert.alert("오류", "로그아웃에 실패했습니다. 다시 시도해주세요.");
+      Alert.alert("로그아웃하지 못했습니다. 잠시 후 다시 시도해주세요.");
     }
   };
 
@@ -32,10 +32,7 @@ export default function AccountScreen() {
               await deleteAccount();
               router.replace("/(auth)/login");
             } catch {
-              Alert.alert(
-                "오류",
-                "회원 탈퇴에 실패했습니다. 다시 시도해주세요.",
-              );
+              Alert.alert("탈퇴 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
             }
           },
         },

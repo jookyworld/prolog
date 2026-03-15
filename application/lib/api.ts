@@ -146,7 +146,7 @@ export async function apiFetch<T>(
   }
 
   if (!res.ok) {
-    let errorMessage = `API 요청 실패 (${res.status})`;
+    let errorMessage = "잠시 후 다시 시도해주세요.";
     try {
       const errorData = await res.json();
       errorMessage = errorData.message || errorMessage;

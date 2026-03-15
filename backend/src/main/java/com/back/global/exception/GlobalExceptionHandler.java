@@ -27,8 +27,8 @@ public class GlobalExceptionHandler {
                 .getFieldErrors()
                 .stream()
                 .findFirst()
-                .map(error -> error.getField() + " " + error.getDefaultMessage())
-                .orElse("잘못된 요청입니다.");
+                .map(error -> error.getDefaultMessage())
+                .orElse("입력 값을 확인해주세요.");
 
         ErrorResponse body = ErrorResponse.of("요청 데이터 오류", message);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
@@ -72,7 +72,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
-        ErrorResponse body = ErrorResponse.of("서버 내부 오류", e.getMessage());
+        ErrorResponse body = ErrorResponse.of("서버 내부 오류", "잠시 후 다시 시도해주세요.");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 }

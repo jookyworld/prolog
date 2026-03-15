@@ -20,7 +20,7 @@ export default function SettingsScreen() {
       updateUser(updated);
     } catch {
       setMarketing(!value);
-      Alert.alert("오류", "설정 변경에 실패했습니다.");
+      Alert.alert("설정을 변경하지 못했습니다. 잠시 후 다시 시도해주세요.");
     }
   };
 

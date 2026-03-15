@@ -68,7 +68,7 @@ export default function RoutineScreen() {
       await routineApi.archiveRoutine(routine.id);
       await fetchRoutines();
     } catch {
-      Alert.alert("오류", "보관에 실패했습니다.");
+      Alert.alert("루틴을 보관하지 못했습니다. 잠시 후 다시 시도해주세요.");
     }
   };
 
@@ -77,7 +77,7 @@ export default function RoutineScreen() {
       await routineApi.activateRoutine(routine.id);
       await fetchRoutines();
     } catch {
-      Alert.alert("오류", "활성화에 실패했습니다.");
+      Alert.alert("루틴을 활성화하지 못했습니다. 잠시 후 다시 시도해주세요.");
     }
   };
 
@@ -92,7 +92,7 @@ export default function RoutineScreen() {
             await routineApi.deleteRoutine(routine.id);
             await fetchRoutines();
           } catch {
-            Alert.alert("오류", "삭제에 실패했습니다.");
+            Alert.alert("루틴을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
           }
         },
       },
