@@ -219,8 +219,8 @@ export default function WorkoutSessionScreen() {
           }
         } catch (err) {
           Alert.alert(
-            "오류",
-            err instanceof Error ? err.message : "세션을 시작할 수 없습니다.",
+            "운동을 시작할 수 없습니다. 잠시 후 다시 시도해주세요.",
+            undefined,
             [{ text: "확인", onPress: () => router.back() }],
           );
         } finally {
@@ -363,10 +363,7 @@ export default function WorkoutSessionScreen() {
       setElapsedTime(0);
       router.back();
     } catch (err) {
-      Alert.alert(
-        "오류",
-        err instanceof Error ? err.message : "운동 완료 처리에 실패했습니다.",
-      );
+      Alert.alert("운동 기록을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setCompleting(false);
     }
