@@ -343,16 +343,8 @@ export default function CommunityScreen() {
         onScroll={handleScroll}
         scrollEventThrottle={400}
       >
-        {/* 헤더 */}
-        <View className="px-5 py-4">
-          <Text className="text-2xl font-bold text-white">커뮤니티</Text>
-          <Text className="mt-1 text-sm text-white/50">
-            다른 사람들의 루틴을 확인하고 가져가보세요
-          </Text>
-        </View>
-
         {/* 검색바 */}
-        <View className="mx-5 mb-3 flex-row items-center gap-2 rounded-xl bg-card px-3 py-2.5">
+        <View className="mx-5 my-4 flex-row items-center gap-2 rounded-xl bg-card px-3 py-2.5">
           <Search size={16} color={COLORS.mutedForeground} />
           <TextInput
             value={searchText}

@@ -40,7 +40,7 @@ export default function ProfileScreen() {
       >
         {/* 헤더 */}
         <View className="flex-row items-center justify-between py-4">
-          <Text className="text-2xl font-bold text-white">내 정보</Text>
+          <Text className="text-2xl font-bold text-white">{user?.nickname ?? "사용자"}</Text>
           <Pressable
             onPress={() => router.push("/(tabs)/profile/settings")}
             className="rounded-xl bg-white/5 p-2.5"

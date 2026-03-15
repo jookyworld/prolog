@@ -1,16 +1,25 @@
+import { useAuth } from "@/contexts/auth-context";
+import { homeApi } from "@/lib/api/home";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatRelativeDate } from "@/lib/format";
 import type { BodyPart } from "@/lib/types/exercise";
-import { ChevronRight, X } from "lucide-react-native";
-import { ActivityIndicator, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import Svg, { Polyline, Circle, Text as SvgText } from "react-native-svg";
-import { useState, useEffect } from "react";
-import { homeApi } from "@/lib/api/home";
 import type { HomeStatsResponse } from "@/lib/types/home";
-import { useAuth } from "@/contexts/auth-context";
-
+import { useRouter } from "expo-router";
+import { ChevronRight, X } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import Svg, { Circle, Polyline, Text as SvgText } from "react-native-svg";
 
 function formatVolume(kg: number): string {
   if (kg >= 1000) {
@@ -37,17 +46,14 @@ function getBodyPartLabel(bodyParts: BodyPart[]): string {
 
   const hasLower = unique.some((bp) => bp === "하체");
   const hasUpper = unique.some(
-    (bp) =>
-      bp === "가슴" || bp === "등" || bp === "어깨" || bp === "팔"
+    (bp) => bp === "가슴" || bp === "등" || bp === "어깨" || bp === "팔",
   );
 
   if (hasLower && hasUpper) return "전신";
   if (hasLower) return "하체";
   if (hasUpper && unique.length > 2) return "상체";
 
-  return unique
-    .slice(0, 2)
-    .join("·");
+  return unique.slice(0, 2).join("·");
 }
 
 export default function HomeScreen() {
@@ -84,8 +90,7 @@ export default function HomeScreen() {
   const toggleSession = (exerciseId: number, sessionIndex: number) => {
     setSelectedSessions((prev) => ({
       ...prev,
-      [exerciseId]:
-        prev[exerciseId] === sessionIndex ? null : sessionIndex,
+      [exerciseId]: prev[exerciseId] === sessionIndex ? null : sessionIndex,
     }));
   };
 
@@ -123,11 +128,15 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
+        contentContainerStyle={{
+          paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16,
+        }}
       >
         {/* 헤더 */}
         <View className="px-5 py-4">
-          <Text className="text-2xl font-bold text-white">홈</Text>
+          <Text className="text-2xl font-bold text-white">
+            Hello, {user?.nickname ?? "사용자"} 👋
+          </Text>
           <Text className="mt-1 text-sm text-white/50">
             {new Date().toLocaleDateString("ko-KR", {
               month: "long",
@@ -226,233 +235,252 @@ export default function HomeScreen() {
             {homeData.exerciseProgress
               .filter((exercise) => exercise.sessions.length >= 2)
               .map((exercise) => {
-              const firstVolume = exercise.sessions[0].totalVolume;
-              const lastVolume =
-                exercise.sessions[exercise.sessions.length - 1].totalVolume;
-              const growth = lastVolume - firstVolume;
-              const growthPercent = ((growth / firstVolume) * 100).toFixed(1);
-              const maxVolume = Math.max(
-                ...exercise.sessions.map((s) => s.totalVolume),
-              );
-              const minVolume = Math.min(
-                ...exercise.sessions.map((s) => s.totalVolume),
-              );
-              const range = maxVolume - minVolume;
+                const firstVolume = exercise.sessions[0].totalVolume;
+                const lastVolume =
+                  exercise.sessions[exercise.sessions.length - 1].totalVolume;
+                const growth = lastVolume - firstVolume;
+                const growthPercent = ((growth / firstVolume) * 100).toFixed(1);
+                const maxVolume = Math.max(
+                  ...exercise.sessions.map((s) => s.totalVolume),
+                );
+                const minVolume = Math.min(
+                  ...exercise.sessions.map((s) => s.totalVolume),
+                );
+                const range = maxVolume - minVolume;
 
-              const selectedSessionIndex =
-                selectedSessions[exercise.exerciseId];
-              const selectedSession =
-                selectedSessionIndex !== null &&
-                selectedSessionIndex !== undefined
-                  ? exercise.sessions[selectedSessionIndex]
-                  : null;
+                const selectedSessionIndex =
+                  selectedSessions[exercise.exerciseId];
+                const selectedSession =
+                  selectedSessionIndex !== null &&
+                  selectedSessionIndex !== undefined
+                    ? exercise.sessions[selectedSessionIndex]
+                    : null;
 
-              return (
-                <View
-                  key={exercise.exerciseId}
-                  className="overflow-visible rounded-2xl bg-card"
-                  style={{
-                    borderWidth: 1,
-                    borderColor: "rgba(255,255,255,0.05)",
-                  }}
-                >
-                  <View className="px-4 pt-4 pb-2">
-                    <View className="mb-2 flex-row items-start justify-between">
-                      <View className="flex-1">
-                        <Text className="text-lg font-bold text-white">
-                          {exercise.exerciseName}
-                        </Text>
-                        <Text className="mt-0.5 text-xs text-white/40">
-                          {formatVolume(firstVolume)} → {formatVolume(lastVolume)}
-                        </Text>
+                return (
+                  <View
+                    key={exercise.exerciseId}
+                    className="overflow-visible rounded-2xl bg-card"
+                    style={{
+                      borderWidth: 1,
+                      borderColor: "rgba(255,255,255,0.05)",
+                    }}
+                  >
+                    <View className="px-4 pt-4 pb-2">
+                      <View className="mb-2 flex-row items-start justify-between">
+                        <View className="flex-1">
+                          <Text className="text-lg font-bold text-white">
+                            {exercise.exerciseName}
+                          </Text>
+                          <Text className="mt-0.5 text-xs text-white/40">
+                            {formatVolume(firstVolume)} →{" "}
+                            {formatVolume(lastVolume)}
+                          </Text>
+                        </View>
+                        <View className="items-end">
+                          <Text className="text-xl font-bold text-primary">
+                            +{formatVolume(growth)}
+                          </Text>
+                          <Text className="text-xs text-white/40">
+                            +{growthPercent}%
+                          </Text>
+                        </View>
                       </View>
-                      <View className="items-end">
-                        <Text className="text-xl font-bold text-primary">
-                          +{formatVolume(growth)}
-                        </Text>
-                        <Text className="text-xs text-white/40">
-                          +{growthPercent}%
-                        </Text>
-                      </View>
-                    </View>
 
-                    {/* 꺾은선 그래프 */}
-                    <View style={{ position: "relative", height: 90, marginTop: 12, marginHorizontal: -8 }}>
-                      <Svg width="100%" height="90" viewBox="0 0 300 90">
-                        {/* 배경 그리드 (은은하게) */}
-                        {[0, 1, 2, 3, 4].map((i) => (
-                          <SvgText
-                            key={`grid-${i}`}
-                            x="5"
-                            y={15 + i * 12}
-                            fontSize="8"
-                            fill="rgba(255,255,255,0.1)"
-                          >
-                            ─
-                          </SvgText>
-                        ))}
-
-                        {/* 라인 그리기 */}
-                        <Polyline
-                          points={exercise.sessions
-                            .map((session, i) => {
-                              const x =
-                                (i / Math.max(exercise.sessions.length - 1, 1)) *
-                                  280 +
-                                10;
-                              const y =
-                                range > 0
-                                  ? 10 +
-                                    (1 - (session.totalVolume - minVolume) / range) *
-                                      40
-                                  : 40;
-                              return `${x},${y}`;
-                            })
-                            .join(" ")}
-                          fill="none"
-                          stroke={COLORS.primary}
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-
-                        {/* 점 그리기 */}
-                        {exercise.sessions.map((session, i) => {
-                          const x =
-                            (i / Math.max(exercise.sessions.length - 1, 1)) * 280 +
-                            10;
-                          const y =
-                            range > 0
-                              ? 10 +
-                                (1 - (session.totalVolume - minVolume) / range) * 40
-                              : 40;
-                          const isLast = i === exercise.sessions.length - 1;
-                          const isSelected = selectedSessionIndex === i;
-                          return (
-                            <Circle
-                              key={i}
-                              cx={x}
-                              cy={y}
-                              r={isSelected ? 8 : isLast ? 6 : 4}
-                              fill={
-                                isSelected || isLast
-                                  ? COLORS.primary
-                                  : COLORS.card
-                              }
-                              stroke={COLORS.primary}
-                              strokeWidth={isSelected ? 3 : isLast ? 2.5 : 2}
-                              onPress={() => toggleSession(exercise.exerciseId, i)}
-                            />
-                          );
-                        })}
-
-                        {/* 날짜 표시 */}
-                        {exercise.sessions.map((session, i) => {
-                          const x =
-                            (i / Math.max(exercise.sessions.length - 1, 1)) * 280 +
-                            10;
-                          const isSelected = selectedSessionIndex === i;
-                          return (
+                      {/* 꺾은선 그래프 */}
+                      <View
+                        style={{
+                          position: "relative",
+                          height: 90,
+                          marginTop: 12,
+                          marginHorizontal: -8,
+                        }}
+                      >
+                        <Svg width="100%" height="90" viewBox="0 0 300 90">
+                          {/* 배경 그리드 (은은하게) */}
+                          {[0, 1, 2, 3, 4].map((i) => (
                             <SvgText
-                              key={`date-${i}`}
-                              x={x}
-                              y="80"
-                              fontSize="11"
-                              fill={
-                                isSelected
-                                  ? COLORS.primary
-                                  : "rgba(255,255,255,0.4)"
-                              }
-                              fontWeight={isSelected ? "bold" : "normal"}
-                              textAnchor="middle"
-                              onPress={() => toggleSession(exercise.exerciseId, i)}
+                              key={`grid-${i}`}
+                              x="5"
+                              y={15 + i * 12}
+                              fontSize="8"
+                              fill="rgba(255,255,255,0.1)"
                             >
-                              {session.date}
+                              ─
                             </SvgText>
-                          );
-                        })}
-                      </Svg>
+                          ))}
 
-                      {/* Floating card for selected session */}
-                      {selectedSession && (
-                        <View
-                          style={{
-                            position: "absolute",
-                            top: 0,
-                            left: "15%",
-                            right: "15%",
-                            zIndex: 1000,
-                            elevation: 20,
-                          }}
-                          className="rounded-xl bg-card/95 backdrop-blur-sm"
-                        >
+                          {/* 라인 그리기 */}
+                          <Polyline
+                            points={exercise.sessions
+                              .map((session, i) => {
+                                const x =
+                                  (i /
+                                    Math.max(exercise.sessions.length - 1, 1)) *
+                                    280 +
+                                  10;
+                                const y =
+                                  range > 0
+                                    ? 10 +
+                                      (1 -
+                                        (session.totalVolume - minVolume) /
+                                          range) *
+                                        40
+                                    : 40;
+                                return `${x},${y}`;
+                              })
+                              .join(" ")}
+                            fill="none"
+                            stroke={COLORS.primary}
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+
+                          {/* 점 그리기 */}
+                          {exercise.sessions.map((session, i) => {
+                            const x =
+                              (i / Math.max(exercise.sessions.length - 1, 1)) *
+                                280 +
+                              10;
+                            const y =
+                              range > 0
+                                ? 10 +
+                                  (1 -
+                                    (session.totalVolume - minVolume) / range) *
+                                    40
+                                : 40;
+                            const isLast = i === exercise.sessions.length - 1;
+                            const isSelected = selectedSessionIndex === i;
+                            return (
+                              <Circle
+                                key={i}
+                                cx={x}
+                                cy={y}
+                                r={isSelected ? 8 : isLast ? 6 : 4}
+                                fill={
+                                  isSelected || isLast
+                                    ? COLORS.primary
+                                    : COLORS.card
+                                }
+                                stroke={COLORS.primary}
+                                strokeWidth={isSelected ? 3 : isLast ? 2.5 : 2}
+                                onPress={() =>
+                                  toggleSession(exercise.exerciseId, i)
+                                }
+                              />
+                            );
+                          })}
+
+                          {/* 날짜 표시 */}
+                          {exercise.sessions.map((session, i) => {
+                            const x =
+                              (i / Math.max(exercise.sessions.length - 1, 1)) *
+                                280 +
+                              10;
+                            const isSelected = selectedSessionIndex === i;
+                            return (
+                              <SvgText
+                                key={`date-${i}`}
+                                x={x}
+                                y="80"
+                                fontSize="11"
+                                fill={
+                                  isSelected
+                                    ? COLORS.primary
+                                    : "rgba(255,255,255,0.4)"
+                                }
+                                fontWeight={isSelected ? "bold" : "normal"}
+                                textAnchor="middle"
+                                onPress={() =>
+                                  toggleSession(exercise.exerciseId, i)
+                                }
+                              >
+                                {session.date}
+                              </SvgText>
+                            );
+                          })}
+                        </Svg>
+
+                        {/* Floating card for selected session */}
+                        {selectedSession && (
                           <View
                             style={{
-                              borderWidth: 1,
-                              borderColor: "rgba(255,255,255,0.1)",
+                              position: "absolute",
+                              top: 0,
+                              left: "15%",
+                              right: "15%",
+                              zIndex: 1000,
+                              elevation: 20,
                             }}
-                            className="rounded-xl p-3"
+                            className="rounded-xl bg-card/95 backdrop-blur-sm"
                           >
-                            {/* Header */}
-                            <View className="mb-2 flex-row items-start justify-between">
-                              <View className="flex-1">
-                                <Text className="text-sm font-semibold text-white">
-                                  {selectedSession.routineName}
-                                </Text>
-                                <Text className="text-xs text-white/50">
-                                  {selectedSession.date}
-                                </Text>
-                              </View>
-                              <TouchableOpacity
-                                onPress={() =>
-                                  toggleSession(exercise.exerciseId, -1)
-                                }
-                                className="ml-2"
-                              >
-                                <X size={16} color="rgba(255,255,255,0.5)" />
-                              </TouchableOpacity>
-                            </View>
-
-                            {/* Sets table */}
-                            <View className="mb-2 gap-1">
-                              {selectedSession.sets.map((set, idx) => (
-                                <View
-                                  key={idx}
-                                  className="flex-row items-center justify-between"
-                                >
-                                  <Text className="w-6 text-xs text-white/40">
-                                    {idx + 1}
+                            <View
+                              style={{
+                                borderWidth: 1,
+                                borderColor: "rgba(255,255,255,0.1)",
+                              }}
+                              className="rounded-xl p-3"
+                            >
+                              {/* Header */}
+                              <View className="mb-2 flex-row items-start justify-between">
+                                <View className="flex-1">
+                                  <Text className="text-sm font-semibold text-white">
+                                    {selectedSession.routineName}
                                   </Text>
-                                  <Text className="w-16 text-sm font-medium text-white">
-                                    {set.weight}kg
-                                  </Text>
-                                  <Text className="w-12 text-sm font-medium text-white">
-                                    ×{set.reps}
-                                  </Text>
-                                  <Text className="w-16 text-right text-xs text-white/40">
-                                    {set.weight * set.reps}kg
+                                  <Text className="text-xs text-white/50">
+                                    {selectedSession.date}
                                   </Text>
                                 </View>
-                              ))}
-                            </View>
+                                <TouchableOpacity
+                                  onPress={() =>
+                                    toggleSession(exercise.exerciseId, -1)
+                                  }
+                                  className="ml-2"
+                                >
+                                  <X size={16} color="rgba(255,255,255,0.5)" />
+                                </TouchableOpacity>
+                              </View>
 
-                            {/* Total volume */}
-                            <View className="flex-row items-center justify-between rounded-lg bg-primary/10 px-2 py-1.5">
-                              <Text className="text-xs font-semibold text-white/70">
-                                총 볼륨
-                              </Text>
-                              <Text className="text-sm font-bold text-primary">
-                                {formatVolume(selectedSession.totalVolume)}
-                              </Text>
+                              {/* Sets table */}
+                              <View className="mb-2 gap-1">
+                                {selectedSession.sets.map((set, idx) => (
+                                  <View
+                                    key={idx}
+                                    className="flex-row items-center justify-between"
+                                  >
+                                    <Text className="w-6 text-xs text-white/40">
+                                      {idx + 1}
+                                    </Text>
+                                    <Text className="w-16 text-sm font-medium text-white">
+                                      {set.weight}kg
+                                    </Text>
+                                    <Text className="w-12 text-sm font-medium text-white">
+                                      ×{set.reps}
+                                    </Text>
+                                    <Text className="w-16 text-right text-xs text-white/40">
+                                      {set.weight * set.reps}kg
+                                    </Text>
+                                  </View>
+                                ))}
+                              </View>
+
+                              {/* Total volume */}
+                              <View className="flex-row items-center justify-between rounded-lg bg-primary/10 px-2 py-1.5">
+                                <Text className="text-xs font-semibold text-white/70">
+                                  총 볼륨
+                                </Text>
+                                <Text className="text-sm font-bold text-primary">
+                                  {formatVolume(selectedSession.totalVolume)}
+                                </Text>
+                              </View>
                             </View>
                           </View>
-                        </View>
-                      )}
+                        )}
+                      </View>
                     </View>
                   </View>
-                </View>
-              );
-            })}
+                );
+              })}
           </View>
         </View>
 
