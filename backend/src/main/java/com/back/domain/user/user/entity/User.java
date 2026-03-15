@@ -42,8 +42,8 @@ public class User {
     @Column(nullable = false)
     private double weight;
 
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean marketingConsent;
+    @Column
+    private LocalDateTime marketingConsentedAt;
 
     @Column
     private Integer birthYear;
@@ -65,6 +65,10 @@ public class User {
         this.height = height;
         this.weight = weight;
         this.birthYear = birthYear;
+    }
+
+    public void updateMarketingConsent(boolean agreed) {
+        this.marketingConsentedAt = agreed ? LocalDateTime.now() : null;
     }
 
     public void resetPassword(String encodedPassword) {

@@ -1,5 +1,6 @@
 package com.back.domain.user.user.controller;
 
+import com.back.domain.user.user.dto.UpdateMarketingConsentRequest;
 import com.back.domain.user.user.dto.UpdateProfileRequest;
 import com.back.domain.user.user.dto.UserResponse;
 import com.back.domain.user.user.service.UserService;
@@ -22,6 +23,15 @@ public class UserController {
             @Valid @RequestBody UpdateProfileRequest dto
     ) {
         UserResponse response = userService.updateProfile(principal.getId(), dto);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/me/marketing-consent")
+    public ResponseEntity<UserResponse> updateMarketingConsent(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestBody UpdateMarketingConsentRequest dto
+    ) {
+        UserResponse response = userService.updateMarketingConsent(principal.getId(), dto.marketingConsent());
         return ResponseEntity.ok(response);
     }
 }

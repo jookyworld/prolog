@@ -23,6 +23,7 @@ import com.back.global.exception.type.BadRequestException;
 import com.back.global.exception.type.NotFoundException;
 import com.back.global.mail.EmailService;
 import com.back.global.mail.EmailVerificationService;
+import java.time.LocalDateTime;
 import com.back.global.security.token.PasswordResetTokenService;
 import com.back.global.security.token.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
@@ -97,7 +98,7 @@ public class AuthService {
                 .birthYear(dto.birthYear())
                 .height(dto.height())
                 .weight(dto.weight())
-                .marketingConsent(dto.marketingConsent())
+                .marketingConsentedAt(dto.marketingConsent() ? LocalDateTime.now() : null)
                 .role(Role.USER)
                 .build();
 

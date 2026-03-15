@@ -16,7 +16,8 @@ public record UserResponse(
         double weight,
         Role role,
         LocalDateTime createdAt,
-        Integer birthYear
+        Integer birthYear,
+        LocalDateTime marketingConsentedAt
 ) {
 
     public static UserResponse from(User user) {
@@ -30,7 +31,8 @@ public record UserResponse(
                 user.getWeight(),
                 user.getRole(),
                 user.getCreatedAt(),
-                user.getBirthYear()
+                user.getBirthYear(),
+                user.getMarketingConsentedAt()
         );
     }
 }

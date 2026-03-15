@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { ApiError } from "@/lib/api";
 import { authApi } from "@/lib/api/auth";
 import { COLORS } from "@/lib/constants";
-import { MARKETING_CONSENT } from "@/lib/constants/terms";
+import { MARKETING_CONSENT, TERMS_URLS } from "@/lib/constants/terms";
 import type { SignupRequest } from "@/lib/types/auth";
 import {
   signupStep1Schema,
@@ -32,11 +32,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-const TERMS_URLS = {
-  terms: "https://prolog.jooky.site/terms",
-  privacy: "https://prolog.jooky.site/privacy",
-} as const;
 
 const STEP_LABELS: Record<number, string> = {
   1: "약관에 동의하세요",

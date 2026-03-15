@@ -28,6 +28,7 @@ export interface UserResponse {
   weight: number;
   role: string;
   createdAt: string;
+  marketingConsentedAt: string | null;
 }
 
 export interface LoginResponse {
@@ -42,6 +43,10 @@ export interface UpdateProfileRequest {
   birthYear: number;
   height: number;
   weight: number;
+}
+
+export interface UpdateMarketingConsentRequest {
+  marketingConsent: boolean;
 }
 
 export interface CheckDuplicatesRequest {

@@ -31,4 +31,11 @@ public class UserService {
 
         return UserResponse.from(user);
     }
+
+    @Transactional
+    public UserResponse updateMarketingConsent(Long userId, boolean marketingConsent) {
+        User user = getUserById(userId);
+        user.updateMarketingConsent(marketingConsent);
+        return UserResponse.from(user);
+    }
 }
