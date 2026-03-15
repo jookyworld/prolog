@@ -2,6 +2,7 @@ package com.back.global.mail;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import com.back.global.exception.type.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -36,7 +37,7 @@ public class EmailService {
                     """.formatted(code));
             mailSender.send(message);
         } catch (MessagingException | java.io.UnsupportedEncodingException e) {
-            throw new RuntimeException("이메일 전송에 실패했습니다.", e);
+            throw new BadRequestException("이메일 전송에 실패했습니다.");
         }
     }
 
@@ -59,7 +60,7 @@ public class EmailService {
                     """.formatted(code));
             mailSender.send(message);
         } catch (MessagingException | java.io.UnsupportedEncodingException e) {
-            throw new RuntimeException("이메일 전송에 실패했습니다.", e);
+            throw new BadRequestException("이메일 전송에 실패했습니다.");
         }
     }
 }
