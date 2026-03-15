@@ -22,7 +22,7 @@ public class UserService {
     public UserResponse updateProfile(Long userId, UpdateProfileRequest dto) {
         User user = getUserById(userId);
 
-        if (!user.getNickname().equals(dto.nickname())
+        if (!user.getNickname().equalsIgnoreCase(dto.nickname())
                 && userRepository.existsByNickname(dto.nickname())) {
             throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
         }
