@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Animated,
   Dimensions,
+  Easing,
   Modal,
   Pressable,
   ScrollView,
@@ -55,10 +56,10 @@ export default function WorkoutStartSheet({
           duration: 200,
           useNativeDriver: true,
         }),
-        Animated.spring(slideAnim, {
+        Animated.timing(slideAnim, {
           toValue: 0,
-          damping: 28,
-          stiffness: 300,
+          duration: 300,
+          easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
       ]).start();
