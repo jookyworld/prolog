@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Animated,
   Dimensions,
-  Easing,
   Modal,
   Pressable,
   ScrollView,
@@ -31,6 +30,7 @@ export default function WorkoutStartSheet({
   const [routines, setRoutines] = useState<RoutineListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
 
@@ -49,17 +49,17 @@ export default function WorkoutStartSheet({
 
   useEffect(() => {
     if (visible) {
+      setModalVisible(true);
       fetchActiveRoutines();
       Animated.parallel([
         Animated.timing(backdropAnim, {
           toValue: 1,
-          duration: 200,
+          duration: 250,
           useNativeDriver: true,
         }),
         Animated.timing(slideAnim, {
           toValue: 0,
           duration: 300,
-          easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
       ]).start();
@@ -75,7 +75,11 @@ export default function WorkoutStartSheet({
           duration: 250,
           useNativeDriver: true,
         }),
-      ]).start();
+      ]).start(() => {
+        slideAnim.setValue(SCREEN_HEIGHT);
+        backdropAnim.setValue(0);
+        setModalVisible(false);
+      });
     }
   }, [visible, slideAnim, backdropAnim, fetchActiveRoutines]);
 
@@ -91,7 +95,7 @@ export default function WorkoutStartSheet({
 
   return (
     <Modal
-      visible={visible}
+      visible={modalVisible}
       transparent
       animationType="none"
       statusBarTranslucent

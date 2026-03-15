@@ -426,6 +426,43 @@ const handlePressFAB = () => {
 
 ---
 
+### 바텀시트 열릴 때/닫힐 때 애니메이션이 어색한 문제 (App)
+
+**증상:** 바텀시트가 올라올 때 뚝뚝 끊기거나, 닫힐 때 슬라이드 애니메이션 없이 순간적으로 사라짐
+
+**원인:** React Native `Modal`의 `visible` prop을 부모 컴포넌트가 직접 제어하면, `visible=false`가 되는 즉시 Modal이 언마운트되어 닫히는 애니메이션이 재생되지 않음. 열릴 때도 `Easing.out(Easing.cubic)`처럼 초반 가속도가 강한 easing을 쓰면 이질감이 생길 수 있음.
+
+**해결:** 내부 `modalVisible` state를 분리하고, 닫기 애니메이션 완료 후 Modal을 숨기도록 변경.
+
+```tsx
+// ❌ 잘못된 방식: 부모 visible prop으로 Modal 직접 제어
+<Modal visible={visible} ...>
+
+// ✅ 올바른 방식: 내부 state 분리 + 애니메이션 완료 후 닫기
+const [modalVisible, setModalVisible] = useState(false);
+
+useEffect(() => {
+  if (visible) {
+    setModalVisible(true); // 먼저 Modal 열고
+    Animated.parallel([...]).start(); // 그 다음 애니메이션
+  } else {
+    Animated.parallel([...]).start(() => {
+      slideAnim.setValue(SHEET_HEIGHT);
+      fadeAnim.setValue(0);
+      setModalVisible(false); // 애니메이션 완료 후 닫기
+    });
+  }
+}, [visible]);
+
+<Modal visible={modalVisible} ...>
+```
+
+**easing 통일:** 여러 바텀시트의 느낌을 통일하려면 easing을 지정하지 않아 기본값(`Easing.inOut(Easing.ease)`)을 사용하거나, 동일한 easing을 공유할 것. `Easing.out(Easing.cubic)`은 초반이 지나치게 빨라 이질감을 줄 수 있음.
+
+**적용 파일:** `application/components/WorkoutStartSheet.tsx`
+
+---
+
 ## 📚 관련 문서
 
 | 문서 | 용도 |
