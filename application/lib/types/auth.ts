@@ -6,6 +6,7 @@ export interface SignupRequest {
   email: string;
   nickname: string;
   gender: Gender;
+  birthYear: number;
   height: number;
   weight: number;
   marketingConsent: boolean;
@@ -22,6 +23,7 @@ export interface UserResponse {
   email: string;
   nickname: string;
   gender: Gender;
+  birthYear: number;
   height: number;
   weight: number;
   role: string;
@@ -37,6 +39,7 @@ export interface LoginResponse {
 export interface UpdateProfileRequest {
   nickname: string;
   gender: Gender;
+  birthYear: number;
   height: number;
   weight: number;
 }

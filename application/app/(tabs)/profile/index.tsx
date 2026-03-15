@@ -4,13 +4,9 @@ import { useRouter } from "expo-router";
 import {
   ChevronRight,
   Dumbbell,
-  Pencil,
-  Ruler,
   Settings,
   Share2,
   Swords,
-  User,
-  Weight,
 } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import {
@@ -23,12 +19,9 @@ export default function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const genderLabel =
-    user?.gender === "MALE"
-      ? "남성"
-      : user?.gender === "FEMALE"
-        ? "여성"
-        : "미설정";
+  const age = user?.birthYear
+    ? new Date().getFullYear() - user.birthYear + 1
+    : null;
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
@@ -40,72 +33,40 @@ export default function ProfileScreen() {
       >
         {/* 헤더 */}
         <View className="flex-row items-center justify-between py-4">
-          <Text className="text-2xl font-bold text-white">{user?.nickname ?? "사용자"}</Text>
+          <Text className="text-2xl font-bold text-white">
+            {user?.nickname ?? "사용자"}
+          </Text>
           <Pressable
             onPress={() => router.push("/(tabs)/profile/settings")}
-            className="rounded-xl bg-white/5 p-2.5"
+            className="h-10 w-10 items-center justify-center"
           >
-            <Settings size={20} color={COLORS.white} />
+            <Settings size={22} color={COLORS.mutedForeground} />
           </Pressable>
         </View>
 
-        {/* 프로필 카드 */}
-        <View className="mb-4 rounded-2xl bg-card p-5">
-          {/* 상단: 아바타 + 유저 정보 */}
-          <View className="flex-row items-center gap-4">
-            <View className="h-16 w-16 items-center justify-center rounded-full bg-primary/15">
-              <User size={28} color={COLORS.primary} />
-            </View>
-            <View className="flex-1">
-              <View className="flex-row items-center gap-2">
-                <Text className="text-xl font-bold text-white">
-                  {user?.nickname ?? "사용자"}
-                </Text>
-                <View className="rounded-md bg-primary/15 px-2 py-0.5">
-                  <Text className="text-xs font-medium text-primary">
-                    {genderLabel}
-                  </Text>
-                </View>
-              </View>
-              <Text className="mt-1 text-sm text-white/50">{user?.email}</Text>
-            </View>
-            <Pressable
-              onPress={() => router.push("/(tabs)/profile/edit")}
-              className="rounded-xl bg-white/5 p-2.5"
-            >
-              <Pencil size={16} color={COLORS.mutedForeground} />
-            </Pressable>
+
+        {/* 신체 정보 */}
+        <View className="mb-4 flex-row gap-3">
+          <View className="flex-1 items-center rounded-2xl bg-card py-4">
+            <Text className="text-xl font-bold text-white">
+              {age ?? "-"}
+              {age && <Text className="text-sm font-normal text-white/40"> 세</Text>}
+            </Text>
+            <Text className="mt-1 text-xs text-white/40">나이</Text>
           </View>
-
-          {/* 구분선 */}
-          <View className="my-4 h-px bg-white/5" />
-
-          {/* 하단: 신체 정보 2열 */}
-          <View className="flex-row">
-            <View className="flex-1 flex-row items-center gap-3">
-              <View className="h-10 w-10 items-center justify-center rounded-xl bg-white/5">
-                <Ruler size={18} color={COLORS.mutedForeground} />
-              </View>
-              <View>
-                <Text className="text-xs text-white/40">키</Text>
-                <Text className="text-lg font-bold text-white">
-                  {user?.height ?? "-"}
-                  <Text className="text-xs font-normal text-white/40"> cm</Text>
-                </Text>
-              </View>
-            </View>
-            <View className="flex-1 flex-row items-center gap-3">
-              <View className="h-10 w-10 items-center justify-center rounded-xl bg-white/5">
-                <Weight size={18} color={COLORS.mutedForeground} />
-              </View>
-              <View>
-                <Text className="text-xs text-white/40">체중</Text>
-                <Text className="text-lg font-bold text-white">
-                  {user?.weight ?? "-"}
-                  <Text className="text-xs font-normal text-white/40"> kg</Text>
-                </Text>
-              </View>
-            </View>
+          <View className="flex-1 items-center rounded-2xl bg-card py-4">
+            <Text className="text-xl font-bold text-white">
+              {user?.height ?? "-"}
+              {user?.height && <Text className="text-sm font-normal text-white/40"> cm</Text>}
+            </Text>
+            <Text className="mt-1 text-xs text-white/40">키</Text>
+          </View>
+          <View className="flex-1 items-center rounded-2xl bg-card py-4">
+            <Text className="text-xl font-bold text-white">
+              {user?.weight ?? "-"}
+              {user?.weight && <Text className="text-sm font-normal text-white/40"> kg</Text>}
+            </Text>
+            <Text className="mt-1 text-xs text-white/40">체중</Text>
           </View>
         </View>
 
@@ -113,7 +74,7 @@ export default function ProfileScreen() {
         <View className="rounded-2xl bg-card">
           <Pressable
             onPress={() => router.push("/(tabs)/profile/history")}
-            className="flex-row items-center px-5 py-4"
+            className="flex-row items-center px-5 py-4 active:opacity-70"
           >
             <View className="h-10 w-10 items-center justify-center rounded-xl bg-white/5">
               <Dumbbell size={18} color={COLORS.white} />
@@ -126,7 +87,7 @@ export default function ProfileScreen() {
 
           <Pressable
             onPress={() => router.push("/(tabs)/profile/exercises")}
-            className="flex-row items-center px-5 py-4"
+            className="flex-row items-center px-5 py-4 active:opacity-70"
           >
             <View className="h-10 w-10 items-center justify-center rounded-xl bg-white/5">
               <Swords size={18} color={COLORS.white} />
@@ -139,18 +100,14 @@ export default function ProfileScreen() {
 
           <Pressable
             onPress={() => router.push("/(tabs)/profile/shared")}
-            className="flex-row items-center px-5 py-4"
+            className="flex-row items-center px-5 py-4 active:opacity-70"
           >
             <View className="h-10 w-10 items-center justify-center rounded-xl bg-white/5">
               <Share2 size={18} color={COLORS.white} />
             </View>
-            <Text className="ml-3 flex-1 text-base text-white">
-              내가 공유한 루틴
-            </Text>
+            <Text className="ml-3 flex-1 text-base text-white">공유 기록</Text>
             <ChevronRight size={18} color={COLORS.iconMuted} />
           </Pressable>
-
-          <View className="mx-5 h-px bg-white/5" />
         </View>
       </ScrollView>
     </SafeAreaView>

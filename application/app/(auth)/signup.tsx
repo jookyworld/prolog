@@ -689,6 +689,30 @@ function Step3Form({
       </View>
 
       <View className="gap-2">
+        <Label>출생연도</Label>
+        <Controller
+          control={control}
+          name="birthYear"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              placeholder="1990"
+              keyboardType="numeric"
+              maxLength={4}
+              onBlur={onBlur}
+              onChangeText={(text) => {
+                const num = Number(text);
+                onChange(text === "" ? undefined : num);
+              }}
+              value={value != null ? String(value) : ""}
+            />
+          )}
+        />
+        {errors.birthYear && (
+          <Text className="text-xs text-red-400">{errors.birthYear.message}</Text>
+        )}
+      </View>
+
+      <View className="gap-2">
         <Label>키 (cm)</Label>
         <Controller
           control={control}

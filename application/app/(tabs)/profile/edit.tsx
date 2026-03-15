@@ -31,6 +31,7 @@ export default function ProfileEditScreen() {
 
   const [nickname, setNickname] = useState(user?.nickname ?? "");
   const [gender, setGender] = useState<Gender>(user?.gender ?? "UNKNOWN");
+  const [birthYear, setBirthYear] = useState(user?.birthYear?.toString() ?? "");
   const [height, setHeight] = useState(user?.height?.toString() ?? "");
   const [weight, setWeight] = useState(user?.weight?.toString() ?? "");
   const [saving, setSaving] = useState(false);
@@ -41,9 +42,15 @@ export default function ProfileEditScreen() {
       return;
     }
 
+    const by = Number(birthYear);
     const h = Number(height);
     const w = Number(weight);
+    const currentYear = new Date().getFullYear();
 
+    if (!by || by < 1930 || by > currentYear - 10) {
+      Alert.alert("알림", "올바른 출생연도를 입력해주세요.");
+      return;
+    }
     if (!h || h <= 0) {
       Alert.alert("알림", "올바른 키를 입력해주세요.");
       return;
@@ -58,6 +65,7 @@ export default function ProfileEditScreen() {
       const updated = await userApi.updateProfile({
         nickname: nickname.trim(),
         gender,
+        birthYear: by,
         height: h,
         weight: w,
       });
@@ -136,6 +144,22 @@ export default function ProfileEditScreen() {
                 </Pressable>
               ))}
             </View>
+          </View>
+
+          {/* Birth Year */}
+          <View className="mt-5">
+            <Text className="mb-2 text-sm font-medium text-white/60">
+              출생연도
+            </Text>
+            <TextInput
+              className="rounded-xl bg-card px-4 py-3.5 text-base text-white"
+              placeholder="1990"
+              placeholderTextColor={COLORS.placeholder}
+              keyboardType="numeric"
+              maxLength={4}
+              value={birthYear}
+              onChangeText={setBirthYear}
+            />
           </View>
 
           {/* Height */}

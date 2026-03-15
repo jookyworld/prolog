@@ -25,10 +25,16 @@ export const signupStep2Schema = z.object({
   code: z.string().length(6, "인증 코드는 6자리입니다."),
 });
 
+const currentYear = new Date().getFullYear();
+
 export const signupStep3Schema = z.object({
   gender: z.enum(["MALE", "FEMALE"], {
     message: "성별을 선택해주세요",
   }),
+  birthYear: z
+    .number()
+    .min(1930, "올바른 출생연도를 입력해주세요")
+    .max(currentYear - 10, "올바른 출생연도를 입력해주세요"),
   height: z
     .number()
     .min(100, "키는 100cm 이상이어야 합니다")
