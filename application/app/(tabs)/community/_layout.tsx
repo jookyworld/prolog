@@ -1,3 +1,4 @@
+import { COLORS } from "@/lib/constants";
 import { Stack } from "expo-router";
 
 export default function CommunityLayout() {
@@ -5,7 +6,7 @@ export default function CommunityLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: "#000" },
+        contentStyle: { backgroundColor: COLORS.background },
       }}
     >
       <Stack.Screen name="index" />

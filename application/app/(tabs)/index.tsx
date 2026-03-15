@@ -122,7 +122,7 @@ export default function HomeScreen() {
       >
         {/* 헤더 */}
         <View className="px-5 py-4">
-          <Text className="text-2xl font-bold text-primary">ProLog</Text>
+          <Text className="text-3xl font-bold text-primary">ProLog</Text>
           <Text className="mt-1 text-sm text-white/50">
             {new Date().toLocaleDateString("ko-KR", {
               month: "long",
