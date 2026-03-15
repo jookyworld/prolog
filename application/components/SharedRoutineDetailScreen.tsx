@@ -144,7 +144,9 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
                   await communityApi.deleteSharedRoutine(routineId);
                   router.back();
                 } catch {
-                  Alert.alert("삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
+                  Alert.alert(
+                    "삭제하지 못했습니다. 잠시 후 다시 시도해주세요.",
+                  );
                 }
               },
             },
@@ -231,9 +233,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
         duration: 300,
         useNativeDriver: true,
       }),
-    ]).start(() => {
-      commentInputRef.current?.focus();
-    });
+    ]).start();
   };
 
   const closeCommentSheet = () => {
@@ -387,17 +387,17 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
               key={item.exerciseId}
               className="flex-row items-center gap-3 rounded-xl bg-white/5 px-4 py-3"
             >
-              <Text className="w-5 text-center text-xs font-bold text-white/25">
+              <Text className="w-5 text-center text-base font-bold text-white/25">
                 {idx + 1}
               </Text>
               <View className="flex-1">
-                <Text className="text-sm font-semibold text-white">
+                <Text className="text-base font-semibold text-white">
                   {item.exerciseName}
                 </Text>
                 <Text className="text-xs text-white/40">{item.bodyPart}</Text>
               </View>
               <View className="items-end">
-                <Text className="text-sm font-bold text-primary">
+                <Text className="text-base font-bold text-primary">
                   {item.sets}세트
                 </Text>
                 <Text className="text-xs text-white/30">
@@ -412,14 +412,14 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
         <View className="flex-row items-center gap-3 px-7 py-3">
           <View className="flex-row items-center gap-1.5">
             <Eye size={16} color={COLORS.mutedForeground} />
-            <Text className="text-sm text-white/40">{routine.viewCount}</Text>
+            <Text className="text-base text-white/40">{routine.viewCount}</Text>
           </View>
           <Pressable
             onPress={openCommentSheet}
             className="flex-row items-center gap-1.5"
           >
             <MessageCircle size={16} color={COLORS.mutedForeground} />
-            <Text className="text-sm text-white/40">
+            <Text className="text-base text-white/40">
               {routine.comments.length > 0 ? routine.comments.length : ""}
             </Text>
           </Pressable>
@@ -494,7 +494,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
               <View className="h-1 w-10 rounded-full bg-white/20" />
             </View>
 
-            <View className="flex-row items-center justify-between px-5 py-3">
+            <View className="flex-row items-center justify-between px-7 py-3">
               <Text className="text-base font-bold text-white">
                 댓글{" "}
                 {routine.comments.length > 0 ? routine.comments.length : ""}
@@ -519,21 +519,16 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
                 <View className="gap-5 py-2" style={{ paddingBottom: 12 }}>
                   {routine.comments.map((comment) => (
                     <View key={comment.id} className="flex-row gap-3">
-                      <View className="h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10">
-                        <Text className="text-xs font-bold text-white/60">
-                          {comment.nickname[0].toUpperCase()}
-                        </Text>
-                      </View>
-                      <View className="flex-1 gap-0.5">
+                      <View className="flex-1 gap-0.5 px-2">
                         <View className="flex-row items-center gap-2">
-                          <Text className="text-sm font-semibold text-white">
+                          <Text className="text-base font-semibold text-white">
                             {comment.nickname}
                           </Text>
                           <Text className="text-xs text-white/30">
                             {formatRelativeDate(comment.createdAt)}
                           </Text>
                         </View>
-                        <Text className="text-sm leading-5 text-white/70">
+                        <Text className="text-base leading-5 text-white/70">
                           {comment.content}
                         </Text>
                       </View>
@@ -615,11 +610,6 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
                 paddingBottom: keyboardVisible ? 12 : insets.bottom + 12,
               }}
             >
-              <View className="h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20">
-                <Text className="text-xs font-bold text-primary">
-                  {user?.nickname?.[0]?.toUpperCase() ?? "?"}
-                </Text>
-              </View>
               <View className="flex-1 flex-row items-center rounded-full bg-white/8 px-4">
                 <TextInput
                   ref={commentInputRef}
@@ -627,7 +617,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
                   onChangeText={setCommentText}
                   placeholder={`${routine.nickname}에게 댓글 달기...`}
                   placeholderTextColor={COLORS.mutedForeground}
-                  className="flex-1 py-2.5 text-sm text-white"
+                  className="flex-1 py-2.5 text-base text-white"
                   multiline
                   maxLength={200}
                 />
