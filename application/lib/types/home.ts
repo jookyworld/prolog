@@ -5,7 +5,6 @@ export interface HomeStatsResponse {
   // 주간/월간 기본 통계
   thisWeek: {
     workouts: number; // 이번 주 운동 횟수 (월~일 기준)
-    goal: number; // 주간 목표
   };
   thisMonth: {
     workouts: number; // 이번 달 운동 횟수 (1일~오늘)

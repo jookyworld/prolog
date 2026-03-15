@@ -43,16 +43,12 @@ public class StatsService {
         // 5. exerciseProgress 계산
         List<HomeStatsResponse.ExerciseProgress> exerciseProgress = calculateExerciseProgress(userId);
 
-        // 6. recentWorkouts 계산
-        List<HomeStatsResponse.RecentWorkoutSummary> recentWorkouts = calculateRecentWorkouts(userId);
-
         return new HomeStatsResponse(
                 thisWeek,
                 thisMonth,
                 avgWorkoutDuration,
                 weeklyActivity,
-                exerciseProgress,
-                recentWorkouts
+                exerciseProgress
         );
     }
 
@@ -65,7 +61,7 @@ public class StatsService {
         long count = workoutSessionRepository.countByUser_IdAndCompletedAtBetween(
                 userId, weekStartDateTime, weekEndDateTime);
 
-        return new HomeStatsResponse.ThisWeek((int) count, 5); // goal은 하드코딩 5
+        return new HomeStatsResponse.ThisWeek((int) count);
     }
 
     private HomeStatsResponse.ThisMonth calculateThisMonth(Long userId, LocalDate today) {
@@ -168,42 +164,4 @@ public class StatsService {
                 .toList();
     }
 
-    private List<HomeStatsResponse.RecentWorkoutSummary> calculateRecentWorkouts(Long userId) {
-        List<WorkoutSession> sessions = workoutSessionRepository.findRecentCompletedSessions(userId, 5);
-
-        return sessions.stream()
-                .map(session -> {
-                    List<WorkoutSessionExercise> sessionExercises = session.getSessionExercises();
-
-                    int exerciseCount = sessionExercises.size();
-
-                    int totalSetCount = sessionExercises.stream()
-                            .mapToInt(se -> se.getSets().size())
-                            .sum();
-
-                    long totalVolume = sessionExercises.stream()
-                            .flatMap(se -> se.getSets().stream())
-                            .mapToLong(set -> (long) set.getWeight() * set.getReps())
-                            .sum();
-
-                    long duration = session.getStartedAt() != null && session.getCompletedAt() != null
-                            ? java.time.Duration.between(session.getStartedAt(), session.getCompletedAt()).getSeconds()
-                            : 0L;
-
-                    String title = session.getRoutine() != null
-                            ? session.getRoutine().getTitle()
-                            : "자유 운동";
-
-                    return new HomeStatsResponse.RecentWorkoutSummary(
-                            session.getId(),
-                            title,
-                            com.back.global.util.DateTimeUtil.formatToIso(session.getCompletedAt()),
-                            exerciseCount,
-                            totalSetCount,
-                            totalVolume,
-                            duration
-                    );
-                })
-                .toList();
-    }
 }

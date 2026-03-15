@@ -44,27 +44,32 @@ export default function ProfileScreen() {
           </Pressable>
         </View>
 
-
         {/* 신체 정보 */}
         <View className="mb-4 flex-row gap-3">
           <View className="flex-1 items-center rounded-2xl bg-card py-4">
             <Text className="text-xl font-bold text-white">
               {age ?? "-"}
-              {age && <Text className="text-sm font-normal text-white/40"> 세</Text>}
+              {age && (
+                <Text className="text-sm font-normal text-white/40"> 세</Text>
+              )}
             </Text>
             <Text className="mt-1 text-xs text-white/40">나이</Text>
           </View>
           <View className="flex-1 items-center rounded-2xl bg-card py-4">
             <Text className="text-xl font-bold text-white">
               {user?.height ?? "-"}
-              {user?.height && <Text className="text-sm font-normal text-white/40"> cm</Text>}
+              {user?.height && (
+                <Text className="text-sm font-normal text-white/40"> cm</Text>
+              )}
             </Text>
             <Text className="mt-1 text-xs text-white/40">키</Text>
           </View>
           <View className="flex-1 items-center rounded-2xl bg-card py-4">
             <Text className="text-xl font-bold text-white">
               {user?.weight ?? "-"}
-              {user?.weight && <Text className="text-sm font-normal text-white/40"> kg</Text>}
+              {user?.weight && (
+                <Text className="text-sm font-normal text-white/40"> kg</Text>
+              )}
             </Text>
             <Text className="mt-1 text-xs text-white/40">체중</Text>
           </View>

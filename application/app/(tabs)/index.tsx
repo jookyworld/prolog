@@ -1,11 +1,9 @@
 import { useAuth } from "@/contexts/auth-context";
 import { homeApi } from "@/lib/api/home";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
-import { formatRelativeDate } from "@/lib/format";
 import type { BodyPart } from "@/lib/types/exercise";
 import type { HomeStatsResponse } from "@/lib/types/home";
-import { useRouter } from "expo-router";
-import { ChevronRight, X } from "lucide-react-native";
+import { TrendingUp, X } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -28,15 +26,6 @@ function formatVolume(kg: number): string {
   return `${kg}kg`;
 }
 
-function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  if (hours > 0) {
-    return `${hours}시간 ${minutes}분`;
-  }
-  return `${minutes}분`;
-}
-
 function getBodyPartLabel(bodyParts: BodyPart[]): string {
   if (bodyParts.length === 0) return "";
   if (bodyParts.length === 1) return bodyParts[0];
@@ -57,7 +46,6 @@ function getBodyPartLabel(bodyParts: BodyPart[]): string {
 }
 
 export default function HomeScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const [selectedSessions, setSelectedSessions] = useState<
@@ -134,9 +122,7 @@ export default function HomeScreen() {
       >
         {/* 헤더 */}
         <View className="px-5 py-4">
-          <Text className="text-2xl font-bold text-white">
-            Hello, {user?.nickname ?? "사용자"} 👋
-          </Text>
+          <Text className="text-2xl font-bold text-primary">ProLog</Text>
           <Text className="mt-1 text-sm text-white/50">
             {new Date().toLocaleDateString("ko-KR", {
               month: "long",
@@ -153,9 +139,7 @@ export default function HomeScreen() {
             <Text className="text-xs text-white/40">이번 주</Text>
             <Text className="mt-1 text-2xl font-bold text-white">
               {homeData.thisWeek.workouts}
-              <Text className="text-base text-white/40">
-                /{homeData.thisWeek.goal}
-              </Text>
+              <Text className="text-base text-white/40">회</Text>
             </Text>
           </View>
 
@@ -232,8 +216,28 @@ export default function HomeScreen() {
           </View>
 
           <View className="gap-3">
+            {homeData.exerciseProgress.filter((e) => e.sessions.length >= 3)
+              .length === 0 ? (
+              <View className="rounded-2xl bg-card p-6">
+                <View className="flex-row items-start gap-4">
+                  <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary/15">
+                    <TrendingUp size={22} color={COLORS.primary} />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="mb-1 text-base font-semibold text-white">
+                      아직 성장 추세가 없어요
+                    </Text>
+                    <Text className="text-sm leading-5 text-white/50">
+                      {
+                        "같은 종목을 이번 달 3회 이상 기록하면\n볼륨 변화 그래프가 표시됩니다."
+                      }
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            ) : null}
             {homeData.exerciseProgress
-              .filter((exercise) => exercise.sessions.length >= 2)
+              .filter((exercise) => exercise.sessions.length >= 3)
               .map((exercise) => {
                 const firstVolume = exercise.sessions[0].totalVolume;
                 const lastVolume =
@@ -481,57 +485,6 @@ export default function HomeScreen() {
                   </View>
                 );
               })}
-          </View>
-        </View>
-
-        {/* 최근 운동 기록 */}
-        <View className="mx-5 mb-6 mt-6">
-          <View className="mb-3 flex-row items-center justify-between">
-            <Text className="text-base font-semibold text-white">
-              최근 운동
-            </Text>
-            <Pressable
-              onPress={() => router.push("/(tabs)/profile/history")}
-              className="flex-row items-center gap-1"
-            >
-              <Text className="text-sm text-white/40">전체보기</Text>
-              <ChevronRight size={16} color={COLORS.mutedForeground} />
-            </Pressable>
-          </View>
-
-          <View className="gap-3">
-            {homeData.recentWorkouts.map((workout) => (
-              <Pressable
-                key={workout.sessionId}
-                onPress={() =>
-                  router.push(`/(tabs)/profile/history/${workout.sessionId}`)
-                }
-                className="rounded-2xl bg-card p-4 active:opacity-80"
-              >
-                <View className="mb-2 flex-row items-center justify-between">
-                  <Text className="text-base font-medium text-white">
-                    {workout.title}
-                  </Text>
-                  <Text className="text-xs text-white/40">
-                    {formatRelativeDate(workout.completedAt)}
-                  </Text>
-                </View>
-                <View className="flex-row gap-3">
-                  <Text className="text-xs text-white/50">
-                    {workout.exerciseCount}종목
-                  </Text>
-                  <Text className="text-xs text-white/50">
-                    {workout.totalSets}세트
-                  </Text>
-                  <Text className="text-xs text-white/50">
-                    {formatVolume(workout.totalVolume)}
-                  </Text>
-                  <Text className="text-xs text-white/50">
-                    {formatDuration(workout.duration)}
-                  </Text>
-                </View>
-              </Pressable>
-            ))}
           </View>
         </View>
       </ScrollView>

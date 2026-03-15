@@ -9,13 +9,11 @@ public record HomeStatsResponse(
         ThisMonth thisMonth,
         long avgWorkoutDuration,
         List<DailyActivity> weeklyActivity,
-        List<ExerciseProgress> exerciseProgress,
-        List<RecentWorkoutSummary> recentWorkouts
+        List<ExerciseProgress> exerciseProgress
 ) {
 
     public record ThisWeek(
-            int workouts,
-            int goal
+            int workouts
     ) {
     }
 
@@ -55,14 +53,4 @@ public record HomeStatsResponse(
     ) {
     }
 
-    public record RecentWorkoutSummary(
-            Long sessionId,
-            String title,
-            String completedAt,     // ISO 8601
-            int exerciseCount,
-            int totalSets,
-            long totalVolume,
-            long duration           // 초
-    ) {
-    }
 }
