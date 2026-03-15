@@ -502,6 +502,7 @@ function Step2Form({
       await authApi.sendEmailVerification({ email });
       setResendMessage("인증 코드를 재전송했습니다.");
       setValue("code", "");
+      setIsLocked(false);
     } catch (e) {
       if (e instanceof ApiError && e.status === 429) {
         setResendMessage("잠시 후 다시 시도해주세요. (10분에 최대 3회)");
@@ -596,6 +597,11 @@ function Step2Form({
 
           {verifyError ? (
             <Text className="text-center text-sm text-red-400">{verifyError}</Text>
+          ) : null}
+          {isLocked ? (
+            <Text className="text-center text-xs text-muted-foreground">
+              코드를 재전송하면 다시 입력할 수 있습니다.
+            </Text>
           ) : null}
 
           <View className="flex-row gap-3">
