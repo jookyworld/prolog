@@ -48,9 +48,15 @@ public class WorkoutSessionService {
 
     @Transactional
     public WorkoutSessionResponse startSession(Long userId, Long routineId) {
-        if (workoutSessionRepository.existsByUser_IdAndCompletedAtIsNull(userId)) {
-            throw new BadRequestException("이미 진행중인 운동이 있습니다.");
-        }
+        workoutSessionRepository.findByUser_IdAndCompletedAtIsNull(userId).ifPresent(existing -> {
+            boolean isAbandoned = existing.getStartedAt()
+                    .isBefore(LocalDateTime.now().minusHours(24));
+            if (isAbandoned) {
+                existing.complete(LocalDateTime.now());
+            } else {
+                throw new BadRequestException("이미 진행중인 운동이 있습니다.");
+            }
+        });
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
