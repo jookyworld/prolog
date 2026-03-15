@@ -2,7 +2,7 @@
 
 **점진적 과부하 추적과 성장 분석을 통해 꾸준한 운동 습관 형성을 돕는 모바일 앱**
 
-**버전:** v1.0.0 | **최종 업데이트:** 2026-03-12
+**앱 이름:** ProLog: 상급노하우 | **버전:** v1.0.0 | **최종 업데이트:** 2026-03-16
 
 ---
 
@@ -13,7 +13,7 @@
 | [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md) | 개발자 | 파일 구조, 작업 패턴, 배포, 트러블슈팅 |
 | [docs/REQUIREMENTS.md](./docs/REQUIREMENTS.md) | 개발자 | 비즈니스 로직, 데이터 모델 |
 | [docs/USER_GUIDE.md](./docs/USER_GUIDE.md) | 앱 사용자 | 앱 사용 방법 |
-| Swagger UI (로컬) | 개발자 | API 명세 (https://api.prolog.jooky.site/swagger-ui/index.html) |
+| Swagger UI | 개발자 | API 명세 (https://api.prolog.jooky.site/swagger-ui/index.html) |
 
 ---
 
@@ -22,8 +22,9 @@
 ```
 prolog/
 ├── backend/           # Spring Boot API Server
-├── application/       # Expo React Native App
-├── admin/             # Next.js 관리자 웹 (예정)
+├── application/       # Expo React Native 사용자 앱 ("ProLog: 상급노하우")
+├── web/               # Next.js 공식 웹페이지 (이용약관, 서비스 소개 등)
+├── admin/             # 관리자 웹 (미개발, 추후 예정)
 └── docs/              # 프로젝트 문서
 ```
 
@@ -42,16 +43,23 @@ prolog/
 - NativeWind 4.2.1 / Expo Router 6 (파일 기반 라우팅)
 - React Hook Form + Zod
 
+### Web (공식 페이지)
+- Next.js / React 19 / TypeScript
+- TailwindCSS
+
 ---
 
 ## 🌐 배포 현황
 
 | 항목 | 상태 | 주소 / 비고 |
 |------|------|-------------|
-| **Backend API** | ✅ 운영 중 | `https://api.prolog.jooky.site` |
+| **Backend API** | ✅ 운영 중 (중단 배포) | `https://api.prolog.jooky.site` |
 | **Swagger UI** | ✅ 운영 중 | `https://api.prolog.jooky.site/swagger-ui/index.html` |
-| **Mobile App** | 🚧 EAS 빌드 테스트 중 | TestFlight 배포 예정 |
-| **Admin Web** | 📋 미개발 | Phase 3-2 이후 예정 |
+| **Mobile App** | ✅ v1.0.0 완성, TestFlight 정식 배포 준비 중 | Bundle ID: `com.jooky.prolog` |
+| **공식 웹페이지** | 🚧 개발 중 | 이용약관, 서비스 소개 |
+| **Admin Web** | 📋 미개발 | 추후 예정 |
+
+> **배포 방식:** 현재 EC2 Docker Compose 기반 중단 배포. 추후 Blue-Green 무중단 배포로 전환 예정.
 
 ---
 
@@ -75,23 +83,14 @@ npx expo start
 
 ## 📊 진행 상황
 
-| Phase | 내용 | 상태 | 진행률 |
-|-------|------|------|--------|
-| **Phase 1** | MVP Core (인증, 루틴, 운동 세션, 기본 통계) | ✅ 완료 | 100% |
-| **Phase 2** | 성장 통계 (볼륨 추이, 최고 중량, 회차 비교) | 🚧 진행 중 | 20% |
-| **Phase 3-1** | 커뮤니티 기본 (공유, 가져오기, 댓글) | ✅ 완료 | 100% |
-| **Phase 3-2** | 커뮤니티 고급 (좋아요, 추천) | 📋 계획 | 0% |
-| **UI/UX 개선** | 운동 화면 개편, 모달 네비게이션 | 🚧 진행 중 | - |
+| Phase | 내용 | 상태 | 비고 |
+|-------|------|------|------|
+| **Phase 1** | MVP Core (인증, 루틴, 운동 세션) | ✅ 완료 | v1.0.0 포함 |
+| **Phase 2-1** | 홈 통계 (주간/월간 요약, 주간 활동, 종목 진행도) | ✅ 완료 | v1.0.0 포함 |
+| **Phase 2-2** | 성장 통계 (볼륨 추이, 최고 중량, 루틴별 비교) | 📋 향후 추가 | 정식 배포 후 |
+| **Phase 3-1** | 커뮤니티 기본 (공유, 가져오기, 댓글) | ✅ 완료 | v1.0.0 포함 |
+| **Phase 3-2** | 커뮤니티 고급 (좋아요, 추천) | 📋 향후 추가 | 정식 배포 후 |
+| **UI/UX 개선** | 애니메이션, 화면 구성 등 | ✅ v1.0.0 기준 완료 | |
 
-> **Phase 2 상세:** 홈 통계(`GET /api/stats/home`)만 완료. 종목별 볼륨 추이, 최고 중량 추이, 루틴별 회차 비교 등은 미구현.
-
-### 🎯 다음 작업 방향
-
-**TestFlight 배포 전**, 실 사용 시 필수적인 기능을 Phase 순서와 무관하게 우선 개발.
-
-| 우선순위 | 항목 | 비고 |
-|----------|------|------|
-| ✅ | 비밀번호 재설정 (이메일) | 완료 |
-| 🔴 1 | 이용약관 / 개인정보처리방침 | Apple 심사 필수, settings 화면에 링크 추가 |
-| 🟡 2 | 이메일 / 비밀번호 변경 | 현재 닉네임·신체정보만 수정 가능, 계정 정보 변경 API 없음 |
-| 🟡 3 | 세션 중 세트 데이터 임시저장 | 앱 강제 종료 시 입력 중 세트 기록 유실 위험 |
+> v1.0.0은 TestFlight 정식 배포 기준 완성 상태. 이후 기능은 정식 배포 후 순차 추가.
+> 긴급 버그/수정은 예외적으로 우선 처리.

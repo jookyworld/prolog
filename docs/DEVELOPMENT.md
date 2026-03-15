@@ -9,8 +9,9 @@
 ```
 prolog/
 ├── backend/           # Spring Boot API Server (배포 완료)
-├── app/               # React Native 사용자 앱 (UI/UX 개선 중)
-├── admin/             # Next.js 관리자 웹 (Phase 3-2 예정)
+├── application/       # React Native 사용자 앱 "ProLog: 상급노하우"
+├── web/               # Next.js 공식 웹페이지 (이용약관, 서비스 소개 등)
+├── admin/             # 관리자 웹 (미개발, 추후 예정)
 ├── README.md
 └── docs/
     ├── ERD.png
@@ -23,9 +24,10 @@ prolog/
 
 | 프로젝트 | 기술 | 역할 | 상태 | 포트 |
 |---------|------|------|------|------|
-| **backend** | Spring Boot 4.0.1 + MySQL + Redis | REST API 서버 | ✅ 배포 완료 | 8080 |
-| **app** | Expo 54 + React Native 0.81.5 | 사용자 모바일 앱 (`application/`) | 🚧 UI/UX 개선 중 | Expo 앱 |
-| **admin** | Next.js (예정) | 관리자 웹 대시보드 | 📋 Phase 3-2 계획 | 3001 |
+| **backend** | Spring Boot 4.0.1 + MySQL + Redis | REST API 서버 | ✅ 배포 완료 (중단 배포) | 8080 |
+| **application** | Expo 54 + React Native 0.81.5 | 사용자 모바일 앱 | ✅ v1.0.0 완성, TestFlight 정식 배포 준비 | Expo 앱 |
+| **web** | Next.js + React 19 + TailwindCSS | 공식 웹페이지 | 🚧 개발 중 | - |
+| **admin** | 미정 | 관리자 대시보드 | 📋 미개발, 추후 예정 | - |
 
 ---
 
@@ -71,10 +73,10 @@ EXPO_PUBLIC_API_URL=http://YOUR_MAC_IP:8080
 backend/src/main/java/com/back/
 ├── domain/
 │   ├── user/
-│   │   ├── auth/          ← 로그인, 회원가입, JWT
-│   │   └── user/          ← 프로필 조회/수정
-│   ├── exercise/          ← 운동 종목 관리
-│   ├── routine/           ← 루틴 CRUD
+│   │   ├── auth/          ← 로그인, 회원가입, JWT, 이메일 인증, 비밀번호 재설정
+│   │   └── user/          ← 프로필 조회/수정, 마케팅 동의
+│   ├── exercise/          ← 운동 종목 관리 (기본 종목 + 사용자 커스텀)
+│   ├── routine/           ← 루틴 CRUD, 활성/보관
 │   │   ├── routine/
 │   │   └── routineItem/
 │   ├── workout/           ← 운동 세션 & 세트
@@ -84,8 +86,8 @@ backend/src/main/java/com/back/
 │   ├── community/         ← 커뮤니티 (Phase 3-1 ✅)
 │   │   ├── sharedRoutine/ ← 공유 루틴, 가져오기
 │   │   └── comment/       ← 댓글 CRUD
-│   ├── stats/             ← 통계 (Phase 2)
-│   └── home/              ← 홈 화면 통계
+│   ├── stats/             ← 홈 통계 (Phase 2-1 ✅)
+│   └── home/              ← 홈 화면 (서버 상태 페이지)
 └── global/
     ├── security/          ← JWT 필터, SecurityConfig
     │   └── token/         ← RefreshTokenService, PasswordResetTokenService (Redis)
@@ -97,7 +99,8 @@ backend/src/main/java/com/back/
 
 **주요 설정 파일:**
 - `application.yml` / `application-local.yml` / `application-prod.yml`
-- `docker-compose.yml` — MySQL 8.0 + Redis 7
+- `docker-compose.yml` — MySQL 8.0 + Redis 7 (로컬)
+- `docker-compose.prod.yml` — 프로덕션용
 
 **프로덕션 엔드포인트:**
 - API: `https://api.prolog.jooky.site`
@@ -109,31 +112,58 @@ backend/src/main/java/com/back/
 application/
 ├── app/                   ← 화면 (파일 기반 라우팅)
 │   ├── _layout.tsx        ← Root Stack (Modal 지원 위해 Stack 필수)
-│   ├── (auth)/            ← 로그인, 회원가입, 비밀번호 재설정
+│   ├── (auth)/            ← 로그인, 회원가입, 비밀번호 재설정, 이메일 인증
+│   │   ├── login.tsx
+│   │   ├── signup.tsx
+│   │   ├── forgot-password.tsx
+│   │   └── reset-password.tsx
 │   ├── (tabs)/            ← 메인 앱 (5개 탭)
 │   │   ├── index.tsx      ← 홈 (통계 대시보드)
-│   │   ├── routine/       ← 루틴 관리
-│   │   ├── workout/       ← 운동 세션
-│   │   ├── community/     ← 커뮤니티 (목록/상세)
-│   │   └── profile/       ← 프로필, 기록, 설정
+│   │   ├── workout/
+│   │   │   ├── index.tsx  ← 운동 탭 (FAB 역할, WorkoutStartSheet 트리거)
+│   │   │   └── session.tsx ← 운동 세션 진행 화면
+│   │   ├── routine/
+│   │   │   ├── index.tsx  ← 루틴 목록
+│   │   │   ├── new.tsx    ← 루틴 생성
+│   │   │   └── [id].tsx   ← 루틴 상세/수정
+│   │   ├── community/
+│   │   │   ├── index.tsx  ← 커뮤니티 목록 + 공유하기 시트
+│   │   │   └── [id].tsx   ← 공유 루틴 상세
+│   │   └── profile/
+│   │       ├── index.tsx  ← 프로필 메인
+│   │       ├── edit.tsx   ← 프로필 수정 (닉네임, 신체정보 등)
+│   │       ├── settings.tsx ← 설정 (알림, 이용약관 링크, 앱 버전)
+│   │       ├── account.tsx  ← 계정 관리 (로그아웃, 탈퇴)
 │   │       ├── exercises/ ← 커스텀 종목 관리
 │   │       ├── history/   ← 운동 기록 목록/상세
 │   │       └── shared/    ← 내가 공유한 루틴 목록/상세
 │   └── (modal)/           ← 모달 화면
-│       └── select-exercises.tsx
+│       └── select-exercises.tsx ← 종목 선택 모달
 ├── components/
-│   ├── AuthGuard.tsx
-│   ├── CustomTabBar.tsx
-│   ├── WorkoutStartSheet.tsx       ← 운동 시작 바텀시트 (루틴 선택 또는 자유 운동)
+│   ├── AuthGuard.tsx               ← 인증 필요 화면 보호
+│   ├── CustomTabBar.tsx            ← 하단 탭 바 (운동 버튼 포함)
+│   ├── WorkoutStartSheet.tsx       ← 운동 시작 바텀시트 (루틴 선택 / 자유 운동)
 │   ├── SharedRoutineDetailScreen.tsx ← 공유 루틴 상세 (community/[id], profile/shared/[id] 공용)
 │   └── ui/
+│       ├── Button.tsx
+│       ├── Card.tsx
+│       ├── Input.tsx
+│       └── Label.tsx
 ├── lib/
-│   ├── api/               ← API 호출 함수 (auth, routine, workout, community, home, exercise, user)
-│   ├── types/             ← TypeScript 타입
+│   ├── api/               ← API 호출 함수
+│   │   ├── auth.ts        ← 로그인, 회원가입, 이메일 인증, 비밀번호 재설정
+│   │   ├── user.ts        ← 프로필 수정, 마케팅 동의
+│   │   ├── exercise.ts    ← 종목 조회, 커스텀 종목 CRUD
+│   │   ├── routine.ts     ← 루틴 CRUD, 활성/보관
+│   │   ├── workout.ts     ← 세션 시작/완료/취소, 기록 조회
+│   │   ├── community.ts   ← 공유 루틴 목록/상세/가져오기, 댓글
+│   │   └── home.ts        ← 홈 통계
+│   ├── types/             ← TypeScript 타입 (도메인별)
 │   ├── store/             ← 간단한 상태 브릿지 (exercise-selection.ts)
-│   ├── validations/       ← Zod 스키마
-│   ├── constants.ts
-│   ├── format.ts
+│   ├── validations/       ← Zod 스키마 (auth.ts)
+│   ├── constants.ts       ← 앱 상수
+│   ├── constants/terms.ts ← 이용약관 텍스트
+│   ├── format.ts          ← 날짜/숫자 포맷 유틸
 │   └── utils.ts
 └── contexts/
     ├── auth-context.tsx   ← 전역 인증 상태
@@ -194,9 +224,12 @@ application/app/(tabs)/routine/[id].tsx  →  /routine/123
 
 **배포 흐름:**
 1. Gradle 빌드 (`bootJar -x test`) — 의존성 캐시 적용
-2. Docker 이미지 빌드 & Docker Hub 푸시 (`latest` 태그)
+2. Docker 이미지 빌드 & Docker Hub 푸시 (`jookyworld/prolog-backend:latest`)
 3. EC2에 `docker-compose.prod.yml` SCP 전송
 4. EC2 SSH 접속 → `docker-compose up -d --pull always`로 컨테이너 교체
+
+**현재 방식:** 중단 배포 (컨테이너 교체 시 짧은 다운타임 발생)
+**전환 예정:** Blue-Green 무중단 배포
 
 **EC2 필수 파일:**
 - `~/app/docker-compose.prod.yml` — 배포 시 자동 동기화
@@ -228,7 +261,8 @@ sudo docker-compose -f docker-compose.prod.yml up -d
 
 ### App
 
-**플랫폼:** App Store / Google Play
+**플랫폼:** App Store (TestFlight → 정식 출시)
+**Bundle ID:** `com.jooky.prolog`
 **빌드:** Expo EAS
 
 ```bash
@@ -288,7 +322,7 @@ docs: API 명세 업데이트
 chore(gitignore): 보안 파일 필터 강화
 ```
 
-**scope:** `backend`, `app`, `admin` 또는 도메인명 (`auth`, `routine`, `workout`)
+**scope:** `backend`, `app`, `admin`, `web` 또는 도메인명 (`auth`, `routine`, `workout`)
 
 ---
 

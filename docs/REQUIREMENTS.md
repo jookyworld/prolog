@@ -1,7 +1,7 @@
 # PROLOG - 기능 요구사항 명세서
 
 **버전:** v1.0.0
-**최종 업데이트:** 2026-03-13
+**최종 업데이트:** 2026-03-16
 
 > 본 문서는 ProLog 서비스의 핵심 가치, 비즈니스 로직, 기능 요구사항을 정의합니다.
 > 기획자, PM, 개발자 모두 본 문서를 기준으로 작업합니다.
@@ -24,8 +24,11 @@
 ### 프로젝트명
 **PROLOG (Progress Log)**
 
+### 앱 이름
+**ProLog: 상급노하우**
+
 ### 한 줄 소개
-점진적 과부하 추적과 성장 분석을 통해 꾸준한 운동 습관 형성을 돕는 웹 서비스
+점진적 과부하 추적과 성장 분석을 통해 꾸준한 운동 습관 형성을 돕는 모바일 앱
 
 ### 타겟 사용자
 - 웨이트 트레이닝을 하는 운동 초보자 ~ 중급자
@@ -97,7 +100,9 @@ GET /api/workouts/sessions/routines/{routineId}/last
 
 ## 핵심 기능
 
-### Phase 1: MVP Core ✅ (완료)
+### v1.0.0: 정식 출시 기준 ✅ (완료, TestFlight 배포 준비 완료)
+
+#### Phase 1: MVP Core ✅
 - [x] 회원가입 (3단계 플로우 + 이메일 인증 + 중복 사전 확인)
 - [x] 로그인 (JWT)
 - [x] 비밀번호 재설정 (이메일 인증 코드)
@@ -110,11 +115,28 @@ GET /api/workouts/sessions/routines/{routineId}/last
 - [x] 실시간 세트 기록
 - [x] 4가지 완료 액션 정책
 - [x] 운동 기록 목록/상세 조회
-- [x] 홈 화면 통계 (기본)
 - [x] 관리자 운동 종목 관리
 
-### Phase 2: 성장 통계 🚧 (진행 중)
+#### Phase 2-1: 홈 통계 ✅
 - [x] 홈 화면 통계 (이번 주/달, 주간 활동, 자주 하는 운동)
+
+#### Phase 3-1: 커뮤니티 기본 ✅
+- [x] 루틴 공유 (스냅샷 저장, title/description 커스터마이징)
+- [x] 공유 루틴 조회 (목록/상세)
+- [x] 루틴 가져오기
+- [x] 댓글 작성/삭제
+- [x] 조회수, 가져오기 횟수 추적
+
+---
+
+### 정식 배포 후 추가 예정 (v1.x~)
+
+> 긴급 버그/수정을 제외하고, 이하 기능은 정식 배포 이후 순차적으로 추가
+
+#### 세트 기록 고도화
+- [ ] **세트별 메모** — 세트마다 짧은 텍스트 메모 기록 (workout_sets.note 컬럼 추가)
+
+#### Phase 2-2: 성장 통계
 - [ ] 종목별 볼륨 추이
 - [ ] 종목별 최고 중량 추이
 - [ ] 루틴별 회차 비교
@@ -123,26 +145,16 @@ GET /api/workouts/sessions/routines/{routineId}/last
 - [ ] 부위별 통계
 - [ ] 월간/연간 통계
 
-### Phase 3: 커뮤니티
-
-#### Phase 3-1: 기본 공유 기능 ✅ (완료)
-- [x] 루틴 공유 (스냅샷 저장, title/description 커스터마이징)
-- [x] 공유 루틴 조회 (목록/상세)
-- [x] 루틴 가져오기
-- [x] 댓글 작성/삭제
-- [x] 조회수, 가져오기 횟수 추적
-
-#### Phase 3-2: 소셜 기능 📋 (계획)
+#### Phase 3-2: 소셜 기능
 - [ ] 댓글 좋아요 (comment_likes 테이블)
 - [ ] 공유 루틴 좋아요 (shared_routine_likes 테이블)
 - [ ] 루틴 추천 알고리즘
 
-### Phase 4: Advanced Features 📋 (계획)
+#### Phase 4: Advanced Features
 - [ ] OAuth 로그인 (Google, Kakao)
 - [ ] 운동 추천 기능
 - [ ] 목표 설정 및 관리
 - [ ] 알림 기능 (운동 리마인더)
-- [ ] PWA 변환
 - [ ] 세트 타이머 기능
 - [ ] 휴식 시간 추천
 
@@ -258,12 +270,16 @@ GET /api/workouts/sessions/routines/{routineId}/last
 | gender | ENUM | NOT NULL | MALE, FEMALE, UNKNOWN |
 | height | DOUBLE | NOT NULL | 신장 (cm, > 0) |
 | weight | DOUBLE | NOT NULL | 체중 (kg, > 0) |
+| birth_year | INT | NULLABLE | 출생 연도 |
+| marketing_consented_at | DATETIME | NULLABLE | 마케팅 동의 일시 (null이면 미동의) |
 | role | ENUM | NOT NULL | USER, ADMIN |
 
 **비즈니스 규칙:**
 - 가입 Step1 제출 시 username/email/nickname 중복 사전 확인 (`POST /api/auth/check-duplicates`)
 - 가입 전 이메일 인증 필수 — Redis에 인증 완료 상태 저장 (30분 TTL)
 - 최종 가입 시 서버에서도 이메일 인증 완료 여부 재확인
+- `birth_year`: 가입 시 선택 입력
+- `marketing_consented_at`: null이면 미동의, 동의 시 동의 시각 저장 (`PATCH /api/users/me/marketing-consent`)
 - 탈퇴 시 cascade 삭제: routines, workout_sessions, workout_sets, custom exercises
 
 ---
@@ -375,9 +391,11 @@ GET /api/workouts/sessions/routines/{routineId}/last
 | set_number | INT | NOT NULL | 세트 번호 (1부터) |
 | weight | DECIMAL(5,2) | NOT NULL | 무게 (kg, 맨몸 운동은 0) |
 | reps | INT | NOT NULL | 반복 횟수 |
+| note | VARCHAR(500) | NULLABLE | 세트별 메모 (v1.x 추가 예정) |
 
 **비즈니스 규칙:**
 - weight = 0: 맨몸 운동 (풀업, 푸시업 등)
+- note: 선택 입력, 세트마다 짧은 메모 기록 가능 (v1.x 구현 예정)
 - 세트는 일괄 저장 (완료 시점에 전체 배열 전송)
 - 운동 기록 종목 삭제 시 CASCADE 삭제
 
@@ -824,6 +842,7 @@ ORDER BY date ASC
 
 #### WorkoutSet (세트 기록)
 - weight = 0으로 맨몸 운동 표현 (nullable 아님)
+- note: 선택 입력, nullable (v1.x 추가 예정)
 - 세트는 일괄 저장 (완료 시점에 exercises 배열로 전송)
 
 #### SharedRoutine (공유 루틴) - Phase 3-1 ✅
