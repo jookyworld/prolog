@@ -281,11 +281,20 @@ export default function MySharedRoutinesScreen() {
         {/* 목록 */}
         <View className="gap-3 px-5">
           {routines.length === 0 ? (
-            <View className="items-center py-20 gap-3">
-              <Share2 size={40} color={COLORS.mutedForeground} />
-              <Text className="text-center text-white/40">
-                아직 공유한 루틴이 없습니다
-              </Text>
+            <View className="rounded-2xl bg-card p-6">
+              <View className="flex-row items-start gap-4">
+                <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary/15">
+                  <Share2 size={22} color={COLORS.primary} />
+                </View>
+                <View className="flex-1">
+                  <Text className="mb-1 text-base font-semibold text-white">
+                    아직 공유한 루틴이 없어요
+                  </Text>
+                  <Text className="text-sm leading-5 text-white/50">
+                    {"내 루틴을 커뮤니티에 공유하면\n여기에 표시됩니다."}
+                  </Text>
+                </View>
+              </View>
             </View>
           ) : (
             routines.map((routine) => (
