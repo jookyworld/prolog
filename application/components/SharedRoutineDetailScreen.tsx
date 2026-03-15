@@ -19,15 +19,20 @@ import {
   Animated,
   Dimensions,
   Keyboard,
-  KeyboardAvoidingView,
+  LayoutAnimation,
   Modal,
   Platform,
   Pressable,
   ScrollView,
   Text,
   TextInput,
+  UIManager,
   View,
 } from "react-native";
+
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -56,6 +61,49 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
   const SHEET_HEIGHT = SCREEN_HEIGHT * 0.75;
   const slideAnim = useRef(new Animated.Value(SHEET_HEIGHT)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [sheetBottom, setSheetBottom] = useState(0);
+  const [sheetHeight, setSheetHeight] = useState(SHEET_HEIGHT);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSub = Keyboard.addListener(showEvent, (e) => {
+      const kbHeight = e.endCoordinates.height;
+      const availableHeight = SCREEN_HEIGHT - kbHeight - insets.top - 8;
+      LayoutAnimation.configureNext(
+        LayoutAnimation.create(
+          Platform.OS === "ios" ? e.duration : 250,
+          LayoutAnimation.Types.easeInEaseOut,
+          LayoutAnimation.Properties.opacity,
+        ),
+      );
+      setKeyboardVisible(true);
+      setSheetBottom(kbHeight);
+      setSheetHeight(Math.min(SHEET_HEIGHT, availableHeight));
+    });
+
+    const hideSub = Keyboard.addListener(hideEvent, (e) => {
+      LayoutAnimation.configureNext(
+        LayoutAnimation.create(
+          Platform.OS === "ios" ? e.duration : 250,
+          LayoutAnimation.Types.easeInEaseOut,
+          LayoutAnimation.Properties.opacity,
+        ),
+      );
+      setKeyboardVisible(false);
+      setSheetBottom(0);
+      setSheetHeight(SHEET_HEIGHT);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [insets.top]);
 
   useEffect(() => {
     loadData();
@@ -333,28 +381,30 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
         transparent
         onRequestClose={closeCommentSheet}
       >
+        {/* 백드롭 */}
         <Animated.View
-          className="flex-1 justify-end"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)", opacity: fadeAnim }}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            opacity: fadeAnim,
+          }}
         >
-          <Pressable
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-            }}
-            onPress={closeCommentSheet}
-          />
+          <Pressable style={{ flex: 1 }} onPress={closeCommentSheet} />
+        </Animated.View>
 
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-          >
+        {/* 시트 래퍼 - 키보드 위에 위치 (state로 제어, driver 충돌 없음) */}
+        <View
+          pointerEvents="box-none"
+          style={{ position: "absolute", bottom: sheetBottom, left: 0, right: 0 }}
+        >
             <Animated.View
               className="rounded-t-3xl bg-background"
               style={{
-                height: SHEET_HEIGHT,
+                height: sheetHeight,
                 transform: [{ translateY: slideAnim }],
               }}
             >
@@ -479,7 +529,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
 
               <View
                 className="flex-row items-center gap-3 border-t border-white/5 px-4 pt-3"
-                style={{ paddingBottom: insets.bottom + 12 }}
+                style={{ paddingBottom: keyboardVisible ? 12 : insets.bottom + 12 }}
               >
                 <View className="h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20">
                   <Text className="text-xs font-bold text-primary">
@@ -510,8 +560,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
                 </View>
               </View>
             </Animated.View>
-          </KeyboardAvoidingView>
-        </Animated.View>
+        </View>
       </Modal>
     </SafeAreaView>
   );
