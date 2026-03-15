@@ -13,7 +13,10 @@ import {
   Weight,
 } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const { user } = useAuth();
@@ -31,7 +34,9 @@ export default function ProfileScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <ScrollView
         className="flex-1 px-5"
-        contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
+        contentContainerStyle={{
+          paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16,
+        }}
       >
         {/* 헤더 */}
         <View className="flex-row items-center justify-between py-4">
@@ -113,9 +118,7 @@ export default function ProfileScreen() {
             <View className="h-10 w-10 items-center justify-center rounded-xl bg-white/5">
               <Dumbbell size={18} color={COLORS.white} />
             </View>
-            <Text className="ml-3 flex-1 text-base text-white">
-              운동 기록 보관함
-            </Text>
+            <Text className="ml-3 flex-1 text-base text-white">운동 기록</Text>
             <ChevronRight size={18} color={COLORS.iconMuted} />
           </Pressable>
 
@@ -128,9 +131,7 @@ export default function ProfileScreen() {
             <View className="h-10 w-10 items-center justify-center rounded-xl bg-white/5">
               <Swords size={18} color={COLORS.white} />
             </View>
-            <Text className="ml-3 flex-1 text-base text-white">
-              종목 관리
-            </Text>
+            <Text className="ml-3 flex-1 text-base text-white">종목 관리</Text>
             <ChevronRight size={18} color={COLORS.iconMuted} />
           </Pressable>
 

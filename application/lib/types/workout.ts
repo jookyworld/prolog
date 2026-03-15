@@ -99,6 +99,7 @@ export interface WorkoutSet {
   setNo: number;
   weight: number;
   reps: number;
+  memo?: string;
 }
 
 export interface WorkoutExercise {
