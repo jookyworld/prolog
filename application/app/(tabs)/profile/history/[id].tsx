@@ -5,7 +5,7 @@ import {
   WorkoutSessionDetail,
   toWorkoutSessionDetail,
 } from "@/lib/types/workout";
-import { ArrowLeft, Calendar, Clock, Flame, Layers, Trash2 } from "lucide-react-native";
+import { ChevronLeft, Calendar, Clock, Flame, Layers, Trash2 } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -111,9 +111,9 @@ export default function WorkoutHistoryDetailScreen() {
         <View className="flex-row items-center">
           <Pressable
             onPress={() => router.back()}
-            className="mr-3 h-10 w-10 items-center justify-center rounded-xl bg-white/5"
+            className="mr-3 h-10 w-10 items-center justify-center"
           >
-            <ArrowLeft size={20} color={COLORS.white} />
+            <ChevronLeft size={24} color={COLORS.white} />
           </Pressable>
           <Text className="text-2xl font-bold text-white">기록 상세</Text>
         </View>

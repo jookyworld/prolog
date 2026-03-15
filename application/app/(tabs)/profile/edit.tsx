@@ -77,7 +77,7 @@ export default function ProfileEditScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       {/* Header */}
       <View className="flex-row items-center justify-between px-5 py-3">
-        <Pressable onPress={() => router.back()} className="p-1">
+        <Pressable onPress={() => router.back()} className="h-10 w-10 items-center justify-center">
           <ChevronLeft size={24} color={COLORS.white} />
         </Pressable>
         <Text className="text-lg font-bold text-white">프로필 수정</Text>

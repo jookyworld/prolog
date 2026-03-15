@@ -3,7 +3,7 @@ import { routineApi } from "@/lib/api/routine";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import type { RoutineDetail } from "@/lib/types/routine";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, EllipsisVertical, Play, Share2 } from "lucide-react-native";
+import { ChevronLeft, EllipsisVertical, Play, Share2 } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -224,9 +224,9 @@ export default function RoutineDetailScreen() {
         <View className="flex-1 flex-row items-center gap-3">
           <Pressable
             onPress={() => router.back()}
-            className="h-10 w-10 items-center justify-center rounded-xl bg-white/5"
+            className="h-10 w-10 items-center justify-center"
           >
-            <ArrowLeft size={20} color={COLORS.white} />
+            <ChevronLeft size={24} color={COLORS.white} />
           </Pressable>
           <Text
             className="flex-1 text-2xl font-bold text-white"

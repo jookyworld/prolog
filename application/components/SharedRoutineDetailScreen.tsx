@@ -5,7 +5,7 @@ import { formatRelativeDate } from "@/lib/format";
 import type { SharedRoutineDetail } from "@/lib/types/community";
 import { useRouter } from "expo-router";
 import {
-  ArrowLeft,
+  ChevronLeft,
   Download,
   Eye,
   MessageCircle,
@@ -257,9 +257,9 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
       <View className="flex-row items-center gap-3 px-4 py-3">
         <Pressable
           onPress={() => router.back()}
-          className="h-9 w-9 items-center justify-center rounded-full bg-white/5"
+          className="h-10 w-10 items-center justify-center"
         >
-          <ArrowLeft size={20} color={COLORS.white} />
+          <ChevronLeft size={24} color={COLORS.white} />
         </Pressable>
       </View>
 

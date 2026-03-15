@@ -4,7 +4,7 @@ import { formatRestTime } from "@/lib/format";
 import { getSelectedExercises } from "@/lib/store/exercise-selection";
 import type { ExerciseResponse } from "@/lib/types/exercise";
 import {
-  ArrowLeft,
+  ChevronLeft,
   ChevronDown,
   ChevronUp,
   Clock,
@@ -158,9 +158,9 @@ export default function NewRoutineScreen() {
         <View className="flex-row items-center">
           <Pressable
             onPress={() => router.back()}
-            className="mr-3 h-10 w-10 items-center justify-center rounded-xl bg-white/5"
+            className="mr-3 h-10 w-10 items-center justify-center"
           >
-            <ArrowLeft size={20} color={COLORS.white} />
+            <ChevronLeft size={24} color={COLORS.white} />
           </Pressable>
           <Text className="text-2xl font-bold text-white">{isEditMode ? "루틴 수정" : "루틴 만들기"}</Text>
         </View>

@@ -5,7 +5,7 @@ import type { RoutineListItem } from "@/lib/types/routine";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
   Archive,
-  ArrowLeft,
+  ChevronLeft,
   ChevronRight,
   ClipboardList,
   Plus,
@@ -135,9 +135,9 @@ export default function RoutineScreen() {
             <View className="flex-row items-center">
               <Pressable
                 onPress={() => setShowArchived(false)}
-                className="mr-3 h-10 w-10 items-center justify-center rounded-xl bg-white/5"
+                className="mr-3 h-10 w-10 items-center justify-center"
               >
-                <ArrowLeft size={20} color={COLORS.white} />
+                <ChevronLeft size={24} color={COLORS.white} />
               </Pressable>
               <Text className="text-2xl font-bold text-white">보관된 루틴</Text>
             </View>

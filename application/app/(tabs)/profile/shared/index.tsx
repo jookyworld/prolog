@@ -4,6 +4,7 @@ import type { SharedRoutineListItem } from "@/lib/types/community";
 import type { BodyPart } from "@/lib/types/exercise";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
+  ChevronLeft,
   EllipsisVertical,
   Eye,
   MessageCircle,
@@ -21,7 +22,10 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 const PAGE_SIZE = 20;
 
@@ -57,7 +61,11 @@ function RoutineCard({ routine, onPress, onDelete }: RoutineCardProps) {
       );
     } else {
       Alert.alert("옵션", undefined, [
-        { text: "삭제", style: "destructive", onPress: () => onDelete(routine.id) },
+        {
+          text: "삭제",
+          style: "destructive",
+          onPress: () => onDelete(routine.id),
+        },
         { text: "취소", style: "cancel" },
       ]);
     }
@@ -174,7 +182,10 @@ export default function MySharedRoutinesScreen() {
     setLoadingMore(true);
     try {
       const nextPage = page + 1;
-      const response = await communityApi.getMySharedRoutines(nextPage, PAGE_SIZE);
+      const response = await communityApi.getMySharedRoutines(
+        nextPage,
+        PAGE_SIZE,
+      );
       setRoutines((prev) => [...prev, ...response.content]);
       setPage(nextPage);
       setHasMore(!response.last);
@@ -195,7 +206,10 @@ export default function MySharedRoutinesScreen() {
   const handleScroll = useCallback(
     ({ nativeEvent }: { nativeEvent: any }) => {
       const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-      if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 300) {
+      if (
+        layoutMeasurement.height + contentOffset.y >=
+        contentSize.height - 300
+      ) {
         loadMore();
       }
     },
@@ -222,7 +236,15 @@ export default function MySharedRoutinesScreen() {
 
   if (loading && !refreshing) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
+      <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
+        <View className="flex-row items-center gap-3 px-4 py-3">
+          <Pressable
+            onPress={() => router.back()}
+            className="h-10 w-10 items-center justify-center"
+          >
+            <ChevronLeft size={24} color={COLORS.white} />
+          </Pressable>
+        </View>
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
@@ -246,11 +268,14 @@ export default function MySharedRoutinesScreen() {
         scrollEventThrottle={400}
       >
         {/* 헤더 */}
-        <View className="px-5 py-4">
-          <Text className="text-2xl font-bold text-white">내가 공유한 루틴</Text>
-          <Text className="mt-1 text-sm text-white/50">
-            커뮤니티에 공유한 루틴 목록입니다
-          </Text>
+        <View className="flex-row items-center gap-3 px-4 py-3">
+          <Pressable
+            onPress={() => router.back()}
+            className="h-10 w-10 items-center justify-center"
+          >
+            <ChevronLeft size={24} color={COLORS.white} />
+          </Pressable>
+          <Text className="text-2xl font-bold text-white">공유 기록</Text>
         </View>
 
         {/* 목록 */}

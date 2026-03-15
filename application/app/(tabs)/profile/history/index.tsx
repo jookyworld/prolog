@@ -5,7 +5,7 @@ import {
   WorkoutSession,
   toWorkoutSession,
 } from "@/lib/types/workout";
-import { ArrowLeft, Dumbbell } from "lucide-react-native";
+import { ChevronLeft, Dumbbell } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -98,9 +98,9 @@ export default function WorkoutHistoryScreen() {
       <View className="flex-row items-center px-5 py-4">
         <Pressable
           onPress={() => router.back()}
-          className="mr-3 h-10 w-10 items-center justify-center rounded-xl bg-white/5"
+          className="mr-3 h-10 w-10 items-center justify-center"
         >
-          <ArrowLeft size={20} color={COLORS.white} />
+          <ChevronLeft size={24} color={COLORS.white} />
         </Pressable>
         <Text className="text-2xl font-bold text-white">운동 기록</Text>
       </View>

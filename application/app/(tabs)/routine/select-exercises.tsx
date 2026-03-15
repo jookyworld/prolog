@@ -3,7 +3,7 @@ import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { setSelectedExercises } from "@/lib/store/exercise-selection";
 import type { BodyPart, ExerciseResponse } from "@/lib/types/exercise";
 import { BODY_PARTS } from "@/lib/types/exercise";
-import { ArrowLeft, Check, Plus, Search, X } from "lucide-react-native";
+import { ChevronLeft, Check, Plus, Search, X } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import {
@@ -180,9 +180,9 @@ export default function SelectExercisesScreen() {
         <View className="flex-row items-center">
           <Pressable
             onPress={() => router.back()}
-            className="mr-3 h-10 w-10 items-center justify-center rounded-xl bg-white/5"
+            className="mr-3 h-10 w-10 items-center justify-center"
           >
-            <ArrowLeft size={20} color={COLORS.white} />
+            <ChevronLeft size={24} color={COLORS.white} />
           </Pressable>
           <Text className="text-2xl font-bold text-white">종목 선택</Text>
         </View>

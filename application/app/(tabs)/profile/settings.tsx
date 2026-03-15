@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/auth-context";
 import { COLORS } from "@/lib/constants";
-import { ArrowLeft, LogOut, Trash2 } from "lucide-react-native";
+import { ChevronLeft, LogOut, Trash2 } from "lucide-react-native";
 import { Alert, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -47,9 +47,9 @@ export default function SettingsScreen() {
         <View className="flex-row items-center py-4">
           <Pressable
             onPress={() => router.back()}
-            className="rounded-xl bg-white/5 p-2.5 mr-3"
+            className="mr-3 h-10 w-10 items-center justify-center"
           >
-            <ArrowLeft size={20} color={COLORS.white} />
+            <ChevronLeft size={24} color={COLORS.white} />
           </Pressable>
           <Text className="text-2xl font-bold text-white">설정</Text>
         </View>
