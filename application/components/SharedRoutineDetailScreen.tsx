@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import {
   ChevronLeft,
   Download,
+  EllipsisVertical,
   Eye,
   MessageCircle,
   MoreVertical,
@@ -29,14 +30,17 @@ import {
   UIManager,
   View,
 } from "react-native";
-
-if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
@@ -120,6 +124,80 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
       setError("데이터를 불러오는데 실패했습니다.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOptions = () => {
+    const isOwn = user?.username === routine?.username;
+    if (isOwn) {
+      const doDelete = () => {
+        Alert.alert(
+          "공유 루틴 삭제",
+          "커뮤니티에서 이 루틴을 삭제하시겠습니까?",
+          [
+            { text: "취소", style: "cancel" },
+            {
+              text: "삭제",
+              style: "destructive",
+              onPress: async () => {
+                try {
+                  await communityApi.deleteSharedRoutine(routineId);
+                  router.back();
+                } catch {
+                  Alert.alert("오류", "삭제에 실패했습니다.");
+                }
+              },
+            },
+          ],
+        );
+      };
+
+      if (Platform.OS === "ios") {
+        ActionSheetIOS.showActionSheetWithOptions(
+          {
+            options: ["취소", "삭제"],
+            destructiveButtonIndex: 1,
+            cancelButtonIndex: 0,
+          },
+          (idx) => {
+            if (idx === 1) doDelete();
+          },
+        );
+      } else {
+        Alert.alert(undefined as unknown as string, undefined, [
+          { text: "삭제", style: "destructive", onPress: doDelete },
+          { text: "취소", style: "cancel" },
+        ]);
+      }
+    } else {
+      const doReport = () => {
+        Alert.alert("신고", "이 루틴을 신고하시겠습니까?", [
+          { text: "취소", style: "cancel" },
+          {
+            text: "신고",
+            style: "destructive",
+            onPress: () => Alert.alert("신고 완료", "신고가 접수되었습니다."),
+          },
+        ]);
+      };
+
+      if (Platform.OS === "ios") {
+        ActionSheetIOS.showActionSheetWithOptions(
+          {
+            options: ["취소", "신고"],
+            destructiveButtonIndex: 1,
+            cancelButtonIndex: 0,
+          },
+          (idx) => {
+            if (idx === 1) doReport();
+          },
+        );
+      } else {
+        Alert.alert(undefined as unknown as string, undefined, [
+          { text: "신고", style: "destructive", onPress: doReport },
+          { text: "취소", style: "cancel" },
+        ]);
+      }
     }
   };
 
@@ -254,12 +332,32 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       {/* 헤더 */}
-      <View className="flex-row items-center gap-3 px-4 py-3">
+      <View className="flex-row items-center px-4 py-3">
         <Pressable
           onPress={() => router.back()}
           className="h-10 w-10 items-center justify-center"
         >
           <ChevronLeft size={24} color={COLORS.white} />
+        </Pressable>
+
+        <View className="flex-1 items-center">
+          <Text className="text-lg font-semibold text-white">
+            {routine.nickname}
+          </Text>
+          <Text className="text-xs text-white/40">
+            {new Date(routine.createdAt).toLocaleDateString("ko-KR", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </Text>
+        </View>
+
+        <Pressable
+          onPress={handleOptions}
+          className="h-10 w-10 items-center justify-center"
+        >
+          <EllipsisVertical size={20} color={COLORS.mutedForeground} />
         </Pressable>
       </View>
 
@@ -270,27 +368,6 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
           paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 80,
         }}
       >
-        {/* 작성자 행 */}
-        <View className="flex-row items-center gap-3 px-5 pb-3">
-          <View className="h-11 w-11 items-center justify-center rounded-full bg-primary/20">
-            <Text className="text-base font-bold text-primary">
-              {routine.nickname[0].toUpperCase()}
-            </Text>
-          </View>
-          <View className="flex-1">
-            <Text className="text-sm font-semibold text-white">
-              {routine.nickname}
-            </Text>
-            <Text className="text-xs text-white/40">
-              {new Date(routine.createdAt).toLocaleDateString("ko-KR", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </Text>
-          </View>
-        </View>
-
         {/* 게시글 본문 */}
         <View className="px-5 pb-5">
           <Text className="mb-2 text-2xl font-bold text-white">
@@ -399,167 +476,174 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
         {/* 시트 래퍼 - 키보드 위에 위치 (state로 제어, driver 충돌 없음) */}
         <View
           pointerEvents="box-none"
-          style={{ position: "absolute", bottom: sheetBottom, left: 0, right: 0 }}
+          style={{
+            position: "absolute",
+            bottom: sheetBottom,
+            left: 0,
+            right: 0,
+          }}
         >
-            <Animated.View
-              className="rounded-t-3xl bg-background"
-              style={{
-                height: sheetHeight,
-                transform: [{ translateY: slideAnim }],
-              }}
+          <Animated.View
+            className="rounded-t-3xl bg-background"
+            style={{
+              height: sheetHeight,
+              transform: [{ translateY: slideAnim }],
+            }}
+          >
+            <View className="items-center pt-3 pb-1">
+              <View className="h-1 w-10 rounded-full bg-white/20" />
+            </View>
+
+            <View className="flex-row items-center justify-between px-5 py-3">
+              <Text className="text-base font-bold text-white">
+                댓글{" "}
+                {routine.comments.length > 0 ? routine.comments.length : ""}
+              </Text>
+            </View>
+
+            <ScrollView
+              className="flex-1 px-5"
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
             >
-              <View className="items-center pt-3 pb-1">
-                <View className="h-1 w-10 rounded-full bg-white/20" />
-              </View>
-
-              <View className="flex-row items-center justify-between px-5 py-3">
-                <Text className="text-base font-bold text-white">
-                  댓글{" "}
-                  {routine.comments.length > 0 ? routine.comments.length : ""}
-                </Text>
-              </View>
-
-              <ScrollView
-                className="flex-1 px-5"
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-              >
-                {routine.comments.length === 0 ? (
-                  <View className="items-center py-12">
-                    <Text className="text-sm text-white/30">
-                      아직 댓글이 없습니다
-                    </Text>
-                    <Text className="mt-1 text-xs text-white/20">
-                      첫 번째 댓글을 남겨보세요
-                    </Text>
-                  </View>
-                ) : (
-                  <View className="gap-5 py-2" style={{ paddingBottom: 12 }}>
-                    {routine.comments.map((comment) => (
-                      <View key={comment.id} className="flex-row gap-3">
-                        <View className="h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10">
-                          <Text className="text-xs font-bold text-white/60">
-                            {comment.nickname[0].toUpperCase()}
-                          </Text>
-                        </View>
-                        <View className="flex-1 gap-0.5">
-                          <View className="flex-row items-center gap-2">
-                            <Text className="text-sm font-semibold text-white">
-                              {comment.nickname}
-                            </Text>
-                            <Text className="text-xs text-white/30">
-                              {formatRelativeDate(comment.createdAt)}
-                            </Text>
-                          </View>
-                          <Text className="text-sm leading-5 text-white/70">
-                            {comment.content}
-                          </Text>
-                        </View>
-                        <Pressable
-                          onPress={() => {
-                            const isOwn = user?.nickname === comment.nickname;
-                            const showMenu = (onAction: () => void) => {
-                              if (Platform.OS === "ios") {
-                                ActionSheetIOS.showActionSheetWithOptions(
-                                  {
-                                    options: [isOwn ? "삭제" : "신고", "취소"],
-                                    destructiveButtonIndex: 0,
-                                    cancelButtonIndex: 1,
-                                  },
-                                  (idx) => {
-                                    if (idx === 0) onAction();
-                                  },
-                                );
-                              } else {
-                                Alert.alert(
-                                  undefined as unknown as string,
-                                  undefined,
-                                  [
-                                    {
-                                      text: isOwn ? "삭제" : "신고",
-                                      style: "destructive",
-                                      onPress: onAction,
-                                    },
-                                    { text: "취소", style: "cancel" },
-                                  ],
-                                );
-                              }
-                            };
-
-                            if (isOwn) {
-                              showMenu(() =>
-                                Alert.alert("삭제", "삭제하시겠습니까?", [
-                                  {
-                                    text: "삭제",
-                                    style: "destructive",
-                                    onPress: () => deleteComment(comment.id),
-                                  },
-                                  { text: "취소", style: "cancel" },
-                                ]),
-                              );
-                            } else {
-                              showMenu(() =>
-                                Alert.alert("신고", "신고하시겠습니까?", [
-                                  {
-                                    text: "신고",
-                                    style: "destructive",
-                                    onPress: () =>
-                                      Alert.alert(
-                                        "신고 완료",
-                                        "신고가 접수되었습니다.",
-                                      ),
-                                  },
-                                  { text: "취소", style: "cancel" },
-                                ]),
-                              );
-                            }
-                          }}
-                          className="self-start p-1"
-                        >
-                          <MoreVertical
-                            size={14}
-                            color={COLORS.mutedForeground}
-                          />
-                        </Pressable>
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </ScrollView>
-
-              <View
-                className="flex-row items-center gap-3 border-t border-white/5 px-4 pt-3"
-                style={{ paddingBottom: keyboardVisible ? 12 : insets.bottom + 12 }}
-              >
-                <View className="h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20">
-                  <Text className="text-xs font-bold text-primary">
-                    {user?.nickname?.[0]?.toUpperCase() ?? "?"}
+              {routine.comments.length === 0 ? (
+                <View className="items-center py-12">
+                  <Text className="text-sm text-white/30">
+                    아직 댓글이 없습니다
+                  </Text>
+                  <Text className="mt-1 text-xs text-white/20">
+                    첫 번째 댓글을 남겨보세요
                   </Text>
                 </View>
-                <View className="flex-1 flex-row items-center rounded-full bg-white/8 px-4">
-                  <TextInput
-                    ref={commentInputRef}
-                    value={commentText}
-                    onChangeText={setCommentText}
-                    placeholder={`${routine.nickname}에게 댓글 달기...`}
-                    placeholderTextColor={COLORS.mutedForeground}
-                    className="flex-1 py-2.5 text-sm text-white"
-                    multiline
-                    maxLength={200}
-                  />
-                  {commentText.trim() ? (
-                    <Pressable
-                      onPress={handleCommentSubmit}
-                      className="ml-2 py-1"
-                    >
-                      <Text className="text-sm font-semibold text-primary">
-                        게시
-                      </Text>
-                    </Pressable>
-                  ) : null}
+              ) : (
+                <View className="gap-5 py-2" style={{ paddingBottom: 12 }}>
+                  {routine.comments.map((comment) => (
+                    <View key={comment.id} className="flex-row gap-3">
+                      <View className="h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10">
+                        <Text className="text-xs font-bold text-white/60">
+                          {comment.nickname[0].toUpperCase()}
+                        </Text>
+                      </View>
+                      <View className="flex-1 gap-0.5">
+                        <View className="flex-row items-center gap-2">
+                          <Text className="text-sm font-semibold text-white">
+                            {comment.nickname}
+                          </Text>
+                          <Text className="text-xs text-white/30">
+                            {formatRelativeDate(comment.createdAt)}
+                          </Text>
+                        </View>
+                        <Text className="text-sm leading-5 text-white/70">
+                          {comment.content}
+                        </Text>
+                      </View>
+                      <Pressable
+                        onPress={() => {
+                          const isOwn = user?.nickname === comment.nickname;
+                          const showMenu = (onAction: () => void) => {
+                            if (Platform.OS === "ios") {
+                              ActionSheetIOS.showActionSheetWithOptions(
+                                {
+                                  options: [isOwn ? "삭제" : "신고", "취소"],
+                                  destructiveButtonIndex: 0,
+                                  cancelButtonIndex: 1,
+                                },
+                                (idx) => {
+                                  if (idx === 0) onAction();
+                                },
+                              );
+                            } else {
+                              Alert.alert(
+                                undefined as unknown as string,
+                                undefined,
+                                [
+                                  {
+                                    text: isOwn ? "삭제" : "신고",
+                                    style: "destructive",
+                                    onPress: onAction,
+                                  },
+                                  { text: "취소", style: "cancel" },
+                                ],
+                              );
+                            }
+                          };
+
+                          if (isOwn) {
+                            showMenu(() =>
+                              Alert.alert("삭제", "삭제하시겠습니까?", [
+                                {
+                                  text: "삭제",
+                                  style: "destructive",
+                                  onPress: () => deleteComment(comment.id),
+                                },
+                                { text: "취소", style: "cancel" },
+                              ]),
+                            );
+                          } else {
+                            showMenu(() =>
+                              Alert.alert("신고", "신고하시겠습니까?", [
+                                {
+                                  text: "신고",
+                                  style: "destructive",
+                                  onPress: () =>
+                                    Alert.alert(
+                                      "신고 완료",
+                                      "신고가 접수되었습니다.",
+                                    ),
+                                },
+                                { text: "취소", style: "cancel" },
+                              ]),
+                            );
+                          }
+                        }}
+                        className="self-start p-1"
+                      >
+                        <MoreVertical
+                          size={14}
+                          color={COLORS.mutedForeground}
+                        />
+                      </Pressable>
+                    </View>
+                  ))}
                 </View>
+              )}
+            </ScrollView>
+
+            <View
+              className="flex-row items-center gap-3 border-t border-white/5 px-4 pt-3"
+              style={{
+                paddingBottom: keyboardVisible ? 12 : insets.bottom + 12,
+              }}
+            >
+              <View className="h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20">
+                <Text className="text-xs font-bold text-primary">
+                  {user?.nickname?.[0]?.toUpperCase() ?? "?"}
+                </Text>
               </View>
-            </Animated.View>
+              <View className="flex-1 flex-row items-center rounded-full bg-white/8 px-4">
+                <TextInput
+                  ref={commentInputRef}
+                  value={commentText}
+                  onChangeText={setCommentText}
+                  placeholder={`${routine.nickname}에게 댓글 달기...`}
+                  placeholderTextColor={COLORS.mutedForeground}
+                  className="flex-1 py-2.5 text-sm text-white"
+                  multiline
+                  maxLength={200}
+                />
+                {commentText.trim() ? (
+                  <Pressable
+                    onPress={handleCommentSubmit}
+                    className="ml-2 py-1"
+                  >
+                    <Text className="text-sm font-semibold text-primary">
+                      게시
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </View>
+            </View>
+          </Animated.View>
         </View>
       </Modal>
     </SafeAreaView>

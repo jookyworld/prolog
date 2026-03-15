@@ -69,15 +69,10 @@ function RoutineCard({ routine, onPress }: RoutineCardProps) {
   return (
     <Pressable
       onPress={() => onPress(routine.id)}
-      className="rounded-2xl bg-card p-3"
+      className="rounded-2xl bg-card p-4"
     >
       {/* 작성자 정보 */}
-      <View className="mb-2 flex-row items-center gap-2">
-        <View className="h-8 w-8 items-center justify-center rounded-full bg-primary/20">
-          <Text className="text-sm font-bold text-primary">
-            {routine.nickname[0].toUpperCase()}
-          </Text>
-        </View>
+      <View className="mb-3 flex-row items-center gap-2">
         <Text className="text-sm font-medium text-white/60">
           {routine.nickname}
         </Text>
@@ -90,27 +85,22 @@ function RoutineCard({ routine, onPress }: RoutineCardProps) {
       </View>
 
       {/* 루틴 제목 */}
-      <Text
-        className="mb-1.5 ml-2 text-base font-bold text-white"
-        numberOfLines={1}
-      >
+      <Text className="mb-3 text-base font-bold text-white" numberOfLines={1}>
         {routine.title}
       </Text>
 
       {/* 대표 운동 종목 */}
       {routine.exerciseNames.length > 0 && (
-        <View className="mb-2 flex-row items-center gap-1">
-          <Text className="flex-1 ml-2 text-xs text-white/60" numberOfLines={1}>
-            {routine.exerciseNames.join(", ")}
-            {routine.exerciseCount > routine.exerciseNames.length &&
-              ` 외 ${routine.exerciseCount - routine.exerciseNames.length}개`}
-          </Text>
-        </View>
+        <Text className="mb-3 text-xs text-white/60" numberOfLines={1}>
+          {routine.exerciseNames.join(", ")}
+          {routine.exerciseCount > routine.exerciseNames.length &&
+            ` 외 ${routine.exerciseCount - routine.exerciseNames.length}개`}
+        </Text>
       )}
 
       {/* 부위 뱃지 + 통계 한 줄 */}
       <View className="flex-row items-center justify-between">
-        <View className="flex-row flex-wrap items-center gap-1.5 ml-1">
+        <View className="flex-row flex-wrap items-center gap-1.5">
           {bodyPartLabels.map((label) => (
             <View
               key={label}
@@ -186,7 +176,12 @@ export default function CommunityScreen() {
     try {
       setLoading(true);
       setError(null);
-      const response = await communityApi.getSharedRoutines(sort, 0, PAGE_SIZE, kw);
+      const response = await communityApi.getSharedRoutines(
+        sort,
+        0,
+        PAGE_SIZE,
+        kw,
+      );
       setRoutines(response.content);
       setPage(0);
       setHasMore(!response.last);
@@ -204,7 +199,12 @@ export default function CommunityScreen() {
     setLoadingMore(true);
     try {
       const nextPage = page + 1;
-      const response = await communityApi.getSharedRoutines(sortType, nextPage, PAGE_SIZE, keyword);
+      const response = await communityApi.getSharedRoutines(
+        sortType,
+        nextPage,
+        PAGE_SIZE,
+        keyword,
+      );
       setRoutines((prev) => [...prev, ...response.content]);
       setPage(nextPage);
       setHasMore(!response.last);
@@ -225,7 +225,10 @@ export default function CommunityScreen() {
   const handleScroll = useCallback(
     ({ nativeEvent }: { nativeEvent: any }) => {
       const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-      if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 300) {
+      if (
+        layoutMeasurement.height + contentOffset.y >=
+        contentSize.height - 300
+      ) {
         loadMoreRoutines();
       }
     },
@@ -407,7 +410,9 @@ export default function CommunityScreen() {
             {routines.length === 0 ? (
               <View className="items-center py-20">
                 <Text className="text-center text-white/40">
-                  {keyword ? `"${keyword}"에 대한 검색 결과가 없습니다` : "아직 공유된 루틴이 없습니다"}
+                  {keyword
+                    ? `"${keyword}"에 대한 검색 결과가 없습니다`
+                    : "아직 공유된 루틴이 없습니다"}
                 </Text>
               </View>
             ) : (
