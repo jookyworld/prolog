@@ -1,12 +1,10 @@
 import { workoutApi } from "@/lib/api/workout";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
-import { formatRelativeDate } from "@/lib/format";
-import {
-  WorkoutSession,
-  toWorkoutSession,
-} from "@/lib/types/workout";
+import { formatShortDate } from "@/lib/format";
+import { WorkoutSession, toWorkoutSession } from "@/lib/types/workout";
+import { useRouter } from "expo-router";
 import { ChevronLeft, Dumbbell } from "lucide-react-native";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -14,8 +12,10 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 const BODY_PART_FILTERS: { value: string | null; label: string }[] = [
   { value: null, label: "전체" },
@@ -47,7 +47,11 @@ export default function WorkoutHistoryScreen() {
     setLoading(true);
     setError(null);
     try {
-      const data = await workoutApi.getSessions(0, PAGE_SIZE, filter ?? undefined);
+      const data = await workoutApi.getSessions(
+        0,
+        PAGE_SIZE,
+        filter ?? undefined,
+      );
       setSessions(data.content.map(toWorkoutSession));
       setPage(0);
       setHasMore(!data.last);
@@ -66,7 +70,11 @@ export default function WorkoutHistoryScreen() {
     setLoadingMore(true);
     try {
       const nextPage = page + 1;
-      const data = await workoutApi.getSessions(nextPage, PAGE_SIZE, bodyPart ?? undefined);
+      const data = await workoutApi.getSessions(
+        nextPage,
+        PAGE_SIZE,
+        bodyPart ?? undefined,
+      );
       setSessions((prev) => [...prev, ...data.content.map(toWorkoutSession)]);
       setPage(nextPage);
       setHasMore(!data.last);
@@ -82,10 +90,30 @@ export default function WorkoutHistoryScreen() {
     fetchSessions(bodyPart);
   }, [bodyPart]);
 
+  const monthGroups = useMemo(() => {
+    const groups: { key: string; label: string; sessions: WorkoutSession[] }[] =
+      [];
+    for (const session of sessions) {
+      const d = new Date(session.completedAt);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      const label = `${d.getFullYear()}년 ${d.getMonth() + 1}월`;
+      const last = groups[groups.length - 1];
+      if (last?.key === key) {
+        last.sessions.push(session);
+      } else {
+        groups.push({ key, label, sessions: [session] });
+      }
+    }
+    return groups;
+  }, [sessions]);
+
   const handleScroll = useCallback(
     ({ nativeEvent }: { nativeEvent: any }) => {
       const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-      if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 300) {
+      if (
+        layoutMeasurement.height + contentOffset.y >=
+        contentSize.height - 300
+      ) {
         loadMore();
       }
     },
@@ -133,7 +161,9 @@ export default function WorkoutHistoryScreen() {
       {/* 컨텐츠 */}
       <ScrollView
         className="flex-1 px-5"
-        contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
+        contentContainerStyle={{
+          paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16,
+        }}
         onScroll={handleScroll}
         scrollEventThrottle={400}
       >
@@ -160,7 +190,9 @@ export default function WorkoutHistoryScreen() {
               </View>
               <View className="flex-1">
                 <Text className="mb-1 text-base font-semibold text-white">
-                  {bodyPart ? `${bodyPart} 운동 기록이 없어요` : "아직 운동 기록이 없어요"}
+                  {bodyPart
+                    ? `${bodyPart} 운동 기록이 없어요`
+                    : "아직 운동 기록이 없어요"}
                 </Text>
                 <Text className="text-sm leading-5 text-white/50">
                   {bodyPart
@@ -171,34 +203,52 @@ export default function WorkoutHistoryScreen() {
             </View>
           </View>
         ) : (
-          <View className="gap-3 pb-8">
-            {sessions.map((session) => (
-              <Pressable
-                key={session.id}
-                onPress={() => router.push(`/(tabs)/profile/history/${session.id}`)}
-                className="rounded-2xl bg-card p-5 active:opacity-80"
-              >
-                <Text className="mb-2 text-xs text-white/40">
-                  {formatRelativeDate(session.completedAt)}
+          <View className="pb-8">
+            {monthGroups.map((group) => (
+              <View key={group.key}>
+                {/* 월 헤더 */}
+                <Text className="pb-3 pt-5 text-lg font-bold text-white">
+                  {group.label}
                 </Text>
-                <Text className="mb-2 text-base font-semibold text-white">
-                  {session.title}
-                </Text>
-                {session.bodyParts.length > 0 && (
-                  <View className="flex-row flex-wrap gap-1.5">
-                    {session.bodyParts.map((part) => (
-                      <View
-                        key={part}
-                        className="rounded-full bg-primary/10 px-2.5 py-0.5"
-                      >
-                        <Text className="text-xs font-medium text-primary">
-                          {part}
+
+                {/* 해당 월 카드들 */}
+                <View className="gap-3">
+                  {group.sessions.map((session) => (
+                    <Pressable
+                      key={session.id}
+                      onPress={() =>
+                        router.push(`/(tabs)/profile/history/${session.id}`)
+                      }
+                      className="rounded-2xl bg-card px-5 py-4 active:opacity-80"
+                    >
+                      <Text className="mb-2 text-xl font-semibold text-white">
+                        {session.title}
+                      </Text>
+                      <View className="flex-row items-end justify-between">
+                        {session.bodyParts.length > 0 ? (
+                          <View className="flex-1 flex-row flex-wrap gap-1.5">
+                            {session.bodyParts.map((part) => (
+                              <View
+                                key={part}
+                                className="rounded-full bg-primary/10 px-2.5 py-0.5"
+                              >
+                                <Text className="text-xs font-medium text-primary">
+                                  {part}
+                                </Text>
+                              </View>
+                            ))}
+                          </View>
+                        ) : (
+                          <View />
+                        )}
+                        <Text className="ml-3 text-sm text-white/30">
+                          {formatShortDate(session.completedAt)}
                         </Text>
                       </View>
-                    ))}
-                  </View>
-                )}
-              </Pressable>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
             ))}
 
             {loadingMore && (
