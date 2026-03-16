@@ -72,7 +72,12 @@ export default function SelectExercisesScreen() {
     }
     if (search.trim()) {
       const q = search.trim().toLowerCase();
-      list = list.filter((e) => e.name.toLowerCase().includes(q));
+      list = list.filter(
+        (e) =>
+          e.name.toLowerCase().includes(q) ||
+          e.bodyPart.toLowerCase().includes(q) ||
+          e.partDetail?.toLowerCase().includes(q),
+      );
     }
     return list;
   }, [exercises, filterBodyPart, search]);
@@ -225,7 +230,7 @@ export default function SelectExercisesScreen() {
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="운동 이름 검색"
+            placeholder="이름, 부위로 검색"
             placeholderTextColor={COLORS.placeholder}
             className="flex-1 py-3 text-base text-white"
           />
