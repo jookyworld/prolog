@@ -3,7 +3,12 @@ import { routineApi } from "@/lib/api/routine";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import type { RoutineDetail } from "@/lib/types/routine";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { ChevronLeft, EllipsisVertical, Play, Share2 } from "lucide-react-native";
+import {
+  ChevronLeft,
+  EllipsisVertical,
+  Play,
+  Share2,
+} from "lucide-react-native";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -69,7 +74,9 @@ export default function RoutineDetailScreen() {
             await routineApi.deleteRoutine(Number(id));
             router.back();
           } catch {
-            Alert.alert("루틴을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
+            Alert.alert(
+              "루틴을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.",
+            );
           } finally {
             setActionLoading(false);
           }
@@ -272,9 +279,14 @@ export default function RoutineDetailScreen() {
         )}
 
         {/* 운동 구성 */}
-        <Text className="mb-3 text-base font-semibold text-white/80">
-          운동 구성 ({sortedItems.length}개)
-        </Text>
+        <View className="mb-3 mr-2 flex-row items-center justify-between">
+          <Text className="text-base font-semibold text-white/80">
+            운동 구성 ({sortedItems.length}개)
+          </Text>
+          <Text className="text-sm text-white/40">
+            총 {sortedItems.reduce((sum, item) => sum + item.sets, 0)}세트
+          </Text>
+        </View>
 
         <View className="gap-3" style={{ paddingBottom: bottomPadding }}>
           {sortedItems.map((item, idx) => (

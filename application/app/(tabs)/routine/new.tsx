@@ -2,10 +2,11 @@ import { routineApi } from "@/lib/api/routine";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatRestTime } from "@/lib/format";
 import { getSelectedExercises } from "@/lib/store/exercise-selection";
-import type { ExerciseResponse } from "@/lib/types/exercise";
+import type { BodyPart, ExerciseResponse } from "@/lib/types/exercise";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import {
-  ChevronLeft,
   ChevronDown,
+  ChevronLeft,
   ChevronUp,
   Clock,
   Layers,
@@ -13,7 +14,6 @@ import {
   Plus,
   Trash2,
 } from "lucide-react-native";
-import type { BodyPart } from "@/lib/types/exercise";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -24,8 +24,10 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 interface RoutineItem {
   exercise: ExerciseResponse;
@@ -72,7 +74,9 @@ export default function NewRoutineScreen() {
         );
       })
       .catch(() => {
-        Alert.alert("루틴 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+        Alert.alert(
+          "루틴 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+        );
         router.back();
       })
       .finally(() => setLoadingRoutine(false));
@@ -162,20 +166,28 @@ export default function NewRoutineScreen() {
           >
             <ChevronLeft size={24} color={COLORS.white} />
           </Pressable>
-          <Text className="text-2xl font-bold text-white">{isEditMode ? "루틴 수정" : "루틴 만들기"}</Text>
+          <Text className="text-2xl font-bold text-white">
+            {isEditMode ? "루틴 수정" : "루틴 만들기"}
+          </Text>
         </View>
         <Pressable
           onPress={handleSave}
           disabled={!canSave || saving}
           className="rounded-xl px-4 py-2"
-          style={{ backgroundColor: canSave ? COLORS.primary : "rgba(255,255,255,0.05)" }}
+          style={{
+            backgroundColor: canSave
+              ? COLORS.primary
+              : "rgba(255,255,255,0.05)",
+          }}
         >
           {saving ? (
             <ActivityIndicator size="small" color={COLORS.white} />
           ) : (
             <Text
               className="text-sm font-semibold"
-              style={{ color: canSave ? COLORS.white : "rgba(255,255,255,0.3)" }}
+              style={{
+                color: canSave ? COLORS.white : "rgba(255,255,255,0.3)",
+              }}
             >
               저장
             </Text>
@@ -185,7 +197,9 @@ export default function NewRoutineScreen() {
 
       <ScrollView
         className="flex-1 px-5"
-        contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16 }}
+        contentContainerStyle={{
+          paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 16,
+        }}
         showsVerticalScrollIndicator={false}
       >
         {/* 루틴 정보 */}
@@ -214,10 +228,15 @@ export default function NewRoutineScreen() {
         </View>
 
         {/* 구성 종목 */}
-        <View className="mb-3 flex-row items-center justify-between">
+        <View className="mb-3 mr-4 flex-row items-center justify-between">
           <Text className="text-base font-semibold text-white/80">
             구성 종목 ({items.length}개)
           </Text>
+          {items.length > 0 && (
+            <Text className="text-sm text-white/40">
+              총 {items.reduce((sum, item) => sum + item.sets, 0)}세트
+            </Text>
+          )}
         </View>
 
         {items.length === 0 ? (
@@ -229,7 +248,10 @@ export default function NewRoutineScreen() {
         ) : (
           <View className="mb-4 gap-3">
             {items.map((item, idx) => (
-              <View key={`${item.exercise.id}-${idx}`} className="rounded-2xl bg-card p-4">
+              <View
+                key={`${item.exercise.id}-${idx}`}
+                className="rounded-2xl bg-card p-4"
+              >
                 {/* 운동명 + 순서/삭제 */}
                 <View className="mb-3 flex-row items-center gap-3">
                   <View className="h-8 w-8 items-center justify-center rounded-lg bg-primary/15">
@@ -256,7 +278,9 @@ export default function NewRoutineScreen() {
                     >
                       <ChevronUp
                         size={16}
-                        color={idx === 0 ? "rgba(255,255,255,0.15)" : COLORS.white}
+                        color={
+                          idx === 0 ? "rgba(255,255,255,0.15)" : COLORS.white
+                        }
                       />
                     </Pressable>
                     <Pressable
