@@ -10,6 +10,7 @@ import com.back.global.dto.PageResponse;
 import com.back.global.security.principal.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,9 +51,10 @@ public class SharedRoutineController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteSharedRoutine(@AuthenticationPrincipal UserPrincipal principal,
-                                    @PathVariable Long id) {
+    public ResponseEntity<Void> deleteSharedRoutine(@AuthenticationPrincipal UserPrincipal principal,
+                                                    @PathVariable Long id) {
         sharedRoutineService.deleteSharedRoutine(principal.getId(), id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/import")

@@ -460,6 +460,41 @@ const handlePressFAB = () => {
 
 ---
 
+### DELETE API 성공했는데 에러 알림이 뜨는 문제 (Backend + App)
+
+**증상:** 공유 루틴 삭제 시 실제로는 삭제가 완료됐지만 "삭제하지 못했습니다" 에러 알림이 표시됨
+
+**원인:** Spring MVC에서 `@DeleteMapping` 메서드가 `void`를 반환하면 기본 HTTP 상태코드가 **200 OK + 빈 바디**로 응답된다. `apiFetch`는 200 응답을 받으면 `res.json()`을 호출하는데, 빈 바디를 JSON으로 파싱하면 `SyntaxError`가 발생해 catch 블록이 실행된다. 삭제 자체는 성공했지만 응답 처리 단계에서 에러가 나는 구조.
+
+```
+DELETE /api/community/routines/{id}
+  → 200 OK (빈 바디)  ← 문제: void 반환 시 Spring 기본값
+  → apiFetch: res.json() 호출
+  → SyntaxError (빈 바디 파싱 실패)
+  → catch → 에러 알림 표시
+```
+
+**해결:** `@ResponseStatus(HttpStatus.NO_CONTENT)`를 추가해 **204 No Content**로 응답. `apiFetch`는 204이면 json 파싱 없이 바로 반환.
+
+```java
+// ❌ 잘못된 방식: void 반환 → 200 OK + 빈 바디
+@DeleteMapping("/{id}")
+public void deleteSharedRoutine(...) { ... }
+
+// ✅ 올바른 방식
+@DeleteMapping("/{id}")
+public ResponseEntity<Void> deleteSharedRoutine(...) {
+    sharedRoutineService.deleteSharedRoutine(...);
+    return ResponseEntity.noContent().build();
+}
+```
+
+**원칙:** 바디 없이 종료되는 모든 API(삭제, 상태 변경 등)는 `ResponseEntity.noContent().build()`로 명시적으로 204를 반환할 것.
+
+**적용 파일:** `backend/.../sharedRoutine/controller/SharedRoutineController.java`
+
+---
+
 ### 바텀시트 열릴 때/닫힐 때 애니메이션이 어색한 문제 (App)
 
 **증상:** 바텀시트가 올라올 때 뚝뚝 끊기거나, 닫힐 때 슬라이드 애니메이션 없이 순간적으로 사라짐
