@@ -9,6 +9,7 @@ export interface RoutineSnapshotItem {
   exerciseId: number;
   exerciseName: string;
   bodyPart: BodyPart;
+  partDetail?: string;
   orderInRoutine: number;
   sets: number;
   restSeconds: number;

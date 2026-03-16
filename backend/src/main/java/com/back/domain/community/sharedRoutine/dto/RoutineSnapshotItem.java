@@ -6,6 +6,7 @@ public record RoutineSnapshotItem(
         Long exerciseId,
         String exerciseName,
         BodyPart bodyPart,
+        String partDetail,
         int orderInRoutine,
         int sets,
         int restSeconds

@@ -64,6 +64,7 @@ public class SharedRoutineService {
                         item.getExercise().getId(),
                         item.getExercise().getName(),
                         item.getExercise().getBodyPart(),
+                        item.getExercise().getPartDetail(),
                         item.getOrderInRoutine(),
                         item.getSets(),
                         item.getRestSeconds()
@@ -224,6 +225,7 @@ public class SharedRoutineService {
         Exercise newExercise = Exercise.builder()
                 .name(item.exerciseName())
                 .bodyPart(item.bodyPart())
+                .partDetail(item.partDetail())
                 .custom(true)
                 .createdBy(user)
                 .build();
