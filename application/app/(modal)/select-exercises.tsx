@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Keyboard,
   Modal,
   Pressable,
   ScrollView,
@@ -351,7 +352,7 @@ export default function SelectExercisesScreen() {
           onPress={() => setShowCreateModal(false)}
         >
           <Pressable
-            onPress={() => {}}
+            onPress={() => Keyboard.dismiss()}
             className="mx-6 w-full max-w-sm rounded-2xl p-6"
             style={{ backgroundColor: COLORS.card }}
           >
