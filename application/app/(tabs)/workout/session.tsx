@@ -40,6 +40,7 @@ export default function WorkoutSessionScreen() {
   const [exercises, setExercises] = useState<ActiveExercise[]>([]);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [sessionId, setSessionId] = useState<number | null>(null);
+  const startedAtRef = useRef<number>(0);
   const [routineTitle, setRoutineTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
@@ -98,13 +99,15 @@ export default function WorkoutSessionScreen() {
               setSessionId(currentSession.sessionId);
               setRoutineTitle("자유 운동");
               setExercises([]);
+              startedAtRef.current = new Date(currentSession.startedAt).getTime();
             } else {
               // Start new free session
               const session = await workoutApi.startSession(null);
               setSessionId(session.id);
               setRoutineTitle("자유 운동");
               setExercises([]);
-              startWorkout(session.id, null);
+              startedAtRef.current = new Date(session.startedAt).getTime();
+              startWorkout(session.id, null, session.startedAt);
             }
           } else if (
             currentSession &&
@@ -117,6 +120,7 @@ export default function WorkoutSessionScreen() {
             setRoutineTitle(routine.title);
             setSessionId(currentSession.sessionId);
             setOriginalRoutineItems(routine.routineItems);
+            startedAtRef.current = new Date(currentSession.startedAt).getTime();
 
             // Load last session data for pre-filling
             let lastDataMap = new Map<
@@ -171,7 +175,8 @@ export default function WorkoutSessionScreen() {
             setRoutineTitle(routine.title);
             setSessionId(session.id);
             setOriginalRoutineItems(routine.routineItems);
-            startWorkout(session.id, numericRoutineId);
+            startedAtRef.current = new Date(session.startedAt).getTime();
+            startWorkout(session.id, numericRoutineId, session.startedAt);
 
             // Load last session data for pre-filling
             let lastDataMap = new Map<
@@ -236,9 +241,11 @@ export default function WorkoutSessionScreen() {
   // Timer
   useEffect(() => {
     if (loading) return;
-    timerRef.current = setInterval(() => {
-      setElapsedTime((t) => t + 1);
-    }, 1000);
+    const tick = () => {
+      setElapsedTime(Math.floor((Date.now() - startedAtRef.current) / 1000));
+    };
+    tick(); // 즉시 한 번 계산 (화면 복귀 시 바로 정확한 시간 표시)
+    timerRef.current = setInterval(tick, 1000);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };

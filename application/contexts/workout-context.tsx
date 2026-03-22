@@ -4,12 +4,13 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 interface ActiveSession {
   sessionId: number;
   routineId: number | null;
+  startedAt: string;
 }
 
 interface WorkoutContextValue {
   activeSession: ActiveSession | null;
   isRestoring: boolean;
-  startWorkout: (sessionId: number, routineId: number | null) => void;
+  startWorkout: (sessionId: number, routineId: number | null, startedAt: string) => void;
   endWorkout: () => void;
 }
 
@@ -22,15 +23,15 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     workoutApi.getActiveSession().then((session) => {
       if (session) {
-        setActiveSession({ sessionId: session.id, routineId: session.routineId ?? null });
+        setActiveSession({ sessionId: session.id, routineId: session.routineId ?? null, startedAt: session.startedAt });
       }
     }).finally(() => {
       setIsRestoring(false);
     });
   }, []);
 
-  const startWorkout = useCallback((sessionId: number, routineId: number | null) => {
-    setActiveSession({ sessionId, routineId });
+  const startWorkout = useCallback((sessionId: number, routineId: number | null, startedAt: string) => {
+    setActiveSession({ sessionId, routineId, startedAt });
   }, []);
 
   const endWorkout = useCallback(() => {
