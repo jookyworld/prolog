@@ -10,11 +10,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.back.domain.exercise.entity.BodyPart;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -116,19 +119,22 @@ public class StatsService {
     private List<HomeStatsResponse.ExerciseProgress> calculateExerciseProgress(Long userId) {
         LocalDateTime since = LocalDateTime.now().minusDays(30);
 
-        // 최근 1달 내 빈도 높은 운동 TOP 5 조회
-        List<WorkoutSetRepository.ExerciseFrequency> frequencies =
-                workoutSetRepository.findTopFrequentExercises(userId, since);
+        // 1단계: 빈도 상위 4개 부위 선정 (유산소·기타 제외)
+        List<String> topBodyParts = workoutSetRepository.findTopBodyPartsByFrequency(userId, since);
 
-        return frequencies.stream()
-                .map(freq -> {
+        // 2단계: 각 부위별 대표 종목 1개 선정 후 세션 계산
+        return topBodyParts.stream()
+                .map(bodyPart -> workoutSetRepository.findTopExerciseByBodyPart(userId, since, bodyPart))
+                .filter(list -> !list.isEmpty())
+                .map(list -> list.get(0))
+                .map(exercise -> {
                     List<HomeStatsResponse.ExerciseSession> sessions =
-                            calculateExerciseSessions(userId, freq.getExerciseId());
+                            calculateExerciseSessions(userId, exercise.getExerciseId());
 
                     return new HomeStatsResponse.ExerciseProgress(
-                            freq.getExerciseId(),
-                            freq.getExerciseName(),
-                            freq.getBodyPart(),
+                            exercise.getExerciseId(),
+                            exercise.getExerciseName(),
+                            BodyPart.valueOf(exercise.getBodyPart()),
                             sessions
                     );
                 })
@@ -144,9 +150,22 @@ public class StatsService {
                     List<WorkoutSet> sets = workoutSetRepository.findBySessionAndExercise(
                             info.getSessionId(), exerciseId);
 
-                    long totalVolume = sets.stream()
-                            .mapToLong(set -> (long) set.getWeight() * set.getReps())
-                            .sum();
+                    boolean isBodyweight = sets.stream().allMatch(s -> s.getWeight() == 0);
+
+                    WorkoutSet bestSet;
+                    double estimatedOneRM;
+
+                    if (isBodyweight) {
+                        bestSet = sets.stream()
+                                .max(Comparator.comparingInt(WorkoutSet::getReps))
+                                .orElseThrow();
+                        estimatedOneRM = 0;
+                    } else {
+                        bestSet = sets.stream()
+                                .max(Comparator.comparingDouble(s -> calculateE1RM(s.getWeight(), s.getReps())))
+                                .orElseThrow();
+                        estimatedOneRM = calculateE1RM(bestSet.getWeight(), bestSet.getReps());
+                    }
 
                     List<HomeStatsResponse.SetDetail> setDetails = sets.stream()
                             .map(set -> new HomeStatsResponse.SetDetail(set.getWeight(), set.getReps()))
@@ -156,12 +175,21 @@ public class StatsService {
 
                     return new HomeStatsResponse.ExerciseSession(
                             com.back.global.util.DateTimeUtil.formatToMd(info.getCompletedAt()),
-                            totalVolume,
+                            estimatedOneRM,
+                            bestSet.getWeight(),
+                            bestSet.getReps(),
+                            isBodyweight,
                             routineName,
                             setDetails
                     );
                 })
                 .toList();
+    }
+
+    // e1RM = weight × (1 + min(reps, 20) / 30), 소수점 1자리
+    private double calculateE1RM(double weight, int reps) {
+        int cappedReps = Math.min(reps, 20);
+        return Math.round(weight * (1 + cappedReps / 30.0) * 10.0) / 10.0;
     }
 
 }

@@ -233,9 +233,9 @@ export default function ExerciseManageScreen() {
         {activeTab === "custom" && (
           <Pressable
             onPress={openCreate}
-            className="h-10 w-10 items-center justify-center rounded-xl bg-primary/15"
+            className="h-10 w-10 items-center justify-center"
           >
-            <Plus size={20} color={COLORS.primary} />
+            <Plus size={20} color={COLORS.white} />
           </Pressable>
         )}
       </View>

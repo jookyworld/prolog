@@ -40,7 +40,10 @@ export interface ExerciseProgress {
 
 export interface ExerciseSession {
   date: string; // "2/10" (간단한 형식)
-  totalVolume: number; // 해당 운동의 총 볼륨 (kg)
+  estimatedOneRM: number; // 세션 최고 e1RM (kg). 맨몸이면 0
+  bestSetWeight: number; // 최고 세트 무게 (kg)
+  bestSetReps: number; // 최고 세트 횟수
+  isBodyweight: boolean; // 맨몸 운동 여부 (weight = 0)
   routineName: string; // 루틴명 또는 "자유 운동"
   sets: SetDetail[]; // 세트 상세
 }

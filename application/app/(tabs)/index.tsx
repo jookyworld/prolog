@@ -19,11 +19,8 @@ import {
 } from "react-native-safe-area-context";
 import Svg, { Circle, Polyline, Text as SvgText } from "react-native-svg";
 
-function formatVolume(kg: number): string {
-  if (kg >= 1000) {
-    return `${(kg / 1000).toFixed(1)}톤`;
-  }
-  return `${kg}kg`;
+function formatE1RM(kg: number): string {
+  return `${kg.toFixed(1)}kg`;
 }
 
 function getBodyPartLabel(bodyParts: BodyPart[]): string {
@@ -156,38 +153,26 @@ export default function HomeScreen() {
           <View className="flex-1 rounded-2xl bg-card p-4">
             <Text className="text-xs text-white/40">평균 시간</Text>
             <Text className="mt-1 text-2xl font-bold text-white">
-              {Math.floor(homeData.avgWorkoutDuration / 3600)}
-              <Text className="text-base text-white/40">h </Text>
+              {homeData.avgWorkoutDuration >= 3600 && (
+                <>
+                  {Math.floor(homeData.avgWorkoutDuration / 3600)}
+                  <Text className="text-base text-white/40">시간 </Text>
+                </>
+              )}
               {Math.floor((homeData.avgWorkoutDuration % 3600) / 60)}
-              <Text className="text-base text-white/40">m</Text>
+              <Text className="text-base text-white/40">분</Text>
             </Text>
           </View>
         </View>
 
         {/* 주간 활동 */}
         <View className="mx-5 mt-6 rounded-2xl bg-card p-5">
-          <Text className="mb-4 text-sm font-medium text-white/60">
-            최근 7일
-          </Text>
           <View className="flex-row items-center justify-between gap-1.5">
             {homeData.weeklyActivity.map((day, idx) => {
               const hasWorkout = day.workoutCount > 0;
               const bodyPartLabel = getBodyPartLabel(day.bodyParts);
               return (
                 <View key={idx} className="flex-1 items-center gap-2">
-                  {/* 부위 표시 */}
-                  {hasWorkout && bodyPartLabel ? (
-                    <View className="w-full items-center rounded-lg bg-primary/15 py-2">
-                      <Text className="text-[10px] font-bold text-primary">
-                        {bodyPartLabel}
-                      </Text>
-                    </View>
-                  ) : (
-                    <View className="w-full items-center py-2">
-                      <View className="h-2 w-2 rounded-full bg-white/5" />
-                    </View>
-                  )}
-
                   {/* 날짜 */}
                   <View className="items-center">
                     <Text
@@ -201,6 +186,18 @@ export default function HomeScreen() {
                       {day.formattedDate}
                     </Text>
                   </View>
+                  {/* 부위 표시 */}
+                  {hasWorkout && bodyPartLabel ? (
+                    <View className="w-full items-center rounded-lg bg-primary/15 py-2">
+                      <Text className="text-[10px] font-bold text-primary">
+                        {bodyPartLabel}
+                      </Text>
+                    </View>
+                  ) : (
+                    <View className="w-full items-center py-2">
+                      <View className="h-2 w-2 rounded-full bg-white/5" />
+                    </View>
+                  )}
                 </View>
               );
             })}
@@ -216,8 +213,8 @@ export default function HomeScreen() {
           </View>
 
           <View className="gap-3">
-            {homeData.exerciseProgress.filter((e) => e.sessions.length >= 3)
-              .length === 0 ? (
+            {/* 데이터 없음 */}
+            {homeData.exerciseProgress.length === 0 && (
               <View className="rounded-2xl bg-card p-6">
                 <View className="flex-row items-start gap-4">
                   <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary/15">
@@ -228,69 +225,100 @@ export default function HomeScreen() {
                       아직 성장 추세가 없어요
                     </Text>
                     <Text className="text-sm leading-5 text-white/50">
-                      {
-                        "같은 종목을 이번 달 3회 이상 기록하면\n볼륨 변화 그래프가 표시됩니다."
-                      }
+                      {"운동을 기록하면\n부위별 성장 그래프가 표시됩니다."}
                     </Text>
                   </View>
                 </View>
               </View>
-            ) : null}
-            {homeData.exerciseProgress
-              .filter((exercise) => exercise.sessions.length >= 3)
-              .map((exercise) => {
-                const firstVolume = exercise.sessions[0].totalVolume;
-                const lastVolume =
-                  exercise.sessions[exercise.sessions.length - 1].totalVolume;
-                const growth = lastVolume - firstVolume;
-                const growthPercent = ((growth / firstVolume) * 100).toFixed(1);
-                const maxVolume = Math.max(
-                  ...exercise.sessions.map((s) => s.totalVolume),
-                );
-                const minVolume = Math.min(
-                  ...exercise.sessions.map((s) => s.totalVolume),
-                );
-                const range = maxVolume - minVolume;
+            )}
 
-                const selectedSessionIndex =
-                  selectedSessions[exercise.exerciseId];
-                const selectedSession =
-                  selectedSessionIndex !== null &&
-                  selectedSessionIndex !== undefined
-                    ? exercise.sessions[selectedSessionIndex]
-                    : null;
+            {homeData.exerciseProgress.map((exercise) => {
+              const isBodyweight = exercise.sessions[0]?.isBodyweight ?? false;
+              const hasSufficientData = exercise.sessions.length >= 3;
 
-                return (
-                  <View
-                    key={exercise.exerciseId}
-                    className="overflow-visible rounded-2xl bg-card"
-                    style={{
-                      borderWidth: 1,
-                      borderColor: "rgba(255,255,255,0.05)",
-                    }}
-                  >
-                    <View className="px-4 pt-4 pb-2">
-                      <View className="mb-2 flex-row items-start justify-between">
-                        <View className="flex-1">
-                          <Text className="text-lg font-bold text-white">
-                            {exercise.exerciseName}
-                          </Text>
-                          <Text className="mt-0.5 text-xs text-white/40">
-                            {formatVolume(firstVolume)} →{" "}
-                            {formatVolume(lastVolume)}
-                          </Text>
-                        </View>
+              // 성장 수치 계산
+              const firstValue = isBodyweight
+                ? exercise.sessions[0].bestSetReps
+                : exercise.sessions[0].estimatedOneRM;
+              const lastValue = isBodyweight
+                ? exercise.sessions[exercise.sessions.length - 1].bestSetReps
+                : exercise.sessions[exercise.sessions.length - 1]
+                    .estimatedOneRM;
+              const growth = lastValue - firstValue;
+              const growthPercent =
+                firstValue > 0
+                  ? ((growth / firstValue) * 100).toFixed(1)
+                  : "0.0";
+
+              // 그래프 Y축 값
+              const graphValues = exercise.sessions.map((s) =>
+                isBodyweight ? s.bestSetReps : s.estimatedOneRM,
+              );
+              const maxVal = Math.max(...graphValues);
+              const minVal = Math.min(...graphValues);
+              const range = maxVal - minVal;
+
+              const selectedSessionIndex =
+                selectedSessions[exercise.exerciseId];
+              const selectedSession =
+                selectedSessionIndex !== null &&
+                selectedSessionIndex !== undefined
+                  ? exercise.sessions[selectedSessionIndex]
+                  : null;
+
+              return (
+                <View
+                  key={exercise.exerciseId}
+                  className="overflow-visible rounded-2xl bg-card"
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "rgba(255,255,255,0.05)",
+                  }}
+                >
+                  <View className="px-4 pt-4 pb-2">
+                    {/* 헤더 */}
+                    <View className="mb-2 flex-row items-start justify-between">
+                      <View className="flex-1">
+                        <Text className="text-lg font-bold text-white">
+                          {exercise.exerciseName}
+                        </Text>
+                        <Text className="mt-0.5 text-xs text-white/40">
+                          {isBodyweight
+                            ? `최고 횟수  ${firstValue}회 → ${lastValue}회`
+                            : `추정 1RM  ${formatE1RM(firstValue)} → ${formatE1RM(lastValue)}`}
+                        </Text>
+                      </View>
+                      {hasSufficientData && (
                         <View className="items-end">
                           <Text className="text-xl font-bold text-primary">
-                            +{formatVolume(growth)}
+                            {growth >= 0 ? "+" : ""}
+                            {isBodyweight ? `${growth}회` : formatE1RM(growth)}
                           </Text>
                           <Text className="text-xs text-white/40">
-                            +{growthPercent}%
+                            {growth >= 0 ? "+" : ""}
+                            {growthPercent}%
                           </Text>
                         </View>
-                      </View>
+                      )}
+                    </View>
 
-                      {/* 꺾은선 그래프 */}
+                    {/* 세션 부족 — 기록 쌓는 중 */}
+                    {!hasSufficientData ? (
+                      <View className="mt-2 rounded-xl bg-white/5 px-4 py-3">
+                        <Text className="mb-2 text-xs text-white/40">
+                          {`${exercise.sessions.length}회 기록됨 · ${3 - exercise.sessions.length}번 더 하면 그래프가 표시됩니다`}
+                        </Text>
+                        {exercise.sessions.length > 0 && (
+                          <Text className="text-sm font-semibold text-white">
+                            최근 최고 세트:{" "}
+                            {isBodyweight
+                              ? `${exercise.sessions[exercise.sessions.length - 1].bestSetReps}회`
+                              : `${exercise.sessions[exercise.sessions.length - 1].bestSetWeight}kg × ${exercise.sessions[exercise.sessions.length - 1].bestSetReps}회`}
+                          </Text>
+                        )}
+                      </View>
+                    ) : (
+                      /* 그래프 */
                       <View
                         style={{
                           position: "relative",
@@ -300,7 +328,7 @@ export default function HomeScreen() {
                         }}
                       >
                         <Svg width="100%" height="90" viewBox="0 0 300 90">
-                          {/* 배경 그리드 (은은하게) */}
+                          {/* 배경 그리드 */}
                           {[0, 1, 2, 3, 4].map((i) => (
                             <SvgText
                               key={`grid-${i}`}
@@ -313,10 +341,13 @@ export default function HomeScreen() {
                             </SvgText>
                           ))}
 
-                          {/* 라인 그리기 */}
+                          {/* 라인 */}
                           <Polyline
                             points={exercise.sessions
                               .map((session, i) => {
+                                const val = isBodyweight
+                                  ? session.bestSetReps
+                                  : session.estimatedOneRM;
                                 const x =
                                   (i /
                                     Math.max(exercise.sessions.length - 1, 1)) *
@@ -324,11 +355,7 @@ export default function HomeScreen() {
                                   10;
                                 const y =
                                   range > 0
-                                    ? 10 +
-                                      (1 -
-                                        (session.totalVolume - minVolume) /
-                                          range) *
-                                        40
+                                    ? 10 + (1 - (val - minVal) / range) * 40
                                     : 40;
                                 return `${x},${y}`;
                               })
@@ -340,18 +367,18 @@ export default function HomeScreen() {
                             strokeLinejoin="round"
                           />
 
-                          {/* 점 그리기 */}
+                          {/* 점 */}
                           {exercise.sessions.map((session, i) => {
+                            const val = isBodyweight
+                              ? session.bestSetReps
+                              : session.estimatedOneRM;
                             const x =
                               (i / Math.max(exercise.sessions.length - 1, 1)) *
                                 280 +
                               10;
                             const y =
                               range > 0
-                                ? 10 +
-                                  (1 -
-                                    (session.totalVolume - minVolume) / range) *
-                                    40
+                                ? 10 + (1 - (val - minVal) / range) * 40
                                 : 40;
                             const isLast = i === exercise.sessions.length - 1;
                             const isSelected = selectedSessionIndex === i;
@@ -375,7 +402,7 @@ export default function HomeScreen() {
                             );
                           })}
 
-                          {/* 날짜 표시 */}
+                          {/* 날짜 */}
                           {exercise.sessions.map((session, i) => {
                             const x =
                               (i / Math.max(exercise.sessions.length - 1, 1)) *
@@ -405,7 +432,7 @@ export default function HomeScreen() {
                           })}
                         </Svg>
 
-                        {/* Floating card for selected session */}
+                        {/* 선택된 세션 팝업 */}
                         {selectedSession && (
                           <View
                             style={{
@@ -425,7 +452,7 @@ export default function HomeScreen() {
                               }}
                               className="rounded-xl p-3"
                             >
-                              {/* Header */}
+                              {/* 팝업 헤더 */}
                               <View className="mb-2 flex-row items-start justify-between">
                                 <View className="flex-1">
                                   <Text className="text-sm font-semibold text-white">
@@ -445,8 +472,20 @@ export default function HomeScreen() {
                                 </TouchableOpacity>
                               </View>
 
-                              {/* Sets table */}
-                              <View className="mb-2 gap-1">
+                              {/* 최고 세트 */}
+                              <View className="mb-2 rounded-lg bg-primary/10 px-2 py-1.5">
+                                <Text className="text-xs text-white/50">
+                                  최고 세트
+                                </Text>
+                                <Text className="text-sm font-bold text-primary">
+                                  {isBodyweight
+                                    ? `${selectedSession.bestSetReps}회`
+                                    : `${selectedSession.bestSetWeight}kg × ${selectedSession.bestSetReps}회  (추정 1RM ${formatE1RM(selectedSession.estimatedOneRM)})`}
+                                </Text>
+                              </View>
+
+                              {/* 전체 세트 목록 */}
+                              <View className="gap-1">
                                 {selectedSession.sets.map((set, idx) => (
                                   <View
                                     key={idx}
@@ -456,35 +495,30 @@ export default function HomeScreen() {
                                       {idx + 1}
                                     </Text>
                                     <Text className="w-16 text-sm font-medium text-white">
-                                      {set.weight}kg
+                                      {set.weight > 0
+                                        ? `${set.weight}kg`
+                                        : "맨몸"}
                                     </Text>
                                     <Text className="w-12 text-sm font-medium text-white">
                                       ×{set.reps}
                                     </Text>
                                     <Text className="w-16 text-right text-xs text-white/40">
-                                      {set.weight * set.reps}kg
+                                      {set.weight > 0
+                                        ? `${set.weight * set.reps}kg`
+                                        : `${set.reps}회`}
                                     </Text>
                                   </View>
                                 ))}
-                              </View>
-
-                              {/* Total volume */}
-                              <View className="flex-row items-center justify-between rounded-lg bg-primary/10 px-2 py-1.5">
-                                <Text className="text-xs font-semibold text-white/70">
-                                  총 볼륨
-                                </Text>
-                                <Text className="text-sm font-bold text-primary">
-                                  {formatVolume(selectedSession.totalVolume)}
-                                </Text>
                               </View>
                             </View>
                           </View>
                         )}
                       </View>
-                    </View>
+                    )}
                   </View>
-                );
-              })}
+                </View>
+              );
+            })}
           </View>
         </View>
       </ScrollView>

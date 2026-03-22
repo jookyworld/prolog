@@ -1,7 +1,7 @@
 # PROLOG - 기능 요구사항 명세서
 
 **버전:** v1.0.0
-**최종 업데이트:** 2026-03-16
+**최종 업데이트:** 2026-03-19
 
 > 본 문서는 ProLog 서비스의 핵심 가치, 비즈니스 로직, 기능 요구사항을 정의합니다.
 > 기획자, PM, 개발자 모두 본 문서를 기준으로 작업합니다.
@@ -118,7 +118,7 @@ GET /api/workouts/sessions/routines/{routineId}/last
 - [x] 관리자 운동 종목 관리
 
 #### Phase 2-1: 홈 통계 ✅
-- [x] 홈 화면 통계 (이번 주/달, 주간 활동, 자주 하는 운동)
+- [x] 홈 화면 통계 (이번 주/달, 평균 운동 시간, 주간 활동, 부위별 대표 종목 성장 추세)
 
 #### Phase 3-1: 커뮤니티 기본 ✅
 - [x] 루틴 공유 (스냅샷 저장, title/description 커스터마이징)
@@ -669,69 +669,84 @@ WorkoutSet set = WorkoutSet.builder()
   INDEX idx_session_exercise_session (workout_session_id)
   ```
 
-#### 3.1 종목별 볼륨 추이
+---
 
-**계산 공식:**
-```sql
-SELECT
-  DATE(ws.completed_at) as date,
-  SUM(wset.weight * wset.reps) as totalVolume
-FROM workout_sessions ws
-JOIN workout_session_exercises wse ON ws.id = wse.workout_session_id
-JOIN workout_sets wset ON wse.id = wset.workout_session_exercise_id
-WHERE ws.user_id = :userId
-  AND wse.exercise_id = :exerciseId
-  AND ws.completed_at BETWEEN :from AND :to
-  AND ws.completed_at IS NOT NULL
-GROUP BY DATE(ws.completed_at)
-ORDER BY date ASC
-```
+#### 4.1 홈 통계 API (`GET /api/stats/home`) ✅
+
+홈 화면에 표시되는 5가지 통계를 한 번에 반환합니다.
+
+##### 기본 통계 3종
+| 항목 | 기준 | 계산 방식 |
+|------|------|---------|
+| 이번 주 운동 횟수 | 월~일 | `completed_at` 기준 세션 수 |
+| 이번 달 운동 횟수 | 1일~오늘 | `completed_at` 기준 세션 수 |
+| 평균 운동 시간 | 이번 달 | `AVG(TIMESTAMPDIFF(SECOND, started_at, completed_at))` |
+
+##### 주간 활동 (최근 7일)
+- 오늘 포함 과거 7일, 날짜별로 운동 횟수 + 수행한 부위 목록 반환
+- 부위는 `body_part_snapshot` 기준, 중복 제거
 
 ---
 
-#### 3.2 종목별 최고 중량 추이
+##### 부위별 성장 추세 — 선정 및 계산 정책
 
-**계산 공식:**
-```sql
-SELECT
-  DATE(ws.completed_at) as date,
-  MAX(wset.weight) as maxWeight
-FROM workout_sessions ws
-JOIN workout_session_exercises wse ON ws.id = wse.workout_session_id
-JOIN workout_sets wset ON wse.id = wset.workout_session_exercise_id
-WHERE ws.user_id = :userId
-  AND wse.exercise_id = :exerciseId
-  AND ws.completed_at BETWEEN :from AND :to
-  AND ws.completed_at IS NOT NULL
-GROUP BY DATE(ws.completed_at)
-ORDER BY date ASC
+**핵심 가치:** 점진적 과부하 — 세트마다 무게 1kg 또는 횟수 1회 증가를 목표로 하는 성장 추적
+
+**1단계: 표시 부위 선정**
+- 대상 부위: `CHEST` / `SHOULDER` / `BACK` / `ARM` / `LOWER_BODY` / `CORE` (유산소·기타 제외)
+- 최근 30일 내 세션 수 기준 상위 4개 부위 선택
+- 이번 달 가장 많이 훈련한 부위가 자동으로 표시됨
+
+**2단계: 부위별 대표 종목 선정**
+- 각 부위에서 최근 30일 내 가장 많이 수행한 종목 1개
+- 동률이면 가장 최근에 수행한 종목 우선
+
+**3단계: 세션 데이터 수집**
+- 대표 종목의 최근 5세션 (오래된 순으로 정렬하여 그래프 표시)
+
+**4단계: 세션별 대표 세트 계산 — 추정 1RM (e1RM)**
+
+볼륨(weight × reps × 세트 수) 대신 **추정 1RM**을 지표로 사용합니다.
+
+볼륨은 세트 수가 늘면 자동으로 증가하고, 무게를 올리고 횟수를 줄이면 감소하는 왜곡이 발생합니다. e1RM은 세트당 무게와 횟수를 하나의 수치로 정규화하므로 "진짜 강해졌는가"를 정확히 반영합니다.
+
 ```
+e1RM 공식 (Epley):
+  e1RM = weight × (1 + min(reps, 20) / 30)
+
+세션 대표값:
+  해당 세션의 모든 세트 중 e1RM이 가장 높은 세트 1개
+  → 백오프 세트, 펌핑 세트는 자연히 무시됨
+
+맨몸 운동 (weight = 0):
+  e1RM 계산 불가 → 최고 reps 세트를 대표값으로 사용
+```
+
+**예시:**
+```
+[벤치프레스 세션]
+  세트1: 80kg × 8회  → e1RM = 80 × 1.267 = 101.3kg  ← 대표값
+  세트2: 85kg × 5회  → e1RM = 85 × 1.167 = 99.2kg
+  세트3: 60kg × 15회 → e1RM = 60 × 1.5   = 90kg  (백오프, 무시)
+
+[성장 계산]
+  첫 세션 e1RM: 84kg → 마지막 세션 e1RM: 101.3kg → +20.6%
+```
+
+**세션 수에 따른 표시 방식:**
+| 세션 수 | 표시 |
+|--------|------|
+| 3회 이상 | 꺾은선 그래프 + 성장률 |
+| 1~2회 | "기록 쌓는 중" — 현재 최고 세트 표시, 그래프 미표시 |
+| 0회 | 미표시 |
 
 ---
 
-#### 3.3 루틴별 회차 비교
-
-**응답 예시:**
-```json
-{
-  "routineId": 1,
-  "routineTitle": "상체 루틴 A",
-  "sessions": [
-    {
-      "sessionId": 10,
-      "index": 1,
-      "completedAt": "2026-01-15T19:30:00",
-      "totalVolume": 5200,
-      "exercises": [
-        {
-          "exerciseName": "벤치프레스",
-          "totalVolume": 3600
-        }
-      ]
-    }
-  ]
-}
-```
+#### 4.2 Phase 2-2 통계 (정식 배포 후 추가 예정)
+- [ ] 종목별 e1RM 추이 (기간 선택: 1주/1달/3개월)
+- [ ] 루틴별 회차 비교
+- [ ] 운동 요약 대시보드
+- [ ] 개인 최고 기록 (PR)
 
 ---
 

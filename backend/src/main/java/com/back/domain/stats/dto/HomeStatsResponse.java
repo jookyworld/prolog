@@ -41,7 +41,10 @@ public record HomeStatsResponse(
 
     public record ExerciseSession(
             String date,            // "2/10" (MM/DD 형식)
-            long totalVolume,       // kg (정수)
+            double estimatedOneRM,  // 세션 최고 e1RM (kg). 맨몸이면 0
+            double bestSetWeight,   // 최고 세트 무게 (kg)
+            int bestSetReps,        // 최고 세트 횟수
+            boolean isBodyweight,   // 맨몸 운동 여부 (weight = 0)
             String routineName,
             List<SetDetail> sets
     ) {

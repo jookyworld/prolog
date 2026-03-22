@@ -92,7 +92,9 @@ export default function RoutineScreen() {
             await routineApi.deleteRoutine(routine.id);
             await fetchRoutines();
           } catch {
-            Alert.alert("루틴을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
+            Alert.alert(
+              "루틴을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.",
+            );
           }
         },
       },
@@ -149,7 +151,7 @@ export default function RoutineScreen() {
             <View className="flex-row items-center gap-2">
               <Pressable
                 onPress={() => router.push("/(tabs)/routine/new")}
-                className="h-10 w-10 items-center justify-center rounded-xl bg-white/5"
+                className="h-10 w-10 items-center justify-center"
               >
                 <Plus size={20} color={COLORS.white} />
               </Pressable>

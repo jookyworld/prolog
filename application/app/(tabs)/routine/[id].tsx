@@ -244,7 +244,7 @@ export default function RoutineDetailScreen() {
         </View>
         <Pressable
           onPress={handleSettingsMenu}
-          className="h-10 w-10 items-center justify-center rounded-xl bg-white/5"
+          className="h-10 w-10 items-center justify-center"
         >
           <EllipsisVertical size={20} color={COLORS.white} />
         </Pressable>

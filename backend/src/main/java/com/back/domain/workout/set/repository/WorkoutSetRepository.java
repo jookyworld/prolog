@@ -16,47 +16,65 @@ public interface WorkoutSetRepository extends JpaRepository<WorkoutSet, Long> {
 
     void deleteAllByWorkoutSessionExercise_WorkoutSession_User_Id(Long userId);
 
-    // 최근 1달 내 운동별 빈도 계산 (3회 이상, TOP 5)
+    // 최근 30일 내 빈도 상위 4개 부위 조회 (유산소·기타 제외)
     @Query(value = """
-        SELECT e.id as exerciseId,
-               e.name as exerciseName,
-               e.body_part as bodyPart,
-               COUNT(DISTINCT wse.workout_session_id) as frequency
+        SELECT wse.body_part_snapshot
         FROM workout_session_exercises wse
-        JOIN exercises e ON wse.exercise_id = e.id
         JOIN workout_sessions ws ON wse.workout_session_id = ws.id
         WHERE ws.user_id = :userId
           AND ws.completed_at >= :since
           AND ws.completed_at IS NOT NULL
-        GROUP BY e.id, e.name, e.body_part
-        HAVING COUNT(DISTINCT wse.workout_session_id) >= 3
-        ORDER BY frequency DESC
-        LIMIT 5
+          AND wse.body_part_snapshot NOT IN ('CARDIO', 'OTHER')
+        GROUP BY wse.body_part_snapshot
+        ORDER BY COUNT(DISTINCT wse.workout_session_id) DESC
+        LIMIT 4
     """, nativeQuery = true)
-    List<ExerciseFrequency> findTopFrequentExercises(@Param("userId") Long userId,
-                                                      @Param("since") LocalDateTime since);
+    List<String> findTopBodyPartsByFrequency(@Param("userId") Long userId,
+                                              @Param("since") LocalDateTime since);
 
-    interface ExerciseFrequency {
-        Long getExerciseId();
-        String getExerciseName();
-        com.back.domain.exercise.entity.BodyPart getBodyPart();
-        Long getFrequency();
-    }
-
-    // 특정 운동의 최근 5회 세션 데이터 조회
+    // 특정 부위에서 가장 많이 수행한 대표 종목 1개 조회
     @Query(value = """
-        SELECT ws.id as sessionId,
-               ws.completed_at as completedAt,
-               r.title as routineTitle
+        SELECT wse.exercise_id as exerciseId,
+               wse.exercise_name as exerciseName,
+               wse.body_part_snapshot as bodyPart
         FROM workout_session_exercises wse
         JOIN workout_sessions ws ON wse.workout_session_id = ws.id
-        LEFT JOIN routines r ON ws.routine_id = r.id
         WHERE ws.user_id = :userId
-          AND wse.exercise_id = :exerciseId
+          AND ws.completed_at >= :since
           AND ws.completed_at IS NOT NULL
-        GROUP BY ws.id, ws.completed_at, r.title
-        ORDER BY ws.completed_at ASC
-        LIMIT 5
+          AND wse.body_part_snapshot = :bodyPart
+        GROUP BY wse.exercise_id, wse.exercise_name, wse.body_part_snapshot
+        ORDER BY COUNT(DISTINCT wse.workout_session_id) DESC, MAX(ws.completed_at) DESC
+        LIMIT 1
+    """, nativeQuery = true)
+    List<ExerciseInfo> findTopExerciseByBodyPart(@Param("userId") Long userId,
+                                                  @Param("since") LocalDateTime since,
+                                                  @Param("bodyPart") String bodyPart);
+
+    interface ExerciseInfo {
+        Long getExerciseId();
+        String getExerciseName();
+        String getBodyPart();
+    }
+
+    // 특정 운동의 최근 5회 세션 조회 (최신 5개를 오래된 순으로 정렬)
+    @Query(value = """
+        SELECT sub.sessionId, sub.completedAt, sub.routineTitle
+        FROM (
+            SELECT ws.id as sessionId,
+                   ws.completed_at as completedAt,
+                   r.title as routineTitle
+            FROM workout_session_exercises wse
+            JOIN workout_sessions ws ON wse.workout_session_id = ws.id
+            LEFT JOIN routines r ON ws.routine_id = r.id
+            WHERE ws.user_id = :userId
+              AND wse.exercise_id = :exerciseId
+              AND ws.completed_at IS NOT NULL
+            GROUP BY ws.id, ws.completed_at, r.title
+            ORDER BY ws.completed_at DESC
+            LIMIT 5
+        ) sub
+        ORDER BY sub.completedAt ASC
     """, nativeQuery = true)
     List<ExerciseSessionInfo> findRecentSessionsByExercise(@Param("userId") Long userId,
                                                             @Param("exerciseId") Long exerciseId);
