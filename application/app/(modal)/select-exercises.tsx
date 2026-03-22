@@ -72,13 +72,13 @@ export default function SelectExercisesScreen() {
       list = list.filter((e) => e.bodyPart === filterBodyPart);
     }
     if (search.trim()) {
-      const q = search.trim().toLowerCase();
-      list = list.filter(
-        (e) =>
-          e.name.toLowerCase().includes(q) ||
-          e.bodyPart.toLowerCase().includes(q) ||
-          e.partDetail?.toLowerCase().includes(q),
-      );
+      const tokens = search.trim().toLowerCase().split(/\s+/);
+      list = list.filter((e) => {
+        const haystack = [e.name, e.bodyPart, e.partDetail ?? ""]
+          .join(" ")
+          .toLowerCase();
+        return tokens.every((token) => haystack.includes(token));
+      });
     }
     return list;
   }, [exercises, filterBodyPart, search]);
