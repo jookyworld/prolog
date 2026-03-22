@@ -152,16 +152,20 @@ export default function HomeScreen() {
           {/* 평균 운동 시간 */}
           <View className="flex-1 rounded-2xl bg-card p-4">
             <Text className="text-xs text-white/40">평균 시간</Text>
-            <Text className="mt-1 text-2xl font-bold text-white">
-              {homeData.avgWorkoutDuration >= 3600 && (
-                <>
-                  {Math.floor(homeData.avgWorkoutDuration / 3600)}
-                  <Text className="text-base text-white/40">시간 </Text>
-                </>
-              )}
-              {Math.floor((homeData.avgWorkoutDuration % 3600) / 60)}
-              <Text className="text-base text-white/40">분</Text>
-            </Text>
+            {homeData.avgWorkoutDuration === 0 ? (
+              <Text className="mt-1 text-2xl font-bold text-white/30">--</Text>
+            ) : (
+              <Text className="mt-1 text-2xl font-bold text-white">
+                {homeData.avgWorkoutDuration >= 3600 && (
+                  <>
+                    {Math.floor(homeData.avgWorkoutDuration / 3600)}
+                    <Text className="text-base text-white/40">시간 </Text>
+                  </>
+                )}
+                {Math.floor((homeData.avgWorkoutDuration % 3600) / 60)}
+                <Text className="text-base text-white/40">분</Text>
+              </Text>
+            )}
           </View>
         </View>
 
