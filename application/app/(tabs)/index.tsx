@@ -214,6 +214,7 @@ export default function HomeScreen() {
             <Text className="text-base font-semibold text-white">
               주요 운동 성장 추세
             </Text>
+            <Text className="text-xs text-white/30">최근 5회</Text>
           </View>
 
           <View className="gap-3">
@@ -442,6 +443,13 @@ export default function HomeScreen() {
                             );
                           })}
                         </Svg>
+
+                        {/* 평평한 그래프 안내 */}
+                        {range === 0 && (
+                          <Text className="mb-1 text-center text-[10px] text-white/30">
+                            {isBodyweight ? "최고 횟수가" : "추정 1RM이"} 모두 동일합니다
+                          </Text>
+                        )}
 
                         {/* 선택된 세션 팝업 */}
                         {selectedSession && (
