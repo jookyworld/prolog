@@ -279,9 +279,16 @@ export default function HomeScreen() {
                     {/* 헤더 */}
                     <View className="mb-2 flex-row items-start justify-between">
                       <View className="flex-1">
-                        <Text className="text-lg font-bold text-white">
-                          {exercise.exerciseName}
-                        </Text>
+                        <View className="flex-row items-center gap-2">
+                          <Text className="text-lg font-bold text-white">
+                            {exercise.exerciseName}
+                          </Text>
+                          <View className="rounded-full bg-white/10 px-2 py-0.5">
+                            <Text className="text-[10px] text-white/50">
+                              {exercise.bodyPart}
+                            </Text>
+                          </View>
+                        </View>
                         <Text className="mt-0.5 text-xs text-white/40">
                           {isBodyweight
                             ? `최고 횟수  ${firstValue}회 → ${lastValue}회`
