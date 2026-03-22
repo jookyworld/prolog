@@ -17,6 +17,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -573,6 +575,10 @@ export default function WorkoutSessionScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
       {/* Header */}
       <View className="border-b border-white/10 px-5 py-3">
         {/* Row 1: Back, Timer, Complete */}
@@ -841,6 +847,7 @@ export default function WorkoutSessionScreen() {
           </Pressable>
         </ScrollView>
       )}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
