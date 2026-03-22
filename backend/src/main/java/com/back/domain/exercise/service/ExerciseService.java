@@ -9,6 +9,7 @@ import com.back.domain.exercise.repository.ExerciseRepository;
 import com.back.domain.routine.routineItem.repository.RoutineItemRepository;
 import com.back.domain.user.user.entity.User;
 import com.back.domain.user.user.repository.UserRepository;
+import com.back.domain.workout.session.repository.WorkoutSessionRepository;
 import com.back.domain.workout.sessionexercise.repository.WorkoutSessionExerciseRepository;
 import com.back.global.exception.type.BadRequestException;
 import com.back.global.exception.type.ConflictException;
@@ -27,6 +28,7 @@ public class ExerciseService {
     private final UserRepository userRepository;
     private final RoutineItemRepository routineItemRepository;
     private final WorkoutSessionExerciseRepository workoutSessionExerciseRepository;
+    private final WorkoutSessionRepository workoutSessionRepository;
 
     public List<ExerciseResponse> getExercisesForUser(Long userId) {
         return exerciseRepository.findAllForUser(userId)
@@ -161,13 +163,16 @@ public class ExerciseService {
                 .map(Exercise::getId)
                 .toList();
 
+        // 2) 커스텀 종목 제작자 중 진행 중인 세션이 있으면 차단
+        if (workoutSessionRepository.countActiveSessionsByExerciseCreators(customIds) > 0) {
+            throw new ConflictException("해당 커스텀 종목으로 진행 중인 운동 세션이 있습니다. 세션 완료 후 다시 시도해주세요.");
+        }
+
         Long officialId = official.getId();
 
-        // 2) FK 들고 있는 테이블에서 exercise_id를 전부 officialId로 업데이트
+        // 3) FK 업데이트 후 커스텀 종목 삭제
         routineItemRepository.updateExerciseIdBulk(customIds, officialId);
         workoutSessionExerciseRepository.updateExerciseIdBulk(customIds, officialId);
-
-        // 3) 커스텀 exercise 삭제
         exerciseRepository.deleteAllById(customIds);
     }
 

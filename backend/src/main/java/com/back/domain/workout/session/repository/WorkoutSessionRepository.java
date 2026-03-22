@@ -74,6 +74,10 @@ public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, 
     List<WorkoutSession> findRecentCompletedSessions(@Param("userId") Long userId,
                                                       @Param("limit") int limit);
 
+    // 커스텀 종목 제작자들 중 활성 세션이 있는지 확인 (관리자 종목 추가 시 차단 여부 판단)
+    @Query("select count(ws) from WorkoutSession ws where ws.completedAt is null and ws.user.id in (select e.createdBy.id from Exercise e where e.id in :customIds)")
+    long countActiveSessionsByExerciseCreators(@Param("customIds") List<Long> customIds);
+
     // 특정 루틴을 참조하는 모든 세션 조회 (루틴 삭제 시 사용)
     List<WorkoutSession> findByRoutine_Id(Long routineId);
 
