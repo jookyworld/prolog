@@ -215,7 +215,7 @@ export default function GuidePage() {
       {/* Hero */}
       <section
         style={{
-          padding: "clamp(80px, 12vw, 120px) clamp(20px, 5vw, 48px) 64px",
+          padding: "clamp(80px, 12vw, 80px) clamp(20px, 5vw, 48px) 64px",
         }}
       >
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
