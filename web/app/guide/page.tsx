@@ -233,7 +233,7 @@ export default function GuidePage() {
           </p>
           <h1
             style={{
-              fontSize: "clamp(28px, 5vw, 48px)",
+              fontSize: "clamp(28px, 5vw, 46px)",
               fontWeight: 700,
               letterSpacing: "-0.03em",
               lineHeight: 1.2,
