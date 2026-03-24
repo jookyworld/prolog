@@ -36,11 +36,13 @@ const FAQS = [
   },
 ];
 
+const px = "clamp(20px, 5vw, 48px)";
+
 export default function SupportPage() {
   return (
     <SiteLayout activePath="/support">
       {/* Hero */}
-      <section style={{ padding: "120px 48px 80px" }}>
+      <section style={{ padding: `clamp(60px, 10vw, 120px) ${px} 80px` }}>
         <div style={{ maxWidth: 1040, margin: "0 auto" }}>
           <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: 24 }}>
             지원
@@ -55,7 +57,7 @@ export default function SupportPage() {
       </section>
 
       {/* FAQ */}
-      <section style={{ padding: "0 48px 80px" }}>
+      <section style={{ padding: `0 ${px} 80px` }}>
         <div style={{ maxWidth: 1040, margin: "0 auto" }}>
           <h2 style={{ fontSize: "clamp(20px, 2.5vw, 28px)", fontWeight: 700, letterSpacing: "-0.02em", margin: "0 0 32px" }}>
             자주 묻는 질문
@@ -86,7 +88,7 @@ export default function SupportPage() {
       </section>
 
       {/* Contact */}
-      <section style={{ padding: "80px 48px 100px", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+      <section style={{ padding: `80px ${px} 100px`, borderTop: "1px solid rgba(255,255,255,0.07)" }}>
         <div style={{ maxWidth: 1040, margin: "0 auto", display: "flex", flexDirection: "column", gap: 16 }}>
           <h2 style={{ fontSize: "clamp(20px, 2.5vw, 28px)", fontWeight: 700, letterSpacing: "-0.02em", margin: 0 }}>
             직접 문의하기

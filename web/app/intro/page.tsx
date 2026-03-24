@@ -37,7 +37,7 @@ export default function Home() {
   return (
     <SiteLayout activePath="/intro">
       {/* Hero */}
-      <section style={{ padding: "80px 48px 40px", textAlign: "center" }}>
+      <section style={{ padding: "80px clamp(20px, 5vw, 48px) 40px", textAlign: "center" }}>
         <div
           style={{
             maxWidth: 640,
@@ -80,7 +80,7 @@ export default function Home() {
       </section>
 
       {/* Features — alternating image / text */}
-      <section style={{ padding: "0 48px 80px" }}>
+      <section style={{ padding: "0 clamp(20px, 5vw, 48px) 80px" }}>
         <div
           style={{
             maxWidth: 880,
@@ -95,19 +95,20 @@ export default function Home() {
             return (
               <div
                 key={f.file}
+                className="feature-row"
                 style={{
                   display: "flex",
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "space-between",
                   gap: "clamp(40px, 6vw, 96px)",
-
                   flexWrap: "wrap",
                 }}
               >
                 <img
                   src={`/screenshots/${encodeURIComponent(f.file)}`}
                   alt={f.title}
+                  className="feature-img"
                   style={{
                     width: "clamp(200px, 25vw, 280px)",
                     borderRadius: 24,
@@ -117,6 +118,7 @@ export default function Home() {
                   }}
                 />
                 <div
+                  className="feature-text"
                   style={{
                     flex: 1,
                     minWidth: 240,
