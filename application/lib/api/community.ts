@@ -57,6 +57,7 @@ export const communityApi = {
     content: string,
   ): Promise<{
     id: number;
+    userId: number;
     nickname: string;
     content: string;
     createdAt: string;

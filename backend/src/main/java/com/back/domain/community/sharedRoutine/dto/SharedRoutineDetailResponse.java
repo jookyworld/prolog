@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 public record SharedRoutineDetailResponse(
         Long id,
+        Long userId,
         String username,
         String nickname,
         String title,
@@ -38,6 +39,7 @@ public record SharedRoutineDetailResponse(
 
         return new SharedRoutineDetailResponse(
                 sharedRoutine.getId(),
+                sharedRoutine.getUser().getId(),
                 sharedRoutine.getUser().getUsername(),
                 sharedRoutine.getUser().getNickname(),
                 sharedRoutine.getTitle(),

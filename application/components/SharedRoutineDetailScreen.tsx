@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/auth-context";
+import { blockApi } from "@/lib/api/block";
 import { communityApi } from "@/lib/api/community";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatRelativeDate } from "@/lib/format";
@@ -127,6 +128,30 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
     }
   };
 
+  const handleBlockUser = async (targetUserId: number, onSuccess?: () => void) => {
+    Alert.alert(
+      "사용자 차단",
+      "이 사용자를 차단하면 해당 사용자의 루틴과 댓글이 더 이상 표시되지 않습니다.",
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "차단",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await blockApi.blockUser(targetUserId);
+              Alert.alert("차단 완료", "사용자가 차단되었습니다.", [
+                { text: "확인", onPress: onSuccess ?? (() => router.back()) },
+              ]);
+            } catch {
+              Alert.alert("차단하지 못했습니다. 잠시 후 다시 시도해주세요.");
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const handleOptions = () => {
     const isOwn = user?.username === routine?.username;
     if (isOwn) {
@@ -172,31 +197,22 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
         ]);
       }
     } else {
-      const doReport = () => {
-        Alert.alert("신고", "이 루틴을 신고하시겠습니까?", [
-          { text: "취소", style: "cancel" },
-          {
-            text: "신고",
-            style: "destructive",
-            onPress: () => Alert.alert("신고 완료", "신고가 접수되었습니다."),
-          },
-        ]);
-      };
+      const doBlock = () => handleBlockUser(routine!.userId);
 
       if (Platform.OS === "ios") {
         ActionSheetIOS.showActionSheetWithOptions(
           {
-            options: ["취소", "신고"],
+            options: ["취소", "이 사용자 차단"],
             destructiveButtonIndex: 1,
             cancelButtonIndex: 0,
           },
           (idx) => {
-            if (idx === 1) doReport();
+            if (idx === 1) doBlock();
           },
         );
       } else {
         Alert.alert(undefined as unknown as string, undefined, [
-          { text: "신고", style: "destructive", onPress: doReport },
+          { text: "이 사용자 차단", style: "destructive", onPress: doBlock },
           { text: "취소", style: "cancel" },
         ]);
       }
@@ -535,60 +551,70 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
                       <Pressable
                         onPress={() => {
                           const isOwn = user?.nickname === comment.nickname;
-                          const showMenu = (onAction: () => void) => {
+
+                          if (isOwn) {
                             if (Platform.OS === "ios") {
                               ActionSheetIOS.showActionSheetWithOptions(
                                 {
-                                  options: [isOwn ? "삭제" : "신고", "취소"],
+                                  options: ["삭제", "취소"],
                                   destructiveButtonIndex: 0,
                                   cancelButtonIndex: 1,
                                 },
                                 (idx) => {
-                                  if (idx === 0) onAction();
+                                  if (idx === 0) {
+                                    Alert.alert("삭제", "삭제하시겠습니까?", [
+                                      {
+                                        text: "삭제",
+                                        style: "destructive",
+                                        onPress: () => deleteComment(comment.id),
+                                      },
+                                      { text: "취소", style: "cancel" },
+                                    ]);
+                                  }
                                 },
                               );
                             } else {
-                              Alert.alert(
-                                undefined as unknown as string,
-                                undefined,
-                                [
-                                  {
-                                    text: isOwn ? "삭제" : "신고",
-                                    style: "destructive",
-                                    onPress: onAction,
-                                  },
-                                  { text: "취소", style: "cancel" },
-                                ],
-                              );
-                            }
-                          };
-
-                          if (isOwn) {
-                            showMenu(() =>
-                              Alert.alert("삭제", "삭제하시겠습니까?", [
+                              Alert.alert(undefined as unknown as string, undefined, [
                                 {
                                   text: "삭제",
                                   style: "destructive",
                                   onPress: () => deleteComment(comment.id),
                                 },
                                 { text: "취소", style: "cancel" },
-                              ]),
-                            );
+                              ]);
+                            }
                           } else {
-                            showMenu(() =>
-                              Alert.alert("신고", "신고하시겠습니까?", [
+                            if (Platform.OS === "ios") {
+                              ActionSheetIOS.showActionSheetWithOptions(
                                 {
-                                  text: "신고",
+                                  options: ["이 사용자 차단", "취소"],
+                                  destructiveButtonIndex: 0,
+                                  cancelButtonIndex: 1,
+                                },
+                                (idx) => {
+                                  if (idx === 0) handleBlockUser(comment.userId, () => {
+                                    closeCommentSheet();
+                                    setRoutine((prev) =>
+                                      prev ? { ...prev, comments: prev.comments.filter((c) => c.userId !== comment.userId) } : null
+                                    );
+                                  });
+                                },
+                              );
+                            } else {
+                              Alert.alert(undefined as unknown as string, undefined, [
+                                {
+                                  text: "이 사용자 차단",
                                   style: "destructive",
-                                  onPress: () =>
-                                    Alert.alert(
-                                      "신고 완료",
-                                      "신고가 접수되었습니다.",
-                                    ),
+                                  onPress: () => handleBlockUser(comment.userId, () => {
+                                    closeCommentSheet();
+                                    setRoutine((prev) =>
+                                      prev ? { ...prev, comments: prev.comments.filter((c) => c.userId !== comment.userId) } : null
+                                    );
+                                  }),
                                 },
                                 { text: "취소", style: "cancel" },
-                              ]),
-                            );
+                              ]);
+                            }
                           }
                         }}
                         className="self-start p-1"

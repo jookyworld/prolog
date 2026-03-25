@@ -3,7 +3,7 @@ import { COLORS } from "@/lib/constants";
 import { TERMS_URLS } from "@/lib/constants/terms";
 import { userApi } from "@/lib/api/user";
 import Constants from "expo-constants";
-import { ChevronLeft, ChevronRight, FileText, Pencil, Shield, UserCog } from "lucide-react-native";
+import { Ban, ChevronLeft, ChevronRight, FileText, Pencil, Shield, UserCog } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Linking, Pressable, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -69,6 +69,17 @@ export default function SettingsScreen() {
               <UserCog size={18} color={COLORS.white} />
             </View>
             <Text className="flex-1 text-base text-white">계정 관리</Text>
+            <ChevronRight size={18} color={COLORS.mutedForeground} />
+          </Pressable>
+          <View className="mx-5 h-px bg-white/5" />
+          <Pressable
+            onPress={() => router.push("/(tabs)/profile/blocked-users")}
+            className="flex-row items-center px-5 py-4 active:opacity-70"
+          >
+            <View className="mr-3 rounded-xl bg-white/5 p-2.5">
+              <Ban size={18} color={COLORS.white} />
+            </View>
+            <Text className="flex-1 text-base text-white">차단 목록</Text>
             <ChevronRight size={18} color={COLORS.mutedForeground} />
           </Pressable>
         </View>

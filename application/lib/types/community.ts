@@ -33,6 +33,7 @@ export interface SharedRoutineListItem {
 // 공유 루틴 상세 (백엔드 SharedRoutineDetailResponse)
 export interface SharedRoutineDetail {
   id: number;
+  userId: number;
   username: string;
   nickname: string;
   title: string;
@@ -49,6 +50,7 @@ export interface SharedRoutineDetail {
 
 export interface Comment {
   id: number;
+  userId: number;
   nickname: string;
   content: string;
   createdAt: string;
