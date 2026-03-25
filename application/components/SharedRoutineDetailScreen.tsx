@@ -1,6 +1,12 @@
 import { useAuth } from "@/contexts/auth-context";
 import { blockApi } from "@/lib/api/block";
 import { communityApi } from "@/lib/api/community";
+import {
+  REPORT_REASON_LABELS,
+  reportApi,
+  type ReportReason,
+  type ReportTargetType,
+} from "@/lib/api/report";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatRelativeDate } from "@/lib/format";
 import type { SharedRoutineDetail } from "@/lib/types/community";
@@ -152,6 +158,46 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
     );
   };
 
+  const handleReport = (targetType: ReportTargetType, targetId: number) => {
+    const reasons = Object.entries(REPORT_REASON_LABELS) as [ReportReason, string][];
+    const options = reasons.map(([, label]) => label);
+
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
+        { options: ["취소", ...options], cancelButtonIndex: 0 },
+        async (idx) => {
+          if (idx === 0) return;
+          const reason = reasons[idx - 1][0];
+          try {
+            await reportApi.createReport(targetType, targetId, reason);
+            Alert.alert("신고 완료", "신고가 접수되었습니다.");
+          } catch {
+            Alert.alert("이미 신고한 콘텐츠이거나 오류가 발생했습니다.");
+          }
+        },
+      );
+    } else {
+      Alert.alert(
+        "신고 사유 선택",
+        undefined,
+        [
+          ...reasons.map(([reason, label]) => ({
+            text: label,
+            onPress: async () => {
+              try {
+                await reportApi.createReport(targetType, targetId, reason);
+                Alert.alert("신고 완료", "신고가 접수되었습니다.");
+              } catch {
+                Alert.alert("이미 신고한 콘텐츠이거나 오류가 발생했습니다.");
+              }
+            },
+          })),
+          { text: "취소", style: "cancel" },
+        ],
+      );
+    }
+  };
+
   const handleOptions = () => {
     const isOwn = user?.username === routine?.username;
     if (isOwn) {
@@ -198,20 +244,23 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
       }
     } else {
       const doBlock = () => handleBlockUser(routine!.userId);
+      const doReport = () => handleReport("ROUTINE", routineId);
 
       if (Platform.OS === "ios") {
         ActionSheetIOS.showActionSheetWithOptions(
           {
-            options: ["취소", "이 사용자 차단"],
-            destructiveButtonIndex: 1,
+            options: ["취소", "신고", "이 사용자 차단"],
+            destructiveButtonIndex: 2,
             cancelButtonIndex: 0,
           },
           (idx) => {
-            if (idx === 1) doBlock();
+            if (idx === 1) doReport();
+            if (idx === 2) doBlock();
           },
         );
       } else {
         Alert.alert(undefined as unknown as string, undefined, [
+          { text: "신고", onPress: doReport },
           { text: "이 사용자 차단", style: "destructive", onPress: doBlock },
           { text: "취소", style: "cancel" },
         ]);
@@ -584,33 +633,35 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
                               ]);
                             }
                           } else {
+                            const blockOnSuccess = () => {
+                              closeCommentSheet();
+                              setRoutine((prev) =>
+                                prev ? { ...prev, comments: prev.comments.filter((c) => c.userId !== comment.userId) } : null
+                              );
+                            };
+
                             if (Platform.OS === "ios") {
                               ActionSheetIOS.showActionSheetWithOptions(
                                 {
-                                  options: ["이 사용자 차단", "취소"],
-                                  destructiveButtonIndex: 0,
-                                  cancelButtonIndex: 1,
+                                  options: ["취소", "신고", "이 사용자 차단"],
+                                  destructiveButtonIndex: 2,
+                                  cancelButtonIndex: 0,
                                 },
                                 (idx) => {
-                                  if (idx === 0) handleBlockUser(comment.userId, () => {
-                                    closeCommentSheet();
-                                    setRoutine((prev) =>
-                                      prev ? { ...prev, comments: prev.comments.filter((c) => c.userId !== comment.userId) } : null
-                                    );
-                                  });
+                                  if (idx === 1) handleReport("COMMENT", comment.id);
+                                  if (idx === 2) handleBlockUser(comment.userId, blockOnSuccess);
                                 },
                               );
                             } else {
                               Alert.alert(undefined as unknown as string, undefined, [
                                 {
+                                  text: "신고",
+                                  onPress: () => handleReport("COMMENT", comment.id),
+                                },
+                                {
                                   text: "이 사용자 차단",
                                   style: "destructive",
-                                  onPress: () => handleBlockUser(comment.userId, () => {
-                                    closeCommentSheet();
-                                    setRoutine((prev) =>
-                                      prev ? { ...prev, comments: prev.comments.filter((c) => c.userId !== comment.userId) } : null
-                                    );
-                                  }),
+                                  onPress: () => handleBlockUser(comment.userId, blockOnSuccess),
                                 },
                                 { text: "취소", style: "cancel" },
                               ]);
