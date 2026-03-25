@@ -74,7 +74,8 @@ backend/src/main/java/com/back/
 ├── domain/
 │   ├── user/
 │   │   ├── auth/          ← 로그인, 회원가입, JWT, 이메일 인증, 비밀번호 재설정
-│   │   └── user/          ← 프로필 조회/수정, 마케팅 동의
+│   │   ├── user/          ← 프로필 조회/수정, 마케팅 동의
+│   │   └── block/         ← 사용자 차단/해제/목록 (Phase 3-1 ✅)
 │   ├── exercise/          ← 운동 종목 관리 (기본 종목 + 사용자 커스텀)
 │   ├── routine/           ← 루틴 CRUD, 활성/보관
 │   │   ├── routine/
@@ -86,6 +87,7 @@ backend/src/main/java/com/back/
 │   ├── community/         ← 커뮤니티 (Phase 3-1 ✅)
 │   │   ├── sharedRoutine/ ← 공유 루틴, 가져오기
 │   │   └── comment/       ← 댓글 CRUD
+│   ├── report/            ← 콘텐츠 신고 (Phase 3-1 ✅)
 │   ├── stats/             ← 홈 통계 (Phase 2-1 ✅)
 │   └── home/              ← 홈 화면 (서버 상태 페이지)
 └── global/
@@ -132,8 +134,9 @@ application/
 │   │   └── profile/
 │   │       ├── index.tsx  ← 프로필 메인
 │   │       ├── edit.tsx   ← 프로필 수정 (닉네임, 신체정보 등)
-│   │       ├── settings.tsx ← 설정 (알림, 이용약관 링크, 앱 버전)
-│   │       ├── account.tsx  ← 계정 관리 (로그아웃, 탈퇴)
+│   │       ├── settings.tsx      ← 설정 (알림, 이용약관 링크, 차단 목록, 앱 버전)
+│   │       ├── account.tsx       ← 계정 관리 (로그아웃, 탈퇴)
+│   │       └── blocked-users.tsx ← 차단 목록 및 해제 (Phase 3-1 ✅)
 │   │       ├── exercises/ ← 커스텀 종목 관리
 │   │       ├── history/   ← 운동 기록 목록/상세
 │   │       └── shared/    ← 내가 공유한 루틴 목록/상세
@@ -157,6 +160,8 @@ application/
 │   │   ├── routine.ts     ← 루틴 CRUD, 활성/보관
 │   │   ├── workout.ts     ← 세션 시작/완료/취소, 기록 조회
 │   │   ├── community.ts   ← 공유 루틴 목록/상세/가져오기, 댓글
+│   │   ├── block.ts       ← 사용자 차단/해제/목록
+│   │   ├── report.ts      ← 콘텐츠 신고
 │   │   └── home.ts        ← 홈 통계
 │   ├── types/             ← TypeScript 타입 (도메인별)
 │   ├── store/             ← 간단한 상태 브릿지 (exercise-selection.ts)
@@ -529,6 +534,18 @@ useEffect(() => {
 **easing 통일:** 여러 바텀시트의 느낌을 통일하려면 easing을 지정하지 않아 기본값(`Easing.inOut(Easing.ease)`)을 사용하거나, 동일한 easing을 공유할 것. `Easing.out(Easing.cubic)`은 초반이 지나치게 빨라 이질감을 줄 수 있음.
 
 **적용 파일:** `application/components/WorkoutStartSheet.tsx`
+
+---
+
+### POST API 성공했는데 에러 알림이 뜨는 문제
+
+**증상:** 차단 API 호출 시 실제로는 차단이 완료됐지만 "차단하지 못했습니다" 에러 알림 표시
+
+**원인:** `ResponseEntity.ok().build()`는 200 OK + 빈 바디를 반환한다. `apiFetch`는 204가 아닌 경우 `res.json()`을 호출하는데, 빈 바디를 JSON으로 파싱하면 `SyntaxError`가 발생해 catch 블록 실행.
+
+**해결:** 바디 없이 종료되는 모든 API(삭제, 차단, 상태 변경 등)는 `ResponseEntity.noContent().build()`로 204 반환.
+
+**원칙:** 기존 DELETE API 트러블슈팅과 동일. 바디 없는 성공 응답은 항상 204 No Content.
 
 ---
 

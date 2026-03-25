@@ -1,7 +1,7 @@
 # PROLOG - 기능 요구사항 명세서
 
 **버전:** v1.0.0
-**최종 업데이트:** 2026-03-19
+**최종 업데이트:** 2026-03-25
 
 > 본 문서는 ProLog 서비스의 핵심 가치, 비즈니스 로직, 기능 요구사항을 정의합니다.
 > 기획자, PM, 개발자 모두 본 문서를 기준으로 작업합니다.
@@ -126,6 +126,8 @@ GET /api/workouts/sessions/routines/{routineId}/last
 - [x] 루틴 가져오기
 - [x] 댓글 작성/삭제
 - [x] 조회수, 가져오기 횟수 추적
+- [x] 사용자 차단/해제 (차단 유저 콘텐츠 피드 필터링)
+- [x] 콘텐츠 신고 (루틴/댓글, 중복 신고 방지)
 
 ---
 
@@ -241,12 +243,18 @@ GET /api/workouts/sessions/routines/{routineId}/last
 ```
 ┌─────────┐         ┌──────────────────┐
 │  User   │◄────────│ SharedRoutine    │
-└─────────┘         │ (스냅샷, 읽기전용) │
+└────┬────┘         │ (스냅샷, 읽기전용) │
      ▲              └────────┬─────────┘
      │                       │ 1:N
      │              ┌────────┴─────────┐
      │              │    Comment       │
      │              └──────────────────┘
+     │
+     ├──────────────┐ N:M (차단)
+     │         UserBlock
+     │
+     └──────────────┐ 1:N (신고)
+                  Report
 
 * CommentLike: Phase 3-2 예정
 * SharedRoutine ↔ Routine: FK 없음 (스냅샷 독립성)
@@ -458,6 +466,47 @@ GET /api/workouts/sessions/routines/{routineId}/last
 - 공유 루틴 삭제 시 댓글도 CASCADE 삭제
 - 작성자만 삭제 가능
 - like_count는 Phase 3 후반에 추가 예정
+
+---
+
+#### UserBlock (사용자 차단) ✅ Phase 3-1
+
+**테이블:** `user_blocks`
+
+| 컬럼 | 타입 | 제약 | 설명 |
+|------|------|------|------|
+| id | BIGINT | PK | 차단 ID |
+| blocker_id | BIGINT | FK (users), NOT NULL | 차단한 사용자 |
+| blocked_id | BIGINT | FK (users), NOT NULL | 차단된 사용자 |
+| created_at | DATETIME | NOT NULL | 차단 일시 |
+
+**제약:** UNIQUE (blocker_id, blocked_id)
+
+**비즈니스 규칙:**
+- 자기 자신 차단 불가
+- 차단 시 해당 유저의 공유 루틴/댓글이 목록에서 즉시 제외
+- 이미 차단된 경우 중복 차단 무시 (멱등성)
+
+---
+
+#### Report (신고) ✅ Phase 3-1
+
+**테이블:** `reports`
+
+| 컬럼 | 타입 | 제약 | 설명 |
+|------|------|------|------|
+| id | BIGINT | PK | 신고 ID |
+| reporter_id | BIGINT | FK (users), NOT NULL | 신고자 |
+| target_type | ENUM | NOT NULL | ROUTINE, COMMENT |
+| target_id | BIGINT | NOT NULL | 신고 대상 ID |
+| reason | ENUM | NOT NULL | SPAM, INAPPROPRIATE, MISLEADING, OTHER |
+| created_at | DATETIME | NOT NULL | 신고 일시 |
+
+**제약:** UNIQUE (reporter_id, target_type, target_id)
+
+**비즈니스 규칙:**
+- 동일 대상 중복 신고 불가 (409 Conflict)
+- 신고 내역은 DB에 보관 (관리자 검토용)
 
 ---
 
@@ -752,7 +801,7 @@ e1RM 공식 (Epley):
 
 ### 5. 커뮤니티 정책 (Phase 3-1 ✅)
 
-#### 4.1 루틴 공유
+#### 5.1 루틴 공유
 
 **동작:**
 1. 사용자가 공유 시 입력:
@@ -786,7 +835,7 @@ e1RM 공식 (Epley):
 
 ---
 
-#### 4.2 루틴 가져오기
+#### 5.2 루틴 가져오기
 
 **동작:**
 1. `routine_snapshot` 파싱
@@ -802,7 +851,38 @@ e1RM 공식 (Epley):
 
 ---
 
-#### 4.3 댓글 좋아요 (Phase 3-2)
+#### 5.3 사용자 차단 ✅
+
+**API:**
+- `POST /api/users/{userId}/block` — 차단
+- `DELETE /api/users/{userId}/block` — 차단 해제
+- `GET /api/users/blocked` — 차단 목록 조회
+
+**동작:**
+- 차단 즉시 해당 유저의 루틴/댓글이 피드에서 제외
+- 앱 설정 > 차단 목록에서 차단 해제 가능
+
+---
+
+#### 5.4 콘텐츠 신고 ✅
+
+**API:**
+- `POST /api/reports` — 신고 접수
+
+**신고 사유:**
+- `SPAM`: 스팸 및 광고
+- `INAPPROPRIATE`: 부적절한 콘텐츠
+- `MISLEADING`: 허위 및 과장 정보
+- `OTHER`: 기타
+
+**동작:**
+- 루틴/댓글 모두 신고 가능 (`targetType`: ROUTINE / COMMENT)
+- 동일 대상 중복 신고 불가 (409)
+- 신고 내역은 서버 DB에 보관
+
+---
+
+#### 5.5 댓글 좋아요 (Phase 3-2)
 
 **상태:** 📋 Phase 3 후반 예정
 
@@ -869,6 +949,15 @@ e1RM 공식 (Epley):
 #### Comment (댓글) - Phase 3-1 ✅
 - 공유 루틴 삭제 시 CASCADE 삭제
 - 작성자만 삭제 가능
+
+#### UserBlock (사용자 차단) - Phase 3-1 ✅
+- 자기 자신 차단 불가
+- 중복 차단 시 무시 (멱등성 보장)
+- 차단 유저 필터링: 공유 루틴 목록/상세, 댓글 목록/댓글 수
+
+#### Report (신고) - Phase 3-1 ✅
+- 동일 (reporter_id, target_type, target_id) 중복 신고 불가
+- 신고만 접수, 자동 삭제 없음 (관리자 검토 후 처리)
 
 ---
 
