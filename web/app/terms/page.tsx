@@ -19,7 +19,7 @@ export default function TermsPage() {
       <main className="flex-1 px-6 py-12">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold text-white mb-2">서비스 이용약관</h1>
-          <p className="text-sm text-muted mb-8">최종 업데이트: 2026년 3월 13일</p>
+          <p className="text-sm text-muted mb-8">최종 업데이트: 2026년 3월 25일</p>
           <div className="bg-card rounded-2xl border border-white/10 p-8">
             <pre className="text-sm text-muted leading-8 whitespace-pre-wrap font-sans">
               {TERMS_OF_SERVICE}
