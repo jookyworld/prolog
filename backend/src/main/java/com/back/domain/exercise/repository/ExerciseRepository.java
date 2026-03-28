@@ -34,4 +34,6 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
     List<Exercise> findAllByCustomIsTrueAndCreatedBy_IdOrderByCreatedAtDesc(Long userId);
 
     boolean existsByNameAndCustomIsTrueAndCreatedBy_IdAndIdNot(String name, Long userId, Long id);
+
+    boolean existsByNameAndCustomIsFalseAndIdNot(String name, Long id);
 }

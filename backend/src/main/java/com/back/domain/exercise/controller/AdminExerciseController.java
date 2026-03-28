@@ -2,6 +2,7 @@ package com.back.domain.exercise.controller;
 
 import com.back.domain.exercise.dto.AdminExerciseResponse;
 import com.back.domain.exercise.dto.ExerciseCreateRequest;
+import com.back.domain.exercise.dto.ExerciseUpdateRequest;
 import com.back.domain.exercise.service.ExerciseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,5 +25,12 @@ public class AdminExerciseController {
     @PostMapping
     public AdminExerciseResponse createAdminExercise(@RequestBody ExerciseCreateRequest request) {
         return exerciseService.adminCreateExercise(request);
+    }
+
+    @PutMapping("/{id}")
+    public AdminExerciseResponse updateAdminExercise(
+            @PathVariable Long id,
+            @RequestBody ExerciseUpdateRequest request) {
+        return exerciseService.adminUpdateExercise(id, request);
     }
 }

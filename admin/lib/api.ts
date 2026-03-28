@@ -1,5 +1,5 @@
 import { getToken } from "./auth";
-import type { LoginResponse } from "./types";
+import type { AdminExerciseResponse, LoginResponse } from "./types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 
@@ -31,5 +31,24 @@ export const authApi = {
     request<LoginResponse>("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ username, password }),
+    }),
+};
+
+export const exerciseApi = {
+  getAll: () => request<AdminExerciseResponse[]>("/api/admin/exercises"),
+
+  create: (data: { name: string; bodyPart: string; partDetail?: string }) =>
+    request<AdminExerciseResponse>("/api/admin/exercises", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  update: (
+    id: number,
+    data: { name: string; bodyPart: string; partDetail?: string }
+  ) =>
+    request<AdminExerciseResponse>(`/api/admin/exercises/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
     }),
 };

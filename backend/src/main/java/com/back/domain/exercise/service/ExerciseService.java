@@ -118,6 +118,23 @@ public class ExerciseService {
         exerciseRepository.delete(exercise);
     }
 
+    @Transactional
+    public AdminExerciseResponse adminUpdateExercise(Long exerciseId, ExerciseUpdateRequest request) {
+        Exercise exercise = exerciseRepository.findById(exerciseId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 종목입니다."));
+
+        if (exercise.isCustom()) {
+            throw new BadRequestException("공식 종목만 수정할 수 있습니다.");
+        }
+
+        if (exerciseRepository.existsByNameAndCustomIsFalseAndIdNot(request.name(), exerciseId)) {
+            throw new ConflictException("이미 존재하는 종목 이름입니다.");
+        }
+
+        exercise.update(request.name(), request.bodyPart(), request.partDetail());
+        return AdminExerciseResponse.from(exercise);
+    }
+
     @Transactional(readOnly = true)
     public List<AdminExerciseResponse> adminGetAllExercises() {
         return exerciseRepository.findAll()

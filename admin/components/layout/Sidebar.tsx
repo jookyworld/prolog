@@ -31,7 +31,7 @@ const NAV_ITEMS = [
     label: "운동 관리",
     href: "/exercises",
     icon: Dumbbell,
-    available: false,
+    available: true,
   },
   {
     label: "신고 관리",
