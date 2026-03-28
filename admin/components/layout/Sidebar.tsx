@@ -7,6 +7,7 @@ import {
   Users,
   Dumbbell,
   Flag,
+  Activity,
   LogOut,
   ChevronRight,
 } from "lucide-react";
@@ -37,6 +38,12 @@ const NAV_ITEMS = [
     label: "신고 관리",
     href: "/reports",
     icon: Flag,
+    available: true,
+  },
+  {
+    label: "세션 조회",
+    href: "/sessions",
+    icon: Activity,
     available: true,
   },
 ];

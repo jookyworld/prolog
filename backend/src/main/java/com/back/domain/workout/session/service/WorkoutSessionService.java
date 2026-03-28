@@ -12,6 +12,8 @@ import com.back.domain.routine.routineItem.dto.RoutineItemCreateRequest;
 import com.back.domain.user.user.entity.User;
 import com.back.domain.user.user.repository.UserRepository;
 import com.back.domain.workout.session.dto.*;
+import com.back.global.dto.PageResponse;
+import org.springframework.data.domain.PageRequest;
 import com.back.domain.workout.session.entity.WorkoutSession;
 import com.back.domain.workout.session.repository.WorkoutSessionRepository;
 import com.back.domain.workout.sessionexercise.entity.WorkoutSessionExercise;
@@ -363,5 +365,13 @@ public class WorkoutSessionService {
         );
 
         routineService.updateRoutine(userId, routine.getId(), updateRequest);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<AdminWorkoutSessionResponse> adminGetSessions(
+            String keyword, LocalDateTime from, LocalDateTime to, int page, int size) {
+        Page<WorkoutSession> sessions = workoutSessionRepository.findAdminSessions(
+                keyword, from, to, PageRequest.of(page, size));
+        return PageResponse.from(sessions.map(AdminWorkoutSessionResponse::from));
     }
 }

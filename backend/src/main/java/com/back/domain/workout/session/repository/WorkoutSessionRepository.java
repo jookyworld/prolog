@@ -81,6 +81,23 @@ public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, 
     // 특정 루틴을 참조하는 모든 세션 조회 (루틴 삭제 시 사용)
     List<WorkoutSession> findByRoutine_Id(Long routineId);
 
+    @Query("""
+            SELECT ws FROM WorkoutSession ws
+            JOIN FETCH ws.user u
+            WHERE ws.completedAt IS NOT NULL
+            AND (:keyword IS NULL OR :keyword = ''
+                 OR LOWER(u.nickname) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                 OR LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')))
+            AND (:from IS NULL OR ws.completedAt >= :from)
+            AND (:to IS NULL OR ws.completedAt <= :to)
+            ORDER BY ws.completedAt DESC
+            """)
+    Page<WorkoutSession> findAdminSessions(
+            @Param("keyword") String keyword,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable);
+
     // 부위 필터
     @Query(
         value = "SELECT * FROM workout_sessions WHERE user_id = :userId AND completed_at IS NOT NULL AND id IN (SELECT DISTINCT workout_session_id FROM workout_session_exercises WHERE body_part_snapshot = :bodyPart) ORDER BY completed_at DESC",

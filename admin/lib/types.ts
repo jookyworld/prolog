@@ -72,6 +72,16 @@ export const REPORT_REASON_LABEL: Record<ReportReason, string> = {
   OTHER: "기타",
 };
 
+export interface AdminWorkoutSessionResponse {
+  id: number;
+  userId: number;
+  userNickname: string;
+  routineTitle: string;
+  startedAt: string;
+  completedAt: string;
+  durationMinutes: number | null;
+}
+
 export interface AdminReportResponse {
   id: number;
   reporterId: number;
