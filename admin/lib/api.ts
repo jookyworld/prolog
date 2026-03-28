@@ -1,5 +1,5 @@
 import { getToken } from "./auth";
-import type { AdminExerciseResponse, LoginResponse } from "./types";
+import type { AdminExerciseResponse, LoginResponse, PageResponse, UserResponse } from "./types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 
@@ -32,6 +32,19 @@ export const authApi = {
       method: "POST",
       body: JSON.stringify({ username, password }),
     }),
+};
+
+export const userApi = {
+  getUsers: (params: { keyword?: string; role?: string; page?: number; size?: number }) => {
+    const query = new URLSearchParams();
+    if (params.keyword) query.set("keyword", params.keyword);
+    if (params.role) query.set("role", params.role);
+    query.set("page", String(params.page ?? 0));
+    query.set("size", String(params.size ?? 20));
+    return request<PageResponse<UserResponse>>(`/api/admin/users?${query}`);
+  },
+
+  getUser: (id: number) => request<UserResponse>(`/api/admin/users/${id}`),
 };
 
 export const exerciseApi = {

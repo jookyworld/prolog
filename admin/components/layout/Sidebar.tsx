@@ -25,7 +25,7 @@ const NAV_ITEMS = [
     label: "유저 관리",
     href: "/users",
     icon: Users,
-    available: false,
+    available: true,
   },
   {
     label: "운동 관리",
