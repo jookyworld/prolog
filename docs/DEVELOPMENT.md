@@ -11,7 +11,7 @@ prolog/
 ├── backend/           # Spring Boot API Server (배포 완료)
 ├── application/       # React Native 사용자 앱 "ProLog: 상급노하우"
 ├── web/               # Next.js 공식 웹페이지 (이용약관, 서비스 소개 등)
-├── admin/             # 관리자 웹 (미개발, 추후 예정)
+├── admin/             # 관리자 웹 대시보드 (Next.js 15, 개발 중)
 ├── README.md
 └── docs/
     ├── ERD.png
@@ -27,7 +27,7 @@ prolog/
 | **backend** | Spring Boot 4.0.1 + MySQL + Redis | REST API 서버 | ✅ 배포 완료 (중단 배포) | 8080 |
 | **application** | Expo 54 + React Native 0.81.5 | 사용자 모바일 앱 | ✅ v1.0.0 완성, TestFlight 정식 배포 준비 | Expo 앱 |
 | **web** | Next.js + React 19 + TailwindCSS | 공식 웹페이지 | 🚧 개발 중 | - |
-| **admin** | 미정 | 관리자 대시보드 | 📋 미개발, 추후 예정 | - |
+| **admin** | Next.js 15 + React 19 + shadcn/ui | 관리자 대시보드 | 🚧 개발 중 (1단계 완료) | 3001 |
 
 ---
 
@@ -43,6 +43,11 @@ docker-compose up -d        # MySQL + Redis
 cd application
 npm install
 npx expo start
+
+# 3. Admin (터미널 3, 선택)
+cd admin
+npm install
+npm run dev   # http://localhost:3001
 ```
 
 ### 환경 변수 설정
@@ -370,6 +375,18 @@ EXPO_PUBLIC_API_URL=http://192.168.x.x:8080
   <Stack.Screen name="(auth)" />
   <Stack.Screen name="(modal)" options={{ presentation: "modal" }} />
 </Stack>
+```
+
+---
+
+### Admin 로그인 시 "Failed to fetch" (CORS)
+
+**원인:** `application-local.yml`의 `cors.allowed-origins`에 admin 포트(3001)가 없는 경우
+**해결:** `backend/src/main/resources/application-local.yml` 수정 후 백엔드 재시작
+
+```yaml
+cors:
+  allowed-origins: http://localhost:3000,http://localhost:3001,http://localhost:5173
 ```
 
 ---
