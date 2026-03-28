@@ -24,7 +24,7 @@ prolog/
 ├── backend/           # Spring Boot API Server
 ├── application/       # Expo React Native 사용자 앱 ("ProLog: 상급노하우")
 ├── web/               # Next.js 공식 웹페이지 (이용약관, 서비스 소개 등)
-├── admin/             # 관리자 웹 (미개발, 추후 예정)
+├── admin/             # Next.js 관리자 대시보드
 └── docs/              # 프로젝트 문서
 ```
 
@@ -47,6 +47,11 @@ prolog/
 - Next.js / React 19 / TypeScript
 - TailwindCSS
 
+### Admin (관리자 대시보드)
+- Next.js 15.1.6 / React 19 / TypeScript
+- Tailwind CSS + shadcn/ui
+- JWT 인증 (ADMIN 역할 전용), 포트 3001
+
 ---
 
 ## 🌐 배포 현황
@@ -57,7 +62,7 @@ prolog/
 | **Swagger UI** | ✅ 운영 중 | `https://api.prolog.jooky.site/swagger-ui/index.html` |
 | **Mobile App** | ✅ v1.0.0 완성, TestFlight 정식 배포 준비 중 | Bundle ID: `com.jooky.prolog` |
 | **공식 웹페이지** | 🚧 개발 중 | 이용약관, 서비스 소개 |
-| **Admin Web** | 📋 미개발 | 추후 예정 |
+| **Admin Web** | ✅ 운영 중 | `https://admin.prolog.jooky.site` |
 
 > **배포 방식:** 현재 EC2 Docker Compose 기반 중단 배포. 추후 Blue-Green 무중단 배포로 전환 예정.
 
@@ -75,6 +80,11 @@ docker-compose up -d
 cd application
 npm install
 npx expo start
+
+# Admin
+cd admin
+npm install
+npm run dev   # http://localhost:3001
 ```
 
 자세한 설정 방법 → [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md)
@@ -91,6 +101,7 @@ npx expo start
 | **Phase 3-1** | 커뮤니티 기본 (공유, 가져오기, 댓글) | ✅ 완료 | v1.0.0 포함 |
 | **Phase 3-2** | 커뮤니티 고급 (좋아요, 추천) | 📋 향후 추가 | 정식 배포 후 |
 | **UI/UX 개선** | 애니메이션, 화면 구성 등 | ✅ v1.0.0 기준 완료 | |
+| **Admin** | 관리자 대시보드 (유저/종목/신고/세션 관리) | ✅ 완료 | |
 
 > v1.0.0은 TestFlight 정식 배포 기준 완성 상태. 이후 기능은 정식 배포 후 순차 추가.
 > 긴급 버그/수정은 예외적으로 우선 처리.
