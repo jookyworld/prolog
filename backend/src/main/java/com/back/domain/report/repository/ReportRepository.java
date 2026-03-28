@@ -26,4 +26,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     Page<Report> findAdminReports(@Param("status") ReportStatus status, Pageable pageable);
 
     List<Report> findAllByTargetTypeAndTargetId(ReportTargetType targetType, Long targetId);
+
+    long countByStatus(ReportStatus status);
 }

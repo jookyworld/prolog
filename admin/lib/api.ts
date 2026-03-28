@@ -47,6 +47,17 @@ export const userApi = {
   getUser: (id: number) => request<UserResponse>(`/api/admin/users/${id}`),
 };
 
+export interface DashboardStats {
+  totalUsers: number;
+  totalOfficialExercises: number;
+  pendingReports: number;
+  sessionsThisMonth: number;
+}
+
+export const dashboardApi = {
+  getStats: () => request<DashboardStats>("/api/admin/dashboard/stats"),
+};
+
 export const sessionApi = {
   getSessions: (params: { keyword?: string; from?: string; to?: string; page?: number; size?: number }) => {
     const query = new URLSearchParams();

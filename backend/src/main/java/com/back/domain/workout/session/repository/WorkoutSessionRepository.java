@@ -78,6 +78,8 @@ public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, 
     @Query("select count(ws) from WorkoutSession ws where ws.completedAt is null and ws.user.id in (select e.createdBy.id from Exercise e where e.id in :customIds)")
     long countActiveSessionsByExerciseCreators(@Param("customIds") List<Long> customIds);
 
+    long countByCompletedAtBetween(LocalDateTime start, LocalDateTime end);
+
     // 특정 루틴을 참조하는 모든 세션 조회 (루틴 삭제 시 사용)
     List<WorkoutSession> findByRoutine_Id(Long routineId);
 
