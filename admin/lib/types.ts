@@ -49,3 +49,37 @@ export interface PageResponse<T> {
   last: boolean;
   empty: boolean;
 }
+
+export type ReportStatus = "PENDING" | "RESOLVED" | "DISMISSED";
+export type ReportTargetType = "ROUTINE" | "COMMENT";
+export type ReportReason = "SPAM" | "INAPPROPRIATE" | "MISLEADING" | "OTHER";
+
+export const REPORT_STATUS_LABEL: Record<ReportStatus, string> = {
+  PENDING: "처리 전",
+  RESOLVED: "처리 완료",
+  DISMISSED: "기각",
+};
+
+export const REPORT_TARGET_LABEL: Record<ReportTargetType, string> = {
+  ROUTINE: "루틴",
+  COMMENT: "댓글",
+};
+
+export const REPORT_REASON_LABEL: Record<ReportReason, string> = {
+  SPAM: "스팸",
+  INAPPROPRIATE: "부적절한 콘텐츠",
+  MISLEADING: "허위/오해 정보",
+  OTHER: "기타",
+};
+
+export interface AdminReportResponse {
+  id: number;
+  reporterId: number;
+  reporterNickname: string;
+  targetType: ReportTargetType;
+  targetId: number;
+  reason: ReportReason;
+  status: ReportStatus;
+  targetPreview: string;
+  createdAt: string;
+}

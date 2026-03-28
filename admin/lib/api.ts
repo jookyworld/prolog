@@ -1,5 +1,5 @@
 import { getToken } from "./auth";
-import type { AdminExerciseResponse, LoginResponse, PageResponse, UserResponse } from "./types";
+import type { AdminExerciseResponse, AdminReportResponse, LoginResponse, PageResponse, ReportStatus, UserResponse } from "./types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 
@@ -45,6 +45,28 @@ export const userApi = {
   },
 
   getUser: (id: number) => request<UserResponse>(`/api/admin/users/${id}`),
+};
+
+export const reportApi = {
+  getReports: (params: { status?: ReportStatus; page?: number; size?: number }) => {
+    const query = new URLSearchParams();
+    if (params.status) query.set("status", params.status);
+    query.set("page", String(params.page ?? 0));
+    query.set("size", String(params.size ?? 20));
+    return request<PageResponse<AdminReportResponse>>(`/api/admin/reports?${query}`);
+  },
+
+  updateStatus: (id: number, status: ReportStatus) =>
+    request<AdminReportResponse>(`/api/admin/reports/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+
+  deleteRoutine: (id: number) =>
+    request<void>(`/api/admin/community/routines/${id}`, { method: "DELETE" }),
+
+  deleteComment: (id: number) =>
+    request<void>(`/api/admin/community/comments/${id}`, { method: "DELETE" }),
 };
 
 export const exerciseApi = {

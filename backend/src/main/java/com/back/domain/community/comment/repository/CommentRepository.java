@@ -23,4 +23,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Query("SELECT c.sharedRoutine.id, COUNT(c) FROM Comment c WHERE c.sharedRoutine.id IN :ids AND c.user.id NOT IN :blockedIds GROUP BY c.sharedRoutine.id")
     List<Object[]> countBySharedRoutineIdInExcludingBlocked(@Param("ids") List<Long> ids, @Param("blockedIds") List<Long> blockedIds);
+
+    void deleteAllBySharedRoutine_Id(Long sharedRoutineId);
 }

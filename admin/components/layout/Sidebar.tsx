@@ -37,7 +37,7 @@ const NAV_ITEMS = [
     label: "신고 관리",
     href: "/reports",
     icon: Flag,
-    available: false,
+    available: true,
   },
 ];
 

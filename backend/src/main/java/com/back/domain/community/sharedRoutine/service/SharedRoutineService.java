@@ -184,6 +184,14 @@ public class SharedRoutineService {
     }
 
     @Transactional
+    public void adminDeleteSharedRoutine(Long sharedRoutineId) {
+        SharedRoutine sharedRoutine = sharedRoutineRepository.findById(sharedRoutineId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 공유 루틴입니다."));
+        commentRepository.deleteAllBySharedRoutine_Id(sharedRoutineId);
+        sharedRoutineRepository.delete(sharedRoutine);
+    }
+
+    @Transactional
     public RoutineResponse importRoutine(Long userId, Long sharedRoutineId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));

@@ -42,7 +42,16 @@ public class Report {
     @Column(nullable = false, length = 20)
     private ReportReason reason;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'PENDING'")
+    private ReportStatus status = ReportStatus.PENDING;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public void updateStatus(ReportStatus status) {
+        this.status = status;
+    }
 }
