@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const APP_STORE_URL = "#";
+const APP_STORE_URL = "https://apps.apple.com/kr/app/%EC%83%81%EA%B8%89%EB%85%B8%ED%95%98%EC%9A%B0/id6760579875";
 
 const NAV_LINKS = [
   { href: "/intro", label: "서비스 소개" },
