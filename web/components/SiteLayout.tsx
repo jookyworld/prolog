@@ -1,4 +1,6 @@
+"use client";
 import Link from "next/link";
+import { useState } from "react";
 
 const APP_STORE_URL =
   "https://apps.apple.com/kr/app/%EC%83%81%EA%B8%89%EB%85%B8%ED%95%98%EC%9A%B0/id6760579875";
@@ -21,70 +23,142 @@ const S = {
   },
 };
 
+const GitHubIcon = ({ size = 22 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+  </svg>
+);
+
 export function SiteHeader({ activePath }: { activePath?: string }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
-    <header
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 20,
-        borderBottom: "1px solid rgba(255,255,255,0.07)",
-        backgroundColor: "rgba(16,16,18,0.9)",
-        backdropFilter: "blur(16px)",
-        padding: "0 clamp(20px, 4vw, 48px)",
-      }}
-    >
-      <div
+    <>
+      <header
         style={{
-          maxWidth: 1040,
-          margin: "0 auto",
-          height: 64,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
+          position: "sticky",
+          top: 0,
+          zIndex: 20,
+          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          backgroundColor: "rgba(16,16,18,0.9)",
+          backdropFilter: "blur(16px)",
+          padding: "0 clamp(20px, 4vw, 48px)",
         }}
       >
-        <Link
-          href="/intro"
+        <div
           style={{
+            maxWidth: 1040,
+            margin: "0 auto",
+            height: 64,
             display: "flex",
-            flexDirection: "row",
             alignItems: "center",
-            gap: 8,
-            textDecoration: "none",
+            justifyContent: "space-between",
           }}
         >
-          <img
-            src="/icon.png"
-            alt="ProLog"
-            className="site-logo-icon"
-            style={{ width: 46, height: 46 }}
-          />
-          <span
-            className="site-logo-text"
+          <Link
+            href="/intro"
+            onClick={() => setMenuOpen(false)}
             style={{
-              fontSize: 22,
-              fontWeight: 700,
-              color: "#fff",
-              lineHeight: 1,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
+              textDecoration: "none",
             }}
           >
-            ProLog
-          </span>
-        </Link>
-        <nav
-          className="site-nav"
-          style={{ display: "flex", alignItems: "center" }}
+            <img
+              src="/icon.png"
+              alt="ProLog"
+              className="site-logo-icon"
+              style={{ width: 46, height: 46 }}
+            />
+            <span
+              className="site-logo-text"
+              style={{ fontSize: 22, fontWeight: 700, color: "#fff", lineHeight: 1 }}
+            >
+              ProLog
+            </span>
+          </Link>
+
+          {/* 데스크탑 nav */}
+          <nav className="site-nav">
+            {NAV_LINKS.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                style={{
+                  fontWeight: 500,
+                  textDecoration: "none",
+                  color: activePath === l.href ? "#fff" : "rgba(255,255,255,0.5)",
+                  transition: "color 0.15s",
+                }}
+              >
+                {l.label}
+              </Link>
+            ))}
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub 저장소"
+              style={{ display: "flex", alignItems: "center", color: "rgba(255,255,255,0.5)" }}
+            >
+              <GitHubIcon />
+            </a>
+          </nav>
+
+          {/* 모바일 햄버거 버튼 */}
+          <button
+            className="hamburger-btn"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label={menuOpen ? "메뉴 닫기" : "메뉴 열기"}
+          >
+            {menuOpen ? (
+              <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            ) : (
+              <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            )}
+          </button>
+        </div>
+      </header>
+
+      {/* 모바일 메뉴 패널 */}
+      {menuOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 64,
+            left: 0,
+            right: 0,
+            zIndex: 19,
+            backgroundColor: "rgba(16,16,18,0.97)",
+            backdropFilter: "blur(16px)",
+            borderBottom: "1px solid rgba(255,255,255,0.07)",
+            padding: "16px clamp(20px, 4vw, 48px) 24px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+          }}
         >
           {NAV_LINKS.map((l) => (
             <Link
               key={l.href}
               href={l.href}
+              onClick={() => setMenuOpen(false)}
               style={{
+                fontSize: 17,
                 fontWeight: 500,
                 textDecoration: "none",
-                color: activePath === l.href ? "#fff" : "rgba(255,255,255,0.5)",
-                transition: "color 0.15s",
+                color: activePath === l.href ? "#fff" : "rgba(255,255,255,0.6)",
+                padding: "12px 0",
+                borderBottom: "1px solid rgba(255,255,255,0.06)",
               }}
             >
               {l.label}
@@ -94,21 +168,24 @@ export function SiteHeader({ activePath }: { activePath?: string }) {
             href={GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="GitHub 저장소"
+            onClick={() => setMenuOpen(false)}
             style={{
               display: "flex",
               alignItems: "center",
-              color: "rgba(255,255,255,0.5)",
-              transition: "color 0.15s",
+              gap: 8,
+              fontSize: 17,
+              fontWeight: 500,
+              textDecoration: "none",
+              color: "rgba(255,255,255,0.6)",
+              padding: "12px 0",
             }}
           >
-            <svg width={22} height={22} viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-            </svg>
+            <GitHubIcon size={18} />
+            GitHub
           </a>
-        </nav>
-      </div>
-    </header>
+        </div>
+      )}
+    </>
   );
 }
 

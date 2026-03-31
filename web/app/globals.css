@@ -26,6 +26,17 @@ body {
   font-size: 16px;
 }
 
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  padding: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Feature card text — right-aligned on desktop, left on mobile */
 .feature-text-right {
   align-items: flex-end;
@@ -38,11 +49,11 @@ body {
 
 @media (max-width: 680px) {
   .site-nav {
-    gap: 20px;
+    display: none;
   }
 
-  .site-nav a {
-    font-size: 13px;
+  .hamburger-btn {
+    display: flex;
   }
 
   .site-logo-icon {
