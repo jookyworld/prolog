@@ -1,4 +1,5 @@
 import { SiteLayout } from "@/components/SiteLayout";
+import { CONTACT_EMAIL } from "@/lib/terms";
 
 export const metadata = {
   title: "사용자 설명서 | ProLog",
@@ -215,22 +216,10 @@ export default function GuidePage() {
       {/* Hero */}
       <section
         style={{
-          padding: "clamp(80px, 12vw, 80px) clamp(20px, 5vw, 48px) 64px",
+          padding: "clamp(60px, 12vw, 60px) clamp(20px, 5vw, 48px) 64px",
         }}
       >
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
-          <p
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.3)",
-              marginBottom: 20,
-            }}
-          >
-            사용자 설명서
-          </p>
           <h1
             style={{
               fontSize: "clamp(28px, 5vw, 46px)",
@@ -434,6 +423,79 @@ export default function GuidePage() {
             </P>
           </SubSection>
         </Section>
+
+        {/* 6. 자주 묻는 질문 */}
+        <Section title="자주 묻는 질문">
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {FAQS.map((faq, i) => (
+              <div
+                key={i}
+                style={{
+                  padding: "24px 0",
+                  borderTop: "1px solid rgba(255,255,255,0.07)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 600,
+                    margin: 0,
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  {faq.q}
+                </p>
+                <p
+                  style={{
+                    fontSize: 15,
+                    lineHeight: 1.7,
+                    color: "rgba(255,255,255,0.5)",
+                    margin: 0,
+                  }}
+                >
+                  {faq.a}
+                </p>
+              </div>
+            ))}
+            <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }} />
+          </div>
+        </Section>
+
+        {/* 7. 문의 */}
+        <section style={{ paddingBottom: 0 }}>
+          <h2
+            style={{
+              fontSize: "clamp(18px, 2.5vw, 24px)",
+              fontWeight: 700,
+              letterSpacing: "-0.02em",
+              margin: "0 0 16px",
+              color: "#fff",
+            }}
+          >
+            직접 문의하기
+          </h2>
+          <P>
+            FAQ에서 해결되지 않은 문제는 이메일로 문의해 주세요. 최대한 빠르게
+            답변드리겠습니다.
+          </P>
+          <a
+            href={`mailto:${CONTACT_EMAIL}`}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 15,
+              fontWeight: 600,
+              color: "#3182F6",
+              textDecoration: "none",
+            }}
+          >
+            {CONTACT_EMAIL} →
+          </a>
+        </section>
       </div>
     </SiteLayout>
   );

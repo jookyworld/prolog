@@ -1,12 +1,13 @@
 import Link from "next/link";
 
-const APP_STORE_URL = "https://apps.apple.com/kr/app/%EC%83%81%EA%B8%89%EB%85%B8%ED%95%98%EC%9A%B0/id6760579875";
+const APP_STORE_URL =
+  "https://apps.apple.com/kr/app/%EC%83%81%EA%B8%89%EB%85%B8%ED%95%98%EC%9A%B0/id6760579875";
 const GITHUB_URL = "https://github.com/jookyworld/prolog";
 
 const NAV_LINKS = [
   { href: "/intro", label: "서비스 소개" },
   { href: "/guide", label: "사용자 설명서" },
-  { href: "/support", label: "지원" },
+  { href: "/dev", label: "개발 정보" },
 ];
 
 const S = {
@@ -61,12 +62,20 @@ export function SiteHeader({ activePath }: { activePath?: string }) {
           />
           <span
             className="site-logo-text"
-            style={{ fontSize: 22, fontWeight: 700, color: "#fff", lineHeight: 1 }}
+            style={{
+              fontSize: 22,
+              fontWeight: 700,
+              color: "#fff",
+              lineHeight: 1,
+            }}
           >
             ProLog
           </span>
         </Link>
-        <nav className="site-nav" style={{ display: "flex", alignItems: "center" }}>
+        <nav
+          className="site-nav"
+          style={{ display: "flex", alignItems: "center" }}
+        >
           {NAV_LINKS.map((l) => (
             <Link
               key={l.href}
@@ -105,7 +114,12 @@ export function SiteHeader({ activePath }: { activePath?: string }) {
 
 export function SiteFooter() {
   return (
-    <footer style={{ backgroundColor: "#000", padding: "64px clamp(20px, 4vw, 48px) 40px" }}>
+    <footer
+      style={{
+        backgroundColor: "#000",
+        padding: "64px clamp(20px, 4vw, 48px) 40px",
+      }}
+    >
       <div style={{ maxWidth: 1040, margin: "0 auto" }}>
         <div
           style={{
@@ -125,7 +139,13 @@ export function SiteFooter() {
                 alt="ProLog"
                 style={{ width: 36, height: 36, borderRadius: 9 }}
               />
-              <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.02em" }}>
+              <span
+                style={{
+                  fontSize: 16,
+                  fontWeight: 700,
+                  letterSpacing: "-0.02em",
+                }}
+              >
                 ProLog: 상급노하우
               </span>
             </div>
@@ -159,11 +179,15 @@ export function SiteFooter() {
               >
                 서비스
               </span>
-              <Link href="/guide" style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>
+              <Link
+                href="/guide"
+                style={{
+                  fontSize: 14,
+                  color: "rgba(255,255,255,0.5)",
+                  textDecoration: "none",
+                }}
+              >
                 사용자 설명서
-              </Link>
-              <Link href="/support" style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>
-                지원
               </Link>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -178,10 +202,24 @@ export function SiteFooter() {
               >
                 법적고지
               </span>
-              <Link href="/terms" style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>
+              <Link
+                href="/terms"
+                style={{
+                  fontSize: 14,
+                  color: "rgba(255,255,255,0.5)",
+                  textDecoration: "none",
+                }}
+              >
                 서비스 이용약관
               </Link>
-              <Link href="/privacy" style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>
+              <Link
+                href="/privacy"
+                style={{
+                  fontSize: 14,
+                  color: "rgba(255,255,255,0.5)",
+                  textDecoration: "none",
+                }}
+              >
                 개인정보 처리방침
               </Link>
             </div>
@@ -262,11 +300,15 @@ export function AppStoreBadge() {
       <svg width={22} height={22} viewBox="0 0 24 24" fill="white">
         <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
       </svg>
-      <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
+      <div
+        style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}
+      >
         <span style={{ fontSize: 10, opacity: 0.8, letterSpacing: "0.02em" }}>
           Download on the
         </span>
-        <span style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.01em" }}>
+        <span
+          style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.01em" }}
+        >
           App Store
         </span>
       </div>
