@@ -3,11 +3,12 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { UserResponse } from "@/lib/types";
 import { getUser, clearAuth } from "@/lib/auth";
+import { authApi } from "@/lib/api";
 
 interface AuthContextType {
   user: UserResponse | null;
   setUser: (user: UserResponse) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -27,9 +28,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUserState(user);
   };
 
-  const logout = () => {
-    clearAuth();
-    window.location.href = "/login";
+  const logout = async () => {
+    try {
+      await authApi.logout();
+    } finally {
+      clearAuth();
+      window.location.href = "/login";
+    }
   };
 
   return (

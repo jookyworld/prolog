@@ -1,19 +1,49 @@
-import { getToken } from "./auth";
+import { clearAuth } from "./auth";
 import type { AdminExerciseResponse, AdminReportResponse, AdminWorkoutSessionResponse, LoginResponse, PageResponse, ReportStatus, UserResponse } from "./types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getToken();
-
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
+    credentials: "include",
   });
+
+  if (res.status === 401 && !path.includes("/api/auth/")) {
+    const refreshRes = await fetch(`${BASE_URL}/api/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (!refreshRes.ok) {
+      clearAuth();
+      window.location.href = "/login";
+      throw new Error("세션이 만료되었습니다. 다시 로그인해주세요.");
+    }
+
+    const retryRes = await fetch(`${BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+      credentials: "include",
+    });
+
+    if (!retryRes.ok) {
+      const error = await retryRes.json().catch(() => ({}));
+      throw new Error(
+        (error as { message?: string }).message ?? `HTTP ${retryRes.status}`,
+      );
+    }
+
+    if (retryRes.status === 204) return undefined as T;
+    return retryRes.json() as Promise<T>;
+  }
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
@@ -32,6 +62,8 @@ export const authApi = {
       method: "POST",
       body: JSON.stringify({ username, password }),
     }),
+  logout: () =>
+    request<void>("/api/auth/logout", { method: "POST" }),
 };
 
 export const userApi = {
