@@ -571,5 +571,6 @@ useEffect(() => {
 | 문서 | 용도 |
 |------|------|
 | [REQUIREMENTS.md](./REQUIREMENTS.md) | 비즈니스 로직, 데이터 모델 |
+| [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) | 배포 구성, CI/CD, 환경 변수, 장애 대응 |
 | [USER_GUIDE.md](./USER_GUIDE.md) | 앱 사용자 가이드 |
-| Swagger UI | API 명세 (http://localhost:8080/swagger-ui) |
+| [Swagger UI](https://api.prolog.jooky.site/swagger-ui/index.html) | API 명세 |
