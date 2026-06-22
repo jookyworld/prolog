@@ -58,11 +58,11 @@ prolog/
 
 | 항목 | 상태 | 주소 / 비고 |
 |------|------|-------------|
-| **Backend API** | ✅ 운영 중 (중단 배포) | `https://api.prolog.jooky.site` |
-| **Swagger UI** | ✅ 운영 중 | `https://api.prolog.jooky.site/swagger-ui/index.html` |
-| **Mobile App** | ✅ v1.0.0 완성, TestFlight 정식 배포 준비 중 | Bundle ID: `com.jooky.prolog` |
-| **공식 웹페이지** | 🚧 개발 중 | 이용약관, 서비스 소개 |
-| **Admin Web** | ✅ 운영 중 | `https://admin.prolog.jooky.site` |
+| **Backend API** | ✅ 운영 중 | [서버 바로가기](https://api.prolog.jooky.site) |
+| **Swagger UI** | ✅ 운영 중 | [API 명세서 바로가기](https://api.prolog.jooky.site/swagger-ui/index.html) |
+| **Mobile App** | ✅ App Store 출시 (v1.0.0) | [App Store 바로가기](https://apps.apple.com/kr/app/%EC%83%81%EA%B8%89%EB%85%B8%ED%95%98%EC%9A%B0/id6760579875) |
+| **공식 웹페이지** | ✅ 운영 중 | [웹 페이지 바로가기](https://prolog.jooky.site) |
+| **Admin Web** | ✅ 운영 중 | [관리자 페이지 바로가기](https://admin.prolog.jooky.site) |
 
 > **배포 방식:** 현재 EC2 Docker Compose 기반 중단 배포. 추후 Blue-Green 무중단 배포로 전환 예정.
 
