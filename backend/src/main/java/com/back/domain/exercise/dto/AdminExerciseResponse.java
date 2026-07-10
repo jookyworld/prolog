@@ -3,7 +3,6 @@ package com.back.domain.exercise.dto;
 import com.back.domain.exercise.entity.BodyPart;
 import com.back.domain.exercise.entity.Exercise;
 import com.back.domain.user.user.dto.UserResponse;
-
 import java.time.LocalDateTime;
 
 public record AdminExerciseResponse(
@@ -13,8 +12,7 @@ public record AdminExerciseResponse(
         String partDetail,
         boolean custom,
         UserResponse createdBy,
-        LocalDateTime createdAt
-) {
+        LocalDateTime createdAt) {
     public static AdminExerciseResponse from(Exercise exercise) {
         return new AdminExerciseResponse(
                 exercise.getId(),
@@ -23,8 +21,7 @@ public record AdminExerciseResponse(
                 exercise.getPartDetail(),
                 exercise.isCustom(),
                 toUserResponse(exercise),
-                exercise.getCreatedAt()
-        );
+                exercise.getCreatedAt());
     }
 
     private static UserResponse toUserResponse(Exercise exercise) {
@@ -33,5 +30,4 @@ public record AdminExerciseResponse(
         }
         return UserResponse.from(exercise.getCreatedBy());
     }
-
 }

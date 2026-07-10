@@ -1,19 +1,9 @@
 import { ApiError } from "@/lib/api";
 import { exerciseApi } from "@/lib/api/exercise";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
-import {
-  BODY_PARTS,
-  type BodyPart,
-  type ExerciseResponse,
-} from "@/lib/types/exercise";
+import { BODY_PARTS, type BodyPart, type ExerciseResponse } from "@/lib/types/exercise";
 import { useRouter } from "expo-router";
-import {
-  ChevronLeft,
-  Dumbbell,
-  EllipsisVertical,
-  Plus,
-  X,
-} from "lucide-react-native";
+import { ChevronLeft, Dumbbell, EllipsisVertical, Plus, X } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -25,10 +15,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 type TabType = "all" | "custom";
 
@@ -57,9 +44,7 @@ export default function ExerciseManageScreen() {
   const [filterBodyPart, setFilterBodyPart] = useState<BodyPart | null>(null);
 
   // 커스텀 종목
-  const [customExercises, setCustomExercises] = useState<ExerciseResponse[]>(
-    [],
-  );
+  const [customExercises, setCustomExercises] = useState<ExerciseResponse[]>([]);
   const [customLoading, setCustomLoading] = useState(false);
   const [customLoaded, setCustomLoaded] = useState(false);
   const [customError, setCustomError] = useState<string | null>(null);
@@ -77,9 +62,7 @@ export default function ExerciseManageScreen() {
       const data = await exerciseApi.getExercises();
       setAllExercises(data);
     } catch (err) {
-      setAllError(
-        err instanceof Error ? err.message : "데이터를 불러오지 못했습니다.",
-      );
+      setAllError(err instanceof Error ? err.message : "데이터를 불러오지 못했습니다.");
     } finally {
       setAllLoading(false);
     }
@@ -93,9 +76,7 @@ export default function ExerciseManageScreen() {
       setCustomExercises(data);
       setCustomLoaded(true);
     } catch (err) {
-      setCustomError(
-        err instanceof Error ? err.message : "데이터를 불러오지 못했습니다.",
-      );
+      setCustomError(err instanceof Error ? err.message : "데이터를 불러오지 못했습니다.");
     } finally {
       setCustomLoading(false);
     }
@@ -165,9 +146,7 @@ export default function ExerciseManageScreen() {
       };
       if (editingId !== null) {
         const updated = await exerciseApi.updateCustomExercise(editingId, body);
-        setCustomExercises((prev) =>
-          prev.map((e) => (e.id === editingId ? updated : e)),
-        );
+        setCustomExercises((prev) => prev.map((e) => (e.id === editingId ? updated : e)));
       } else {
         const created = await exerciseApi.createCustomExercise(body);
         setCustomExercises((prev) => [created, ...prev]);
@@ -176,10 +155,7 @@ export default function ExerciseManageScreen() {
       }
       closeModal();
     } catch (err) {
-      Alert.alert(
-        "오류",
-        err instanceof Error ? err.message : "저장에 실패했습니다.",
-      );
+      Alert.alert("오류", err instanceof Error ? err.message : "저장에 실패했습니다.");
     } finally {
       setSubmitting(false);
     }
@@ -231,10 +207,7 @@ export default function ExerciseManageScreen() {
           <Text className="text-2xl font-bold text-white">종목 관리</Text>
         </View>
         {activeTab === "custom" && (
-          <Pressable
-            onPress={openCreate}
-            className="h-10 w-10 items-center justify-center"
-          >
+          <Pressable onPress={openCreate} className="h-10 w-10 items-center justify-center">
             <Plus size={20} color={COLORS.white} />
           </Pressable>
         )}
@@ -247,17 +220,12 @@ export default function ExerciseManageScreen() {
             key={tab}
             onPress={() => setActiveTab(tab)}
             className="flex-1 items-center rounded-lg py-2"
-            style={
-              activeTab === tab
-                ? { backgroundColor: COLORS.primary }
-                : undefined
-            }
+            style={activeTab === tab ? { backgroundColor: COLORS.primary } : undefined}
           >
             <Text
               className="text-sm font-semibold"
               style={{
-                color:
-                  activeTab === tab ? COLORS.white : "rgba(255,255,255,0.4)",
+                color: activeTab === tab ? COLORS.white : "rgba(255,255,255,0.4)",
               }}
             >
               {tab === "all" ? "전체 종목" : "커스텀 종목"}
@@ -281,18 +249,13 @@ export default function ExerciseManageScreen() {
               className="rounded-full px-4 py-1.5"
               style={{
                 backgroundColor:
-                  filterBodyPart === null
-                    ? COLORS.primary
-                    : "rgba(255,255,255,0.08)",
+                  filterBodyPart === null ? COLORS.primary : "rgba(255,255,255,0.08)",
               }}
             >
               <Text
                 className="text-sm font-medium"
                 style={{
-                  color:
-                    filterBodyPart === null
-                      ? COLORS.white
-                      : "rgba(255,255,255,0.6)",
+                  color: filterBodyPart === null ? COLORS.white : "rgba(255,255,255,0.6)",
                 }}
               >
                 전체
@@ -301,24 +264,17 @@ export default function ExerciseManageScreen() {
             {BODY_PARTS.map((bp) => (
               <Pressable
                 key={bp}
-                onPress={() =>
-                  setFilterBodyPart(bp === filterBodyPart ? null : bp)
-                }
+                onPress={() => setFilterBodyPart(bp === filterBodyPart ? null : bp)}
                 className="rounded-full px-4 py-1.5"
                 style={{
                   backgroundColor:
-                    filterBodyPart === bp
-                      ? COLORS.primary
-                      : "rgba(255,255,255,0.08)",
+                    filterBodyPart === bp ? COLORS.primary : "rgba(255,255,255,0.08)",
                 }}
               >
                 <Text
                   className="text-sm font-medium"
                   style={{
-                    color:
-                      filterBodyPart === bp
-                        ? COLORS.white
-                        : "rgba(255,255,255,0.6)",
+                    color: filterBodyPart === bp ? COLORS.white : "rgba(255,255,255,0.6)",
                   }}
                 >
                   {bp}
@@ -339,23 +295,17 @@ export default function ExerciseManageScreen() {
               </View>
             ) : allError ? (
               <View className="rounded-2xl bg-card p-6">
-                <Text className="mb-3 text-center text-white/60">
-                  {allError}
-                </Text>
+                <Text className="mb-3 text-center text-white/60">{allError}</Text>
                 <Pressable
                   onPress={fetchAll}
                   className="items-center rounded-xl bg-primary/15 py-2.5"
                 >
-                  <Text className="text-sm font-medium text-white">
-                    다시 시도
-                  </Text>
+                  <Text className="text-sm font-medium text-white">다시 시도</Text>
                 </Pressable>
               </View>
             ) : allGrouped.length === 0 ? (
               <View className="items-center py-20">
-                <Text className="text-sm text-white/40">
-                  해당 부위의 종목이 없습니다
-                </Text>
+                <Text className="text-sm text-white/40">해당 부위의 종목이 없습니다</Text>
               </View>
             ) : (
               <View className="gap-3">
@@ -367,20 +317,14 @@ export default function ExerciseManageScreen() {
                     <View className="rounded-2xl bg-card">
                       {section.items.map((exercise, index) => (
                         <View key={exercise.id}>
-                          {index > 0 && (
-                            <View className="mx-5 h-px bg-white/5" />
-                          )}
+                          {index > 0 && <View className="mx-5 h-px bg-white/5" />}
                           <View className="flex-row items-center px-5 py-4">
                             <View className="flex-1">
                               <View className="flex-row items-center gap-2">
-                                <Text className="text-base text-white">
-                                  {exercise.name}
-                                </Text>
+                                <Text className="text-base text-white">{exercise.name}</Text>
                                 {exercise.custom && (
                                   <View className="rounded bg-white/10 px-1.5 py-0.5">
-                                    <Text className="text-[10px] text-white/40">
-                                      커스텀
-                                    </Text>
+                                    <Text className="text-[10px] text-white/40">커스텀</Text>
                                   </View>
                                 )}
                               </View>
@@ -416,16 +360,12 @@ export default function ExerciseManageScreen() {
             </View>
           ) : customError ? (
             <View className="rounded-2xl bg-card p-6">
-              <Text className="mb-3 text-center text-white/60">
-                {customError}
-              </Text>
+              <Text className="mb-3 text-center text-white/60">{customError}</Text>
               <Pressable
                 onPress={fetchCustom}
                 className="items-center rounded-xl bg-primary/15 py-2.5"
               >
-                <Text className="text-sm font-medium text-white">
-                  다시 시도
-                </Text>
+                <Text className="text-sm font-medium text-white">다시 시도</Text>
               </Pressable>
             </View>
           ) : customExercises.length === 0 ? (
@@ -483,10 +423,7 @@ export default function ExerciseManageScreen() {
                             }
                             className="h-9 w-9 items-center justify-center rounded-xl"
                           >
-                            <EllipsisVertical
-                              size={16}
-                              color={COLORS.mutedForeground}
-                            />
+                            <EllipsisVertical size={16} color={COLORS.mutedForeground} />
                           </Pressable>
                         </View>
                       </View>
@@ -500,12 +437,7 @@ export default function ExerciseManageScreen() {
       )}
 
       {/* 추가/수정 모달 */}
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={closeModal}
-      >
+      <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={closeModal}>
         <Pressable
           className="flex-1 items-center justify-center"
           style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
@@ -520,17 +452,12 @@ export default function ExerciseManageScreen() {
               <Text className="text-xl font-bold text-white">
                 {editingId !== null ? "종목 수정" : "커스텀 종목 추가"}
               </Text>
-              <Pressable
-                onPress={closeModal}
-                className="rounded-lg p-1 active:bg-white/5"
-              >
+              <Pressable onPress={closeModal} className="rounded-lg p-1 active:bg-white/5">
                 <X size={20} color={COLORS.mutedForeground} />
               </Pressable>
             </View>
 
-            <Text className="mb-2 text-sm font-medium text-white/60">
-              종목 이름
-            </Text>
+            <Text className="mb-2 text-sm font-medium text-white/60">종목 이름</Text>
             <TextInput
               value={form.name}
               onChangeText={(text) => setForm((f) => ({ ...f, name: text }))}
@@ -539,9 +466,7 @@ export default function ExerciseManageScreen() {
               className="mb-4 rounded-xl bg-white/5 px-4 py-3 text-base text-white"
             />
 
-            <Text className="mb-2 text-sm font-medium text-white/60">
-              운동 부위
-            </Text>
+            <Text className="mb-2 text-sm font-medium text-white/60">운동 부위</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -555,18 +480,13 @@ export default function ExerciseManageScreen() {
                   className="rounded-full px-3.5 py-2"
                   style={{
                     backgroundColor:
-                      form.bodyPart === bp
-                        ? COLORS.primary
-                        : "rgba(255,255,255,0.08)",
+                      form.bodyPart === bp ? COLORS.primary : "rgba(255,255,255,0.08)",
                   }}
                 >
                   <Text
                     className="text-sm font-medium"
                     style={{
-                      color:
-                        form.bodyPart === bp
-                          ? COLORS.white
-                          : "rgba(255,255,255,0.6)",
+                      color: form.bodyPart === bp ? COLORS.white : "rgba(255,255,255,0.6)",
                     }}
                   >
                     {bp}
@@ -575,14 +495,10 @@ export default function ExerciseManageScreen() {
               ))}
             </ScrollView>
 
-            <Text className="mb-2 text-sm font-medium text-white/60">
-              세부 부위 (선택)
-            </Text>
+            <Text className="mb-2 text-sm font-medium text-white/60">세부 부위 (선택)</Text>
             <TextInput
               value={form.partDetail}
-              onChangeText={(text) =>
-                setForm((f) => ({ ...f, partDetail: text }))
-              }
+              onChangeText={(text) => setForm((f) => ({ ...f, partDetail: text }))}
               placeholder="예: 전면 어깨, 이두, 힙 등"
               placeholderTextColor={COLORS.placeholder}
               className="mb-6 rounded-xl bg-white/5 px-4 py-3 text-base text-white"
@@ -593,9 +509,7 @@ export default function ExerciseManageScreen() {
               disabled={submitting || !form.name.trim()}
               className="items-center rounded-xl py-3.5 active:opacity-80"
               style={{
-                backgroundColor: form.name.trim()
-                  ? COLORS.primary
-                  : "rgba(255,255,255,0.05)",
+                backgroundColor: form.name.trim() ? COLORS.primary : "rgba(255,255,255,0.05)",
               }}
             >
               {submitting ? (
@@ -604,9 +518,7 @@ export default function ExerciseManageScreen() {
                 <Text
                   className="text-base font-semibold"
                   style={{
-                    color: form.name.trim()
-                      ? COLORS.white
-                      : "rgba(255,255,255,0.3)",
+                    color: form.name.trim() ? COLORS.white : "rgba(255,255,255,0.3)",
                   }}
                 >
                   {editingId !== null ? "수정 완료" : "추가하기"}

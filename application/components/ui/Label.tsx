@@ -6,10 +6,5 @@ interface LabelProps extends TextProps {
 }
 
 export function Label({ className, ...props }: LabelProps) {
-  return (
-    <Text
-      className={cn("text-sm text-muted-foreground", className)}
-      {...props}
-    />
-  );
+  return <Text className={cn("text-sm text-muted-foreground", className)} {...props} />;
 }

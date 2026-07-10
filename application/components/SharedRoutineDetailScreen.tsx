@@ -37,15 +37,9 @@ import {
   UIManager,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
-if (
-  Platform.OS === "android" &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -77,10 +71,8 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
-    const showEvent =
-      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    const hideEvent =
-      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
 
     const showSub = Keyboard.addListener(showEvent, (e) => {
       const kbHeight = e.endCoordinates.height;
@@ -177,24 +169,20 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
         },
       );
     } else {
-      Alert.alert(
-        "신고 사유 선택",
-        undefined,
-        [
-          ...reasons.map(([reason, label]) => ({
-            text: label,
-            onPress: async () => {
-              try {
-                await reportApi.createReport(targetType, targetId, reason);
-                Alert.alert("신고 완료", "신고가 접수되었습니다.");
-              } catch {
-                Alert.alert("이미 신고한 콘텐츠이거나 오류가 발생했습니다.");
-              }
-            },
-          })),
-          { text: "취소", style: "cancel" },
-        ],
-      );
+      Alert.alert("신고 사유 선택", undefined, [
+        ...reasons.map(([reason, label]) => ({
+          text: label,
+          onPress: async () => {
+            try {
+              await reportApi.createReport(targetType, targetId, reason);
+              Alert.alert("신고 완료", "신고가 접수되었습니다.");
+            } catch {
+              Alert.alert("이미 신고한 콘텐츠이거나 오류가 발생했습니다.");
+            }
+          },
+        })),
+        { text: "취소", style: "cancel" },
+      ]);
     }
   };
 
@@ -202,27 +190,21 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
     const isOwn = user?.username === routine?.username;
     if (isOwn) {
       const doDelete = () => {
-        Alert.alert(
-          "공유 루틴 삭제",
-          "커뮤니티에서 이 루틴을 삭제하시겠습니까?",
-          [
-            { text: "취소", style: "cancel" },
-            {
-              text: "삭제",
-              style: "destructive",
-              onPress: async () => {
-                try {
-                  await communityApi.deleteSharedRoutine(routineId);
-                  router.back();
-                } catch {
-                  Alert.alert(
-                    "삭제하지 못했습니다. 잠시 후 다시 시도해주세요.",
-                  );
-                }
-              },
+        Alert.alert("공유 루틴 삭제", "커뮤니티에서 이 루틴을 삭제하시겠습니까?", [
+          { text: "취소", style: "cancel" },
+          {
+            text: "삭제",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                await communityApi.deleteSharedRoutine(routineId);
+                router.back();
+              } catch {
+                Alert.alert("삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
+              }
             },
-          ],
-        );
+          },
+        ]);
       };
 
       if (Platform.OS === "ios") {
@@ -327,9 +309,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
     setCommentText("");
     try {
       const newComment = await communityApi.createComment(routineId, text);
-      setRoutine((prev) =>
-        prev ? { ...prev, comments: [...prev.comments, newComment] } : null,
-      );
+      setRoutine((prev) => (prev ? { ...prev, comments: [...prev.comments, newComment] } : null));
     } catch (err) {
       console.error("Failed to create comment:", err);
       setCommentText(text);
@@ -369,20 +349,12 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
         <Text className="mb-2 text-lg font-semibold text-white">
           {error ?? "루틴을 찾을 수 없어요"}
         </Text>
-        <Text className="mb-6 text-sm text-white/50">
-          삭제되었거나 존재하지 않는 루틴입니다.
-        </Text>
+        <Text className="mb-6 text-sm text-white/50">삭제되었거나 존재하지 않는 루틴입니다.</Text>
         <View className="flex-row gap-3">
-          <Pressable
-            onPress={loadData}
-            className="rounded-full bg-white/10 px-5 py-2.5"
-          >
+          <Pressable onPress={loadData} className="rounded-full bg-white/10 px-5 py-2.5">
             <Text className="text-sm font-medium text-white">다시 시도</Text>
           </Pressable>
-          <Pressable
-            onPress={() => router.back()}
-            className="rounded-full bg-primary px-5 py-2.5"
-          >
+          <Pressable onPress={() => router.back()} className="rounded-full bg-primary px-5 py-2.5">
             <Text className="text-sm font-medium text-white">목록으로</Text>
           </Pressable>
         </View>
@@ -398,17 +370,12 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       {/* 헤더 */}
       <View className="flex-row items-center px-4 py-3">
-        <Pressable
-          onPress={() => router.back()}
-          className="h-10 w-10 items-center justify-center"
-        >
+        <Pressable onPress={() => router.back()} className="h-10 w-10 items-center justify-center">
           <ChevronLeft size={24} color={COLORS.white} />
         </Pressable>
 
         <View className="flex-1 items-center">
-          <Text className="text-lg font-semibold text-white">
-            {routine.nickname}
-          </Text>
+          <Text className="text-lg font-semibold text-white">{routine.nickname}</Text>
           <Text className="text-xs text-white/40">
             {new Date(routine.createdAt).toLocaleDateString("ko-KR", {
               year: "numeric",
@@ -418,10 +385,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
           </Text>
         </View>
 
-        <Pressable
-          onPress={handleOptions}
-          className="h-10 w-10 items-center justify-center"
-        >
+        <Pressable onPress={handleOptions} className="h-10 w-10 items-center justify-center">
           <EllipsisVertical size={20} color={COLORS.mutedForeground} />
         </Pressable>
       </View>
@@ -435,13 +399,9 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
       >
         {/* 게시글 본문 */}
         <View className="px-5 pb-5">
-          <Text className="mb-2 text-2xl font-bold text-white">
-            {routine.title}
-          </Text>
+          <Text className="mb-2 text-2xl font-bold text-white">{routine.title}</Text>
           {routine.description ? (
-            <Text className="text-sm leading-6 text-white/60">
-              {routine.description}
-            </Text>
+            <Text className="text-sm leading-6 text-white/60">{routine.description}</Text>
           ) : null}
         </View>
 
@@ -452,22 +412,14 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
               key={item.exerciseId}
               className="flex-row items-center gap-3 rounded-xl bg-white/5 px-4 py-3"
             >
-              <Text className="w-5 text-center text-base font-bold text-white/25">
-                {idx + 1}
-              </Text>
+              <Text className="w-5 text-center text-base font-bold text-white/25">{idx + 1}</Text>
               <View className="flex-1">
-                <Text className="text-base font-semibold text-white">
-                  {item.exerciseName}
-                </Text>
+                <Text className="text-base font-semibold text-white">{item.exerciseName}</Text>
                 <Text className="text-xs text-white/40">{item.bodyPart}</Text>
               </View>
               <View className="items-end">
-                <Text className="text-base font-bold text-primary">
-                  {item.sets}세트
-                </Text>
-                <Text className="text-xs text-white/30">
-                  휴식 {item.restSeconds}초
-                </Text>
+                <Text className="text-base font-bold text-primary">{item.sets}세트</Text>
+                <Text className="text-xs text-white/30">휴식 {item.restSeconds}초</Text>
               </View>
             </View>
           ))}
@@ -479,10 +431,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
             <Eye size={16} color={COLORS.mutedForeground} />
             <Text className="text-base text-white/40">{routine.viewCount}</Text>
           </View>
-          <Pressable
-            onPress={openCommentSheet}
-            className="flex-row items-center gap-1.5"
-          >
+          <Pressable onPress={openCommentSheet} className="flex-row items-center gap-1.5">
             <MessageCircle size={16} color={COLORS.mutedForeground} />
             <Text className="text-base text-white/40">
               {routine.comments.length > 0 ? routine.comments.length : ""}
@@ -561,8 +510,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
 
             <View className="flex-row items-center justify-between px-7 py-3">
               <Text className="text-base font-bold text-white">
-                댓글{" "}
-                {routine.comments.length > 0 ? routine.comments.length : ""}
+                댓글 {routine.comments.length > 0 ? routine.comments.length : ""}
               </Text>
             </View>
 
@@ -573,12 +521,8 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
             >
               {routine.comments.length === 0 ? (
                 <View className="items-center py-12">
-                  <Text className="text-sm text-white/30">
-                    아직 댓글이 없습니다
-                  </Text>
-                  <Text className="mt-1 text-xs text-white/20">
-                    첫 번째 댓글을 남겨보세요
-                  </Text>
+                  <Text className="text-sm text-white/30">아직 댓글이 없습니다</Text>
+                  <Text className="mt-1 text-xs text-white/20">첫 번째 댓글을 남겨보세요</Text>
                 </View>
               ) : (
                 <View className="gap-5 py-2" style={{ paddingBottom: 12 }}>
@@ -593,9 +537,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
                             {formatRelativeDate(comment.createdAt)}
                           </Text>
                         </View>
-                        <Text className="text-base leading-5 text-white/70">
-                          {comment.content}
-                        </Text>
+                        <Text className="text-base leading-5 text-white/70">{comment.content}</Text>
                       </View>
                       <Pressable
                         onPress={() => {
@@ -636,7 +578,14 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
                             const blockOnSuccess = () => {
                               closeCommentSheet();
                               setRoutine((prev) =>
-                                prev ? { ...prev, comments: prev.comments.filter((c) => c.userId !== comment.userId) } : null
+                                prev
+                                  ? {
+                                      ...prev,
+                                      comments: prev.comments.filter(
+                                        (c) => c.userId !== comment.userId,
+                                      ),
+                                    }
+                                  : null,
                               );
                             };
 
@@ -670,10 +619,7 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
                         }}
                         className="self-start p-1"
                       >
-                        <MoreVertical
-                          size={14}
-                          color={COLORS.mutedForeground}
-                        />
+                        <MoreVertical size={14} color={COLORS.mutedForeground} />
                       </Pressable>
                     </View>
                   ))}
@@ -699,13 +645,8 @@ export default function SharedRoutineDetailScreen({ routineId }: Props) {
                   maxLength={200}
                 />
                 {commentText.trim() ? (
-                  <Pressable
-                    onPress={handleCommentSubmit}
-                    className="ml-2 py-1"
-                  >
-                    <Text className="text-sm font-semibold text-primary">
-                      게시
-                    </Text>
+                  <Pressable onPress={handleCommentSubmit} className="ml-2 py-1">
+                    <Text className="text-sm font-semibold text-primary">게시</Text>
                   </Pressable>
                 ) : null}
               </View>

@@ -4,7 +4,6 @@ import com.back.domain.report.entity.Report;
 import com.back.domain.report.entity.ReportReason;
 import com.back.domain.report.entity.ReportStatus;
 import com.back.domain.report.entity.ReportTargetType;
-
 import java.time.LocalDateTime;
 
 public record AdminReportResponse(
@@ -16,8 +15,7 @@ public record AdminReportResponse(
         ReportReason reason,
         ReportStatus status,
         String targetPreview,
-        LocalDateTime createdAt
-) {
+        LocalDateTime createdAt) {
     public static AdminReportResponse of(Report report, String targetPreview) {
         return new AdminReportResponse(
                 report.getId(),
@@ -28,7 +26,6 @@ public record AdminReportResponse(
                 report.getReason(),
                 report.getStatus(),
                 targetPreview,
-                report.getCreatedAt()
-        );
+                report.getCreatedAt());
     }
 }

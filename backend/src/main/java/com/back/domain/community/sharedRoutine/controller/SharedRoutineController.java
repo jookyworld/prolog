@@ -23,8 +23,8 @@ public class SharedRoutineController {
     private final CommentService commentService;
 
     @PostMapping
-    public SharedRoutineDetailResponse shareRoutine(@AuthenticationPrincipal UserPrincipal principal,
-                                                    @Valid @RequestBody SharedRoutineCreateRequest request) {
+    public SharedRoutineDetailResponse shareRoutine(
+            @AuthenticationPrincipal UserPrincipal principal, @Valid @RequestBody SharedRoutineCreateRequest request) {
         return sharedRoutineService.shareRoutine(principal.getId(), request);
     }
 
@@ -41,8 +41,7 @@ public class SharedRoutineController {
 
     @GetMapping("/{id}")
     public SharedRoutineDetailResponse getSharedRoutineDetail(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @PathVariable Long id) {
+            @AuthenticationPrincipal UserPrincipal principal, @PathVariable Long id) {
         Long userId = principal != null ? principal.getId() : null;
         return sharedRoutineService.getSharedRoutineDetail(userId, id);
     }
@@ -56,22 +55,22 @@ public class SharedRoutineController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSharedRoutine(@AuthenticationPrincipal UserPrincipal principal,
-                                                    @PathVariable Long id) {
+    public ResponseEntity<Void> deleteSharedRoutine(
+            @AuthenticationPrincipal UserPrincipal principal, @PathVariable Long id) {
         sharedRoutineService.deleteSharedRoutine(principal.getId(), id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/import")
-    public RoutineResponse importRoutine(@AuthenticationPrincipal UserPrincipal principal,
-                                         @PathVariable Long id) {
+    public RoutineResponse importRoutine(@AuthenticationPrincipal UserPrincipal principal, @PathVariable Long id) {
         return sharedRoutineService.importRoutine(principal.getId(), id);
     }
 
     @PostMapping("/{id}/comments")
-    public CommentResponse createComment(@AuthenticationPrincipal UserPrincipal principal,
-                                         @PathVariable Long id,
-                                         @Valid @RequestBody CommentCreateRequest request) {
+    public CommentResponse createComment(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long id,
+            @Valid @RequestBody CommentCreateRequest request) {
         return commentService.createComment(principal.getId(), id, request);
     }
 }

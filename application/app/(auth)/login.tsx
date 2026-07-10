@@ -7,13 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -52,9 +46,7 @@ export default function LoginScreen() {
         <View className="gap-8">
           <View className="items-center gap-2">
             <Text className="text-3xl font-bold text-white">ProLog</Text>
-            <Text className="text-sm text-muted-foreground">
-              운동을 기록하고 성장하세요
-            </Text>
+            <Text className="text-sm text-muted-foreground">운동을 기록하고 성장하세요</Text>
           </View>
 
           <View className="gap-4">
@@ -75,9 +67,7 @@ export default function LoginScreen() {
                 )}
               />
               {errors.username && (
-                <Text className="text-xs text-red-400">
-                  {errors.username.message}
-                </Text>
+                <Text className="text-xs text-red-400">{errors.username.message}</Text>
               )}
             </View>
 
@@ -98,15 +88,11 @@ export default function LoginScreen() {
                 )}
               />
               {errors.password && (
-                <Text className="text-xs text-red-400">
-                  {errors.password.message}
-                </Text>
+                <Text className="text-xs text-red-400">{errors.password.message}</Text>
               )}
             </View>
 
-            {error ? (
-              <Text className="text-center text-sm text-red-400">{error}</Text>
-            ) : null}
+            {error ? <Text className="text-center text-sm text-red-400">{error}</Text> : null}
 
             <Button
               onPress={handleSubmit(onSubmit)}
@@ -123,9 +109,7 @@ export default function LoginScreen() {
               <Text className="text-sm text-muted-foreground">비밀번호를 잊으셨나요?</Text>
             </Link>
             <View className="flex-row gap-1">
-              <Text className="text-sm text-muted-foreground">
-                계정이 없으신가요?
-              </Text>
+              <Text className="text-sm text-muted-foreground">계정이 없으신가요?</Text>
               <Link href="/(auth)/signup">
                 <Text className="text-sm text-primary">회원가입</Text>
               </Link>

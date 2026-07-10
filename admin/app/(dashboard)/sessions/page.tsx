@@ -18,24 +18,27 @@ export default function SessionsPage() {
   const [to, setTo] = useState("");
   const [page, setPage] = useState(0);
 
-  const fetch = useCallback(async (keyword: string, fromDate: string, toDate: string, p: number) => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await sessionApi.getSessions({
-        keyword: keyword || undefined,
-        from: fromDate || undefined,
-        to: toDate || undefined,
-        page: p,
-        size: 20,
-      });
-      setData(res);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "불러오기 실패");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetch = useCallback(
+    async (keyword: string, fromDate: string, toDate: string, p: number) => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await sessionApi.getSessions({
+          keyword: keyword || undefined,
+          from: fromDate || undefined,
+          to: toDate || undefined,
+          page: p,
+          size: 20,
+        });
+        setData(res);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "불러오기 실패");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     fetch(search, from, to, page);

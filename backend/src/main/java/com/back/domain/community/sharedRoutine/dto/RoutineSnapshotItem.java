@@ -9,6 +9,4 @@ public record RoutineSnapshotItem(
         String partDetail,
         int orderInRoutine,
         int sets,
-        int restSeconds
-) {
-}
+        int restSeconds) {}

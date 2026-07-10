@@ -38,7 +38,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dashboardApi.getStats()
+    dashboardApi
+      .getStats()
       .then(setStats)
       .finally(() => setLoading(false));
   }, []);
@@ -64,10 +65,14 @@ export default function DashboardPage() {
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {card.title}
                 </CardTitle>
-                <Icon className={`h-4 w-4 ${isPendingAlert ? "text-destructive" : "text-muted-foreground"}`} />
+                <Icon
+                  className={`h-4 w-4 ${isPendingAlert ? "text-destructive" : "text-muted-foreground"}`}
+                />
               </CardHeader>
               <CardContent>
-                <p className={`text-2xl font-bold ${isPendingAlert ? "text-destructive" : "text-foreground"}`}>
+                <p
+                  className={`text-2xl font-bold ${isPendingAlert ? "text-destructive" : "text-foreground"}`}
+                >
                   {loading ? "-" : value?.toLocaleString()}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">{card.description}</p>

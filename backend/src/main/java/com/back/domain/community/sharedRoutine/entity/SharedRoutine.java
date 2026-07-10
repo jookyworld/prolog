@@ -4,12 +4,11 @@ import com.back.domain.community.sharedRoutine.dto.RoutineSnapshotWrapper;
 import com.back.domain.user.user.entity.User;
 import com.back.global.converter.RoutineSnapshotConverter;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter

@@ -72,7 +72,9 @@ export default function ProfileEditScreen() {
       updateUser(updated);
       router.back();
     } catch (err) {
-      Alert.alert(err instanceof Error ? err.message : "저장하지 못했습니다. 잠시 후 다시 시도해주세요.");
+      Alert.alert(
+        err instanceof Error ? err.message : "저장하지 못했습니다. 잠시 후 다시 시도해주세요.",
+      );
     } finally {
       setSaving(false);
     }
@@ -106,9 +108,7 @@ export default function ProfileEditScreen() {
         >
           {/* Nickname */}
           <View className="mt-6">
-            <Text className="mb-2 text-sm font-medium text-white/60">
-              닉네임
-            </Text>
+            <Text className="mb-2 text-sm font-medium text-white/60">닉네임</Text>
             <TextInput
               className="rounded-xl bg-card px-4 py-3.5 text-base text-white"
               placeholder="닉네임"
@@ -145,9 +145,7 @@ export default function ProfileEditScreen() {
 
           {/* Birth Year */}
           <View className="mt-5">
-            <Text className="mb-2 text-sm font-medium text-white/60">
-              출생연도
-            </Text>
+            <Text className="mb-2 text-sm font-medium text-white/60">출생연도</Text>
             <TextInput
               className="rounded-xl bg-card px-4 py-3.5 text-base text-white"
               placeholder="1990"
@@ -161,9 +159,7 @@ export default function ProfileEditScreen() {
 
           {/* Height */}
           <View className="mt-5">
-            <Text className="mb-2 text-sm font-medium text-white/60">
-              키 (cm)
-            </Text>
+            <Text className="mb-2 text-sm font-medium text-white/60">키 (cm)</Text>
             <TextInput
               className="rounded-xl bg-card px-4 py-3.5 text-base text-white"
               placeholder="0"
@@ -176,9 +172,7 @@ export default function ProfileEditScreen() {
 
           {/* Weight */}
           <View className="mt-5">
-            <Text className="mb-2 text-sm font-medium text-white/60">
-              체중 (kg)
-            </Text>
+            <Text className="mb-2 text-sm font-medium text-white/60">체중 (kg)</Text>
             <TextInput
               className="rounded-xl bg-card px-4 py-3.5 text-base text-white"
               placeholder="0"

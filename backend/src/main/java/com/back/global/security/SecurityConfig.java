@@ -4,6 +4,9 @@ import com.back.domain.user.user.repository.UserRepository;
 import com.back.global.security.jwt.JwtAuthenticationFilter;
 import com.back.global.security.jwt.JwtTokenProvider;
 import com.back.global.security.jwt.JwtTokenResolver;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,13 +19,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
@@ -42,35 +41,32 @@ public class SecurityConfig {
 
     // 허용 URL 패턴
     private static final String[] ALWAYS_PERMIT = {
-            "/",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/api/auth/signup",
-            "/api/auth/login",
-            "/api/auth/refresh",
-            "/api/auth/check-duplicates",
-            "/api/auth/email-verification/send",
-            "/api/auth/email-verification/confirm",
-            "/api/auth/password-reset/request",
-            "/api/auth/password-reset/confirm"
+        "/",
+        "/swagger-ui/**",
+        "/v3/api-docs/**",
+        "/api/auth/signup",
+        "/api/auth/login",
+        "/api/auth/refresh",
+        "/api/auth/check-duplicates",
+        "/api/auth/email-verification/send",
+        "/api/auth/email-verification/confirm",
+        "/api/auth/password-reset/request",
+        "/api/auth/password-reset/confirm"
     };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers(ALWAYS_PERMIT).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((request, response, authException) ->
-                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
-                        )
-                )
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/admin/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers(ALWAYS_PERMIT)
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
+                .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) ->
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -80,9 +76,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        List<String> origins = Arrays.stream(allowedOrigins.split(","))
-                .map(String::trim)
-                .toList();
+        List<String> origins =
+                Arrays.stream(allowedOrigins.split(",")).map(String::trim).toList();
         config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cookie"));
@@ -93,7 +88,6 @@ public class SecurityConfig {
 
         return source;
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {

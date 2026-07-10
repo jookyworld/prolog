@@ -26,8 +26,7 @@ public class UserService {
     public UserResponse updateProfile(Long userId, UpdateProfileRequest dto) {
         User user = getUserById(userId);
 
-        if (!user.getNickname().equalsIgnoreCase(dto.nickname())
-                && userRepository.existsByNickname(dto.nickname())) {
+        if (!user.getNickname().equalsIgnoreCase(dto.nickname()) && userRepository.existsByNickname(dto.nickname())) {
             throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
         }
 
@@ -47,15 +46,12 @@ public class UserService {
     public PageResponse<UserResponse> adminGetUsers(String keyword, Role role, int page, int size) {
         var pageable = PageRequest.of(page, size);
         return PageResponse.from(
-                userRepository.findAdminUsers(keyword, role, pageable)
-                        .map(UserResponse::from)
-        );
+                userRepository.findAdminUsers(keyword, role, pageable).map(UserResponse::from));
     }
 
     @Transactional(readOnly = true)
     public UserResponse adminGetUser(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
         return UserResponse.from(user);
     }
 }

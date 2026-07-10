@@ -2,24 +2,20 @@ package com.back.domain.user.block.entity;
 
 import com.back.domain.user.user.entity.User;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(
-    name = "user_blocks",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"blocker_id", "blocked_id"})
-)
+@Table(name = "user_blocks", uniqueConstraints = @UniqueConstraint(columnNames = {"blocker_id", "blocked_id"}))
 @EntityListeners(AuditingEntityListener.class)
 public class UserBlock {
 

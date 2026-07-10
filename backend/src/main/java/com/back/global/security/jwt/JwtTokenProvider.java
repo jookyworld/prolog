@@ -3,12 +3,11 @@ package com.back.global.security.jwt;
 import com.back.domain.user.user.entity.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import javax.crypto.SecretKey;
+import org.springframework.stereotype.Component;
 
 @Component
 public class JwtTokenProvider {
@@ -42,10 +41,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser()
-                    .verifyWith((SecretKey) key)
-                    .build()
-                    .parseSignedClaims(token);
+            Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(token);
             return true;
         } catch (ExpiredJwtException e) {
             return false;

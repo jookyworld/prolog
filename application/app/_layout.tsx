@@ -19,24 +19,24 @@ const AppTheme = {
 export default function RootLayout() {
   return (
     <ThemeProvider value={AppTheme}>
-    <AuthProvider>
-      <WorkoutProvider>
-        <StatusBar style="light" />
-        <AuthGuard>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen
-              name="(modal)"
-              options={{
-                presentation: "modal",
-                headerShown: false,
-              }}
-            />
-          </Stack>
-        </AuthGuard>
-      </WorkoutProvider>
-    </AuthProvider>
+      <AuthProvider>
+        <WorkoutProvider>
+          <StatusBar style="light" />
+          <AuthGuard>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen
+                name="(modal)"
+                options={{
+                  presentation: "modal",
+                  headerShown: false,
+                }}
+              />
+            </Stack>
+          </AuthGuard>
+        </WorkoutProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

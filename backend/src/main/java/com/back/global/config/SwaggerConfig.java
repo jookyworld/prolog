@@ -22,10 +22,12 @@ public class SwaggerConfig {
                         .version("v1.0"))
                 .addSecurityItem(new SecurityRequirement().addList(schemeName))
                 .components(new Components()
-                        .addSecuritySchemes(schemeName, new SecurityScheme()
-                                .name(schemeName)
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("JWT")));
+                        .addSecuritySchemes(
+                                schemeName,
+                                new SecurityScheme()
+                                        .name(schemeName)
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")));
     }
 }

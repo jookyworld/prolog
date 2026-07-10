@@ -2,6 +2,7 @@ package com.back.domain.report.entity;
 
 import com.back.domain.user.user.entity.User;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,17 +10,14 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Table(
-    name = "reports",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"reporter_id", "target_type", "target_id"})
-)
+        name = "reports",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"reporter_id", "target_type", "target_id"}))
 @EntityListeners(AuditingEntityListener.class)
 public class Report {
 

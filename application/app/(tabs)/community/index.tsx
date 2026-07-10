@@ -1,22 +1,11 @@
 import { communityApi } from "@/lib/api/community";
 import { routineApi } from "@/lib/api/routine";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
-import type {
-  SharedRoutineListItem,
-  SharedRoutineSortType,
-} from "@/lib/types/community";
+import type { SharedRoutineListItem, SharedRoutineSortType } from "@/lib/types/community";
 import type { BodyPart } from "@/lib/types/exercise";
 import type { RoutineListItem } from "@/lib/types/routine";
 import { useFocusEffect, useRouter } from "expo-router";
-import {
-  ArrowLeft,
-  Check,
-  Eye,
-  MessageCircle,
-  Search,
-  Share2,
-  X,
-} from "lucide-react-native";
+import { ArrowLeft, Check, Eye, MessageCircle, Search, Share2, X } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -33,10 +22,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 const PAGE_SIZE = 20;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -67,15 +53,10 @@ function RoutineCard({ routine, onPress }: RoutineCardProps) {
   const bodyPartLabels = getBodyPartLabels(routine.bodyParts);
 
   return (
-    <Pressable
-      onPress={() => onPress(routine.id)}
-      className="rounded-2xl bg-card p-4"
-    >
+    <Pressable onPress={() => onPress(routine.id)} className="rounded-2xl bg-card p-4">
       {/* 작성자 정보 */}
       <View className="mb-3 flex-row items-center gap-2">
-        <Text className="text-sm font-medium text-white/60">
-          {routine.nickname}
-        </Text>
+        <Text className="text-sm font-medium text-white/60">{routine.nickname}</Text>
         <Text className="text-xs text-white/30">
           {new Date(routine.createdAt).toLocaleDateString("ko-KR", {
             month: "short",
@@ -102,10 +83,7 @@ function RoutineCard({ routine, onPress }: RoutineCardProps) {
       <View className="flex-row items-center justify-between">
         <View className="flex-row flex-wrap items-center gap-1.5">
           {bodyPartLabels.map((label) => (
-            <View
-              key={label}
-              className="rounded-full bg-primary/10 px-2 py-0.5"
-            >
+            <View key={label} className="rounded-full bg-primary/10 px-2 py-0.5">
               <Text className="text-xs font-medium text-primary">{label}</Text>
             </View>
           ))}
@@ -114,15 +92,11 @@ function RoutineCard({ routine, onPress }: RoutineCardProps) {
         <View className="flex-row items-center gap-2.5">
           <View className="flex-row items-center gap-1">
             <Eye size={12} color={COLORS.mutedForeground} />
-            <Text className="text-xs text-white/40">
-              {formatNumber(routine.viewCount)}
-            </Text>
+            <Text className="text-xs text-white/40">{formatNumber(routine.viewCount)}</Text>
           </View>
           <View className="flex-row items-center gap-1">
             <MessageCircle size={12} color={COLORS.mutedForeground} />
-            <Text className="text-xs text-white/40">
-              {formatNumber(routine.commentCount)}
-            </Text>
+            <Text className="text-xs text-white/40">{formatNumber(routine.commentCount)}</Text>
           </View>
         </View>
       </View>
@@ -152,8 +126,7 @@ export default function CommunityScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [myRoutines, setMyRoutines] = useState<RoutineListItem[]>([]);
   const [myRoutinesLoading, setMyRoutinesLoading] = useState(false);
-  const [selectedRoutine, setSelectedRoutine] =
-    useState<RoutineListItem | null>(null);
+  const [selectedRoutine, setSelectedRoutine] = useState<RoutineListItem | null>(null);
   const [shareTitle, setShareTitle] = useState("");
   const [shareDescription, setShareDescription] = useState("");
   const [shareLoading, setShareLoading] = useState(false);
@@ -176,12 +149,7 @@ export default function CommunityScreen() {
     try {
       setLoading(true);
       setError(null);
-      const response = await communityApi.getSharedRoutines(
-        sort,
-        0,
-        PAGE_SIZE,
-        kw,
-      );
+      const response = await communityApi.getSharedRoutines(sort, 0, PAGE_SIZE, kw);
       setRoutines(response.content);
       setPage(0);
       setHasMore(!response.last);
@@ -199,12 +167,7 @@ export default function CommunityScreen() {
     setLoadingMore(true);
     try {
       const nextPage = page + 1;
-      const response = await communityApi.getSharedRoutines(
-        sortType,
-        nextPage,
-        PAGE_SIZE,
-        keyword,
-      );
+      const response = await communityApi.getSharedRoutines(sortType, nextPage, PAGE_SIZE, keyword);
       setRoutines((prev) => [...prev, ...response.content]);
       setPage(nextPage);
       setHasMore(!response.last);
@@ -225,10 +188,7 @@ export default function CommunityScreen() {
   const handleScroll = useCallback(
     ({ nativeEvent }: { nativeEvent: any }) => {
       const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-      if (
-        layoutMeasurement.height + contentOffset.y >=
-        contentSize.height - 300
-      ) {
+      if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 300) {
         loadMoreRoutines();
       }
     },
@@ -409,11 +369,7 @@ export default function CommunityScreen() {
               </View>
             ) : (
               routines.map((routine) => (
-                <RoutineCard
-                  key={routine.id}
-                  routine={routine}
-                  onPress={handlePress}
-                />
+                <RoutineCard key={routine.id} routine={routine} onPress={handlePress} />
               ))
             )}
             {loadingMore && (
@@ -519,10 +475,7 @@ export default function CommunityScreen() {
                     </Text>
                   </View>
                 ) : (
-                  <View
-                    className="gap-2 py-2"
-                    style={{ paddingBottom: insets.bottom + 20 }}
-                  >
+                  <View className="gap-2 py-2" style={{ paddingBottom: insets.bottom + 20 }}>
                     {myRoutines.map((routine) => (
                       <Pressable
                         key={routine.id}
@@ -530,14 +483,9 @@ export default function CommunityScreen() {
                         className="flex-row items-center justify-between rounded-xl bg-white/5 px-4 py-4 active:opacity-70"
                       >
                         <View className="flex-1">
-                          <Text className="text-sm font-semibold text-white">
-                            {routine.title}
-                          </Text>
+                          <Text className="text-sm font-semibold text-white">{routine.title}</Text>
                           {routine.description ? (
-                            <Text
-                              className="mt-0.5 text-xs text-white/40"
-                              numberOfLines={1}
-                            >
+                            <Text className="mt-0.5 text-xs text-white/40" numberOfLines={1}>
                               {routine.description}
                             </Text>
                           ) : null}
@@ -552,10 +500,7 @@ export default function CommunityScreen() {
 
             {/* Step 2: 제목/설명 입력 */}
             {shareStep === "form" && (
-              <View
-                className="px-5"
-                style={{ paddingBottom: insets.bottom + 20 }}
-              >
+              <View className="px-5" style={{ paddingBottom: insets.bottom + 20 }}>
                 <Text className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/30">
                   제목
                 </Text>
@@ -584,9 +529,7 @@ export default function CommunityScreen() {
                   onPress={handleShareSubmit}
                   disabled={!shareTitle.trim() || shareLoading}
                   className={`flex-row items-center justify-center gap-2 rounded-xl py-4 ${
-                    shareTitle.trim() && !shareLoading
-                      ? "bg-primary"
-                      : "bg-white/10"
+                    shareTitle.trim() && !shareLoading ? "bg-primary" : "bg-white/10"
                   }`}
                 >
                   {shareLoading ? (
@@ -594,9 +537,7 @@ export default function CommunityScreen() {
                   ) : (
                     <>
                       <Share2 size={16} color={COLORS.white} />
-                      <Text className="text-sm font-semibold text-white">
-                        공유하기
-                      </Text>
+                      <Text className="text-sm font-semibold text-white">공유하기</Text>
                     </>
                   )}
                 </Pressable>

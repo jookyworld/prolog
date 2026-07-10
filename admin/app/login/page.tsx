@@ -32,9 +32,7 @@ export default function LoginPage() {
       setUser(res.userResponse);
       router.push("/dashboard");
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "로그인에 실패했습니다."
-      );
+      setError(err instanceof Error ? err.message : "로그인에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -51,9 +49,7 @@ export default function LoginPage() {
               Admin
             </span>
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            관리자 전용 대시보드
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">관리자 전용 대시보드</p>
         </div>
 
         <Card>

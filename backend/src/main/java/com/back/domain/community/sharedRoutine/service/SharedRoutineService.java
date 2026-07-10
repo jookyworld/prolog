@@ -19,17 +19,16 @@ import com.back.domain.user.user.repository.UserRepository;
 import com.back.global.exception.type.BadRequestException;
 import com.back.global.exception.type.ForbiddenException;
 import com.back.global.exception.type.NotFoundException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,17 +44,18 @@ public class SharedRoutineService {
 
     @Transactional
     public SharedRoutineDetailResponse shareRoutine(Long userId, SharedRoutineCreateRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
 
-        Routine routine = routineRepository.findById(request.routineId())
+        Routine routine = routineRepository
+                .findById(request.routineId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 루틴입니다."));
 
         if (!userId.equals(routine.getUser().getId())) {
             throw new ForbiddenException("권한이 없습니다.");
         }
 
-        List<RoutineItem> routineItems = routineItemRepository.findByRoutineIdOrderByOrderInRoutineAsc(request.routineId());
+        List<RoutineItem> routineItems =
+                routineItemRepository.findByRoutineIdOrderByOrderInRoutineAsc(request.routineId());
 
         if (routineItems.isEmpty()) {
             throw new BadRequestException("운동이 없는 루틴은 공유할 수 없습니다.");
@@ -69,8 +69,7 @@ public class SharedRoutineService {
                         item.getExercise().getPartDetail(),
                         item.getOrderInRoutine(),
                         item.getSets(),
-                        item.getRestSeconds()
-                ))
+                        item.getRestSeconds()))
                 .toList();
 
         RoutineSnapshotWrapper routineSnapshot = new RoutineSnapshotWrapper(snapshotItems);
@@ -88,8 +87,10 @@ public class SharedRoutineService {
     }
 
     @Transactional(readOnly = true)
-    public Page<SharedRoutineResponse> getSharedRoutines(Long userId, int page, int size, SharedRoutineSortType sortType, String keyword) {
-        List<Long> rawBlockedIds = userId != null ? userBlockRepository.findBlockedUserIdsByBlockerId(userId) : List.of();
+    public Page<SharedRoutineResponse> getSharedRoutines(
+            Long userId, int page, int size, SharedRoutineSortType sortType, String keyword) {
+        List<Long> rawBlockedIds =
+                userId != null ? userBlockRepository.findBlockedUserIdsByBlockerId(userId) : List.of();
         boolean hasBlocked = !rawBlockedIds.isEmpty();
         List<Long> blockedIds = hasBlocked ? rawBlockedIds : List.of(-1L);
         boolean hasKeyword = keyword != null && !keyword.isBlank();
@@ -99,47 +100,57 @@ public class SharedRoutineService {
         if (sortType == SharedRoutineSortType.POPULAR) {
             if (hasKeyword) {
                 sharedRoutines = hasBlocked
-                        ? sharedRoutineRepository.findAllByKeywordOrderByPopularityExcludingBlocked(keyword, blockedIds, PageRequest.of(page, size))
-                        : sharedRoutineRepository.findAllByKeywordOrderByPopularity(keyword, PageRequest.of(page, size));
+                        ? sharedRoutineRepository.findAllByKeywordOrderByPopularityExcludingBlocked(
+                                keyword, blockedIds, PageRequest.of(page, size))
+                        : sharedRoutineRepository.findAllByKeywordOrderByPopularity(
+                                keyword, PageRequest.of(page, size));
             } else {
                 sharedRoutines = hasBlocked
-                        ? sharedRoutineRepository.findAllOrderByPopularityExcludingBlocked(blockedIds, PageRequest.of(page, size))
+                        ? sharedRoutineRepository.findAllOrderByPopularityExcludingBlocked(
+                                blockedIds, PageRequest.of(page, size))
                         : sharedRoutineRepository.findAllOrderByPopularity(PageRequest.of(page, size));
             }
         } else {
             if (hasKeyword) {
                 sharedRoutines = hasBlocked
-                        ? sharedRoutineRepository.findAllByKeywordExcludingBlocked(keyword, blockedIds, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")))
+                        ? sharedRoutineRepository.findAllByKeywordExcludingBlocked(
+                                keyword,
+                                blockedIds,
+                                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")))
                         : sharedRoutineRepository.findAllByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-                                keyword, keyword, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+                                keyword,
+                                keyword,
+                                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
             } else {
                 sharedRoutines = hasBlocked
-                        ? sharedRoutineRepository.findAllExcludingBlocked(blockedIds, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")))
-                        : sharedRoutineRepository.findAll(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+                        ? sharedRoutineRepository.findAllExcludingBlocked(
+                                blockedIds, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")))
+                        : sharedRoutineRepository.findAll(
+                                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
             }
         }
 
-        List<Long> ids = sharedRoutines.getContent().stream().map(SharedRoutine::getId).toList();
+        List<Long> ids =
+                sharedRoutines.getContent().stream().map(SharedRoutine::getId).toList();
         List<Object[]> countRows = hasBlocked
                 ? commentRepository.countBySharedRoutineIdInExcludingBlocked(ids, blockedIds)
                 : commentRepository.countBySharedRoutineIdIn(ids);
-        Map<Long, Integer> commentCounts = countRows.stream().collect(Collectors.toMap(
-                row -> (Long) row[0],
-                row -> ((Long) row[1]).intValue()
-        ));
+        Map<Long, Integer> commentCounts =
+                countRows.stream().collect(Collectors.toMap(row -> (Long) row[0], row -> ((Long) row[1]).intValue()));
 
-        return sharedRoutines.map(sr ->
-                SharedRoutineResponse.from(sr, commentCounts.getOrDefault(sr.getId(), 0)));
+        return sharedRoutines.map(sr -> SharedRoutineResponse.from(sr, commentCounts.getOrDefault(sr.getId(), 0)));
     }
 
     @Transactional
     public SharedRoutineDetailResponse getSharedRoutineDetail(Long userId, Long sharedRoutineId) {
-        SharedRoutine sharedRoutine = sharedRoutineRepository.findById(sharedRoutineId)
+        SharedRoutine sharedRoutine = sharedRoutineRepository
+                .findById(sharedRoutineId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 공유 루틴입니다."));
 
         sharedRoutine.incrementViewCount();
 
-        List<Long> rawBlockedIds = userId != null ? userBlockRepository.findBlockedUserIdsByBlockerId(userId) : List.of();
+        List<Long> rawBlockedIds =
+                userId != null ? userBlockRepository.findBlockedUserIdsByBlockerId(userId) : List.of();
         boolean hasBlocked = !rawBlockedIds.isEmpty();
         List<Long> blockedIds = hasBlocked ? rawBlockedIds : List.of(-1L);
 
@@ -147,33 +158,29 @@ public class SharedRoutineService {
                 ? commentRepository.findBySharedRoutineIdExcludingBlocked(sharedRoutineId, blockedIds)
                 : commentRepository.findBySharedRoutineIdOrderByCreatedAtAsc(sharedRoutineId);
 
-        List<CommentResponse> commentResponses = comments.stream()
-                .map(CommentResponse::from)
-                .toList();
+        List<CommentResponse> commentResponses =
+                comments.stream().map(CommentResponse::from).toList();
 
         return SharedRoutineDetailResponse.from(sharedRoutine, commentResponses);
     }
 
-
     @Transactional(readOnly = true)
     public Page<SharedRoutineResponse> getMySharedRoutines(Long userId, int page, int size) {
-        Page<SharedRoutine> sharedRoutines = sharedRoutineRepository
-                .findAllByUser_IdOrderByCreatedAtDesc(userId, PageRequest.of(page, size));
+        Page<SharedRoutine> sharedRoutines =
+                sharedRoutineRepository.findAllByUser_IdOrderByCreatedAtDesc(userId, PageRequest.of(page, size));
 
-        List<Long> ids = sharedRoutines.getContent().stream().map(SharedRoutine::getId).toList();
-        Map<Long, Integer> commentCounts = commentRepository.countBySharedRoutineIdIn(ids)
-                .stream().collect(Collectors.toMap(
-                        row -> (Long) row[0],
-                        row -> ((Long) row[1]).intValue()
-                ));
+        List<Long> ids =
+                sharedRoutines.getContent().stream().map(SharedRoutine::getId).toList();
+        Map<Long, Integer> commentCounts = commentRepository.countBySharedRoutineIdIn(ids).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row -> ((Long) row[1]).intValue()));
 
-        return sharedRoutines.map(sr ->
-                SharedRoutineResponse.from(sr, commentCounts.getOrDefault(sr.getId(), 0)));
+        return sharedRoutines.map(sr -> SharedRoutineResponse.from(sr, commentCounts.getOrDefault(sr.getId(), 0)));
     }
 
     @Transactional
     public void deleteSharedRoutine(Long userId, Long sharedRoutineId) {
-        SharedRoutine sharedRoutine = sharedRoutineRepository.findById(sharedRoutineId)
+        SharedRoutine sharedRoutine = sharedRoutineRepository
+                .findById(sharedRoutineId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 공유 루틴입니다."));
 
         if (!sharedRoutine.getUser().getId().equals(userId)) {
@@ -185,7 +192,8 @@ public class SharedRoutineService {
 
     @Transactional
     public void adminDeleteSharedRoutine(Long sharedRoutineId) {
-        SharedRoutine sharedRoutine = sharedRoutineRepository.findById(sharedRoutineId)
+        SharedRoutine sharedRoutine = sharedRoutineRepository
+                .findById(sharedRoutineId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 공유 루틴입니다."));
         commentRepository.deleteAllBySharedRoutine_Id(sharedRoutineId);
         sharedRoutineRepository.delete(sharedRoutine);
@@ -193,10 +201,10 @@ public class SharedRoutineService {
 
     @Transactional
     public RoutineResponse importRoutine(Long userId, Long sharedRoutineId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
 
-        SharedRoutine sharedRoutine = sharedRoutineRepository.findById(sharedRoutineId)
+        SharedRoutine sharedRoutine = sharedRoutineRepository
+                .findById(sharedRoutineId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 공유 루틴입니다."));
 
         Routine newRoutine = Routine.builder()
@@ -208,7 +216,8 @@ public class SharedRoutineService {
 
         routineRepository.save(newRoutine);
 
-        List<RoutineSnapshotItem> snapshotItems = sharedRoutine.getRoutineSnapshot().items();
+        List<RoutineSnapshotItem> snapshotItems =
+                sharedRoutine.getRoutineSnapshot().items();
 
         for (RoutineSnapshotItem item : snapshotItems) {
             Exercise exercise = matchExercise(userId, item);
@@ -239,20 +248,20 @@ public class SharedRoutineService {
                 return exercise;
             }
 
-            if (exercise.getCreatedBy() != null && userId.equals(exercise.getCreatedBy().getId())) {
+            if (exercise.getCreatedBy() != null
+                    && userId.equals(exercise.getCreatedBy().getId())) {
                 return exercise;
             }
         }
 
-        Optional<Exercise> userCustomExercise = exerciseRepository
-                .findByNameAndBodyPartAndCreatedBy_Id(item.exerciseName(), item.bodyPart(), userId);
+        Optional<Exercise> userCustomExercise =
+                exerciseRepository.findByNameAndBodyPartAndCreatedBy_Id(item.exerciseName(), item.bodyPart(), userId);
 
         if (userCustomExercise.isPresent()) {
             return userCustomExercise.get();
         }
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
 
         Exercise newExercise = Exercise.builder()
                 .name(item.exerciseName())

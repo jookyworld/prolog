@@ -1,17 +1,7 @@
 import { authApi } from "@/lib/api/auth";
 import { hasTokens } from "@/lib/api";
-import type {
-  LoginRequest,
-  SignupRequest,
-  UserResponse,
-} from "@/lib/types/auth";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import type { LoginRequest, SignupRequest, UserResponse } from "@/lib/types/auth";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 interface AuthContextValue {
   user: UserResponse | null;

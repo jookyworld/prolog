@@ -3,7 +3,6 @@ package com.back.domain.community.sharedRoutine.dto;
 import com.back.domain.community.comment.dto.CommentResponse;
 import com.back.domain.community.sharedRoutine.entity.SharedRoutine;
 import com.back.domain.exercise.entity.BodyPart;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,8 +21,7 @@ public record SharedRoutineDetailResponse(
         int viewCount,
         int commentCount,
         LocalDateTime createdAt,
-        List<CommentResponse> comments
-) {
+        List<CommentResponse> comments) {
     public static SharedRoutineDetailResponse from(SharedRoutine sharedRoutine, List<CommentResponse> comments) {
         RoutineSnapshotWrapper snapshot = sharedRoutine.getRoutineSnapshot();
 
@@ -51,7 +49,6 @@ public record SharedRoutineDetailResponse(
                 sharedRoutine.getViewCount(),
                 comments.size(),
                 sharedRoutine.getCreatedAt(),
-                comments
-        );
+                comments);
     }
 }

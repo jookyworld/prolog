@@ -1,27 +1,16 @@
 import { useAuth } from "@/contexts/auth-context";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { useRouter } from "expo-router";
-import {
-  ChevronRight,
-  Dumbbell,
-  Settings,
-  Share2,
-  Swords,
-} from "lucide-react-native";
+import { ChevronRight, Dumbbell, Settings, Share2, Swords } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const age = user?.birthYear
-    ? new Date().getFullYear() - user.birthYear + 1
-    : null;
+  const age = user?.birthYear ? new Date().getFullYear() - user.birthYear + 1 : null;
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
@@ -33,9 +22,7 @@ export default function ProfileScreen() {
       >
         {/* 헤더 */}
         <View className="flex-row items-center justify-between py-4">
-          <Text className="text-2xl font-bold text-white">
-            {user?.nickname ?? "사용자"}
-          </Text>
+          <Text className="text-2xl font-bold text-white">{user?.nickname ?? "사용자"}</Text>
           <Pressable
             onPress={() => router.push("/(tabs)/profile/settings")}
             className="h-10 w-10 items-center justify-center"
@@ -49,27 +36,21 @@ export default function ProfileScreen() {
           <View className="flex-1 items-center rounded-2xl bg-card py-4">
             <Text className="text-xl font-bold text-white">
               {age ?? "-"}
-              {age && (
-                <Text className="text-sm font-normal text-white/40"> 세</Text>
-              )}
+              {age && <Text className="text-sm font-normal text-white/40"> 세</Text>}
             </Text>
             <Text className="mt-1 text-xs text-white/40">나이</Text>
           </View>
           <View className="flex-1 items-center rounded-2xl bg-card py-4">
             <Text className="text-xl font-bold text-white">
               {user?.height ?? "-"}
-              {user?.height && (
-                <Text className="text-sm font-normal text-white/40"> cm</Text>
-              )}
+              {user?.height && <Text className="text-sm font-normal text-white/40"> cm</Text>}
             </Text>
             <Text className="mt-1 text-xs text-white/40">키</Text>
           </View>
           <View className="flex-1 items-center rounded-2xl bg-card py-4">
             <Text className="text-xl font-bold text-white">
               {user?.weight ?? "-"}
-              {user?.weight && (
-                <Text className="text-sm font-normal text-white/40"> kg</Text>
-              )}
+              {user?.weight && <Text className="text-sm font-normal text-white/40"> kg</Text>}
             </Text>
             <Text className="mt-1 text-xs text-white/40">체중</Text>
           </View>

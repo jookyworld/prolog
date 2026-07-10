@@ -135,9 +135,7 @@ export default function ResetPasswordScreen() {
                   />
                 )}
               />
-              {errors.code && (
-                <Text className="text-xs text-red-400">{errors.code.message}</Text>
-              )}
+              {errors.code && <Text className="text-xs text-red-400">{errors.code.message}</Text>}
             </View>
 
             <View className="gap-2">
@@ -182,9 +180,7 @@ export default function ResetPasswordScreen() {
               )}
             </View>
 
-            {error ? (
-              <Text className="text-center text-sm text-red-400">{error}</Text>
-            ) : null}
+            {error ? <Text className="text-center text-sm text-red-400">{error}</Text> : null}
 
             <Button
               onPress={handleSubmit(onSubmit)}
@@ -203,9 +199,7 @@ export default function ResetPasswordScreen() {
             <TouchableOpacity onPress={onResend} disabled={isResending}>
               <Text className="text-sm text-muted-foreground">
                 코드를 받지 못하셨나요?{" "}
-                <Text className="text-primary">
-                  {isResending ? "전송 중..." : "재전송"}
-                </Text>
+                <Text className="text-primary">{isResending ? "전송 중..." : "재전송"}</Text>
               </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.back()}>

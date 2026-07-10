@@ -1,17 +1,17 @@
 package com.back.global.security.token;
 
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {
     private final StringRedisTemplate redisTemplate;
     private static final String KEY_PREFIX = "refresh:";
+
     @Value("${jwt.refresh-exp}")
     private int refreshExp;
 
@@ -31,5 +31,4 @@ public class RefreshTokenService {
         String key = KEY_PREFIX + userId;
         redisTemplate.delete(key);
     }
-
 }

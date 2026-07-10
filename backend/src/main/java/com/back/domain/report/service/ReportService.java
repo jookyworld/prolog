@@ -37,8 +37,7 @@ public class ReportService {
             throw new ConflictException("이미 신고한 콘텐츠입니다.");
         }
 
-        User reporter = userRepository.findById(reporterId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
+        User reporter = userRepository.findById(reporterId).orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
 
         reportRepository.save(Report.builder()
                 .reporter(reporter)
@@ -60,8 +59,7 @@ public class ReportService {
 
     @Transactional
     public AdminReportResponse adminUpdateReportStatus(Long reportId, ReportStatus status) {
-        Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 신고입니다."));
+        Report report = reportRepository.findById(reportId).orElseThrow(() -> new NotFoundException("존재하지 않는 신고입니다."));
         report.updateStatus(status);
         String preview = resolvePreview(report);
         return AdminReportResponse.of(report, preview);
@@ -69,17 +67,20 @@ public class ReportService {
 
     @Transactional
     public void resolveAllByTarget(ReportTargetType targetType, Long targetId) {
-        reportRepository.findAllByTargetTypeAndTargetId(targetType, targetId)
+        reportRepository
+                .findAllByTargetTypeAndTargetId(targetType, targetId)
                 .forEach(r -> r.updateStatus(ReportStatus.RESOLVED));
     }
 
     private String resolvePreview(Report report) {
         if (report.getTargetType() == ReportTargetType.ROUTINE) {
-            return sharedRoutineRepository.findById(report.getTargetId())
+            return sharedRoutineRepository
+                    .findById(report.getTargetId())
                     .map(SharedRoutine::getTitle)
                     .orElse("[삭제된 루틴]");
         } else {
-            return commentRepository.findById(report.getTargetId())
+            return commentRepository
+                    .findById(report.getTargetId())
                     .map(Comment::getContent)
                     .orElse("[삭제된 댓글]");
         }

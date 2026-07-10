@@ -28,8 +28,7 @@ public class AdminReportController {
 
     @PatchMapping("/{id}/status")
     public AdminReportResponse updateStatus(
-            @PathVariable Long id,
-            @Valid @RequestBody UpdateReportStatusRequest request) {
+            @PathVariable Long id, @Valid @RequestBody UpdateReportStatusRequest request) {
         return reportService.adminUpdateReportStatus(id, request.status());
     }
 }

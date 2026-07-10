@@ -1,9 +1,5 @@
 import { apiFetch } from "../api";
-import type {
-  RoutineCreateRequest,
-  RoutineDetail,
-  RoutineListItem,
-} from "../types/routine";
+import type { RoutineCreateRequest, RoutineDetail, RoutineListItem } from "../types/routine";
 
 export const routineApi = {
   getRoutines(status?: "ACTIVE" | "ARCHIVED" | "ALL"): Promise<RoutineListItem[]> {

@@ -1,7 +1,6 @@
 package com.back.domain.workout.session.dto;
 
 import com.back.domain.workout.session.entity.WorkoutSession;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -12,12 +11,12 @@ public record AdminWorkoutSessionResponse(
         String routineTitle,
         LocalDateTime startedAt,
         LocalDateTime completedAt,
-        Integer durationMinutes
-) {
+        Integer durationMinutes) {
     public static AdminWorkoutSessionResponse from(WorkoutSession ws) {
         Integer duration = null;
         if (ws.getStartedAt() != null && ws.getCompletedAt() != null) {
-            duration = (int) Duration.between(ws.getStartedAt(), ws.getCompletedAt()).toMinutes();
+            duration = (int)
+                    Duration.between(ws.getStartedAt(), ws.getCompletedAt()).toMinutes();
         }
         return new AdminWorkoutSessionResponse(
                 ws.getId(),
@@ -26,7 +25,6 @@ public record AdminWorkoutSessionResponse(
                 ws.getRoutineTitleSnapshot() != null ? ws.getRoutineTitleSnapshot() : "자유 운동",
                 ws.getStartedAt(),
                 ws.getCompletedAt(),
-                duration
-        );
+                duration);
     }
 }

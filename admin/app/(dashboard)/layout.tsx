@@ -21,19 +21,13 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       <AuthGuard>
         <div className="flex h-screen overflow-hidden">
           <Sidebar />
-          <main className="flex-1 overflow-y-auto bg-background p-8">
-            {children}
-          </main>
+          <main className="flex-1 overflow-y-auto bg-background p-8">{children}</main>
         </div>
       </AuthGuard>
     </AuthProvider>

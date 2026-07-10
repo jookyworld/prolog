@@ -8,11 +8,7 @@ import { Select } from "@/components/ui/select";
 import { ExerciseTable } from "@/components/exercises/ExerciseTable";
 import { ExerciseFormModal } from "@/components/exercises/ExerciseFormModal";
 import { exerciseApi } from "@/lib/api";
-import {
-  BODY_PARTS,
-  type AdminExerciseResponse,
-  type BodyPart,
-} from "@/lib/types";
+import { BODY_PARTS, type AdminExerciseResponse, type BodyPart } from "@/lib/types";
 
 type FilterType = "ALL" | "OFFICIAL" | "CUSTOM";
 
@@ -46,29 +42,18 @@ export default function ExercisesPage() {
   }, []);
 
   const filtered = useMemo(() => {
-    const tokens = search
-      .trim()
-      .toLowerCase()
-      .split(/\s+/)
-      .filter(Boolean);
+    const tokens = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
 
     return exercises.filter((ex) => {
       if (tokens.length > 0) {
-        const targets = [
-          ex.name,
-          ex.bodyPart,
-          ex.partDetail ?? "",
-        ].map((s) => s.toLowerCase());
+        const targets = [ex.name, ex.bodyPart, ex.partDetail ?? ""].map((s) => s.toLowerCase());
 
-        const allMatch = tokens.every((token) =>
-          targets.some((t) => t.includes(token))
-        );
+        const allMatch = tokens.every((token) => targets.some((t) => t.includes(token)));
         if (!allMatch) return false;
       }
       if (filterType === "OFFICIAL" && ex.custom) return false;
       if (filterType === "CUSTOM" && !ex.custom) return false;
-      if (filterBodyPart !== "ALL" && ex.bodyPart !== filterBodyPart)
-        return false;
+      if (filterBodyPart !== "ALL" && ex.bodyPart !== filterBodyPart) return false;
       return true;
     });
   }, [exercises, search, filterType, filterBodyPart]);
@@ -83,16 +68,10 @@ export default function ExercisesPage() {
     setModalOpen(true);
   };
 
-  const handleSubmit = async (data: {
-    name: string;
-    bodyPart: BodyPart;
-    partDetail?: string;
-  }) => {
+  const handleSubmit = async (data: { name: string; bodyPart: BodyPart; partDetail?: string }) => {
     if (editTarget) {
       const updated = await exerciseApi.update(editTarget.id, data);
-      setExercises((prev) =>
-        prev.map((ex) => (ex.id === updated.id ? updated : ex))
-      );
+      setExercises((prev) => prev.map((ex) => (ex.id === updated.id ? updated : ex)));
     } else {
       const created = await exerciseApi.create(data);
       setExercises((prev) => [...prev, created]);
@@ -137,9 +116,7 @@ export default function ExercisesPage() {
         </Select>
         <Select
           value={filterBodyPart}
-          onChange={(e) =>
-            setFilterBodyPart(e.target.value as BodyPart | "ALL")
-          }
+          onChange={(e) => setFilterBodyPart(e.target.value as BodyPart | "ALL")}
           className="w-32"
         >
           <option value="ALL">전체 부위</option>

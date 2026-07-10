@@ -1,6 +1,7 @@
 package com.back.domain.community.sharedRoutine.repository;
 
 import com.back.domain.community.sharedRoutine.entity.SharedRoutine;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -8,8 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public interface SharedRoutineRepository extends JpaRepository<SharedRoutine, Long> {
@@ -25,65 +24,53 @@ public interface SharedRoutineRepository extends JpaRepository<SharedRoutine, Lo
     Page<SharedRoutine> findAllByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
             String titleKeyword, String descriptionKeyword, Pageable pageable);
 
-    @Query("SELECT sr FROM SharedRoutine sr JOIN FETCH sr.user " +
-           "WHERE sr.user.id NOT IN :blockedIds " +
-           "AND (LOWER(sr.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "OR LOWER(sr.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    @Query("SELECT sr FROM SharedRoutine sr JOIN FETCH sr.user " + "WHERE sr.user.id NOT IN :blockedIds "
+            + "AND (LOWER(sr.title) LIKE LOWER(CONCAT('%', :keyword, '%')) "
+            + "OR LOWER(sr.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<SharedRoutine> findAllByKeywordExcludingBlocked(
-            @Param("keyword") String keyword,
-            @Param("blockedIds") List<Long> blockedIds,
-            Pageable pageable);
+            @Param("keyword") String keyword, @Param("blockedIds") List<Long> blockedIds, Pageable pageable);
 
     @EntityGraph(attributePaths = "user")
     Page<SharedRoutine> findAllByUser_IdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
     @Query(
-        value = "SELECT * FROM shared_routines sr " +
-                "ORDER BY (sr.import_count * 3.0 + sr.view_count) / " +
-                "POWER((UNIX_TIMESTAMP() - UNIX_TIMESTAMP(sr.created_at)) / 3600.0 + 2, 1.5) DESC",
-        countQuery = "SELECT COUNT(*) FROM shared_routines",
-        nativeQuery = true
-    )
+            value = "SELECT * FROM shared_routines sr " + "ORDER BY (sr.import_count * 3.0 + sr.view_count) / "
+                    + "POWER((UNIX_TIMESTAMP() - UNIX_TIMESTAMP(sr.created_at)) / 3600.0 + 2, 1.5) DESC",
+            countQuery = "SELECT COUNT(*) FROM shared_routines",
+            nativeQuery = true)
     Page<SharedRoutine> findAllOrderByPopularity(Pageable pageable);
 
     @Query(
-        value = "SELECT * FROM shared_routines sr " +
-                "WHERE sr.user_id NOT IN (:blockedIds) " +
-                "ORDER BY (sr.import_count * 3.0 + sr.view_count) / " +
-                "POWER((UNIX_TIMESTAMP() - UNIX_TIMESTAMP(sr.created_at)) / 3600.0 + 2, 1.5) DESC",
-        countQuery = "SELECT COUNT(*) FROM shared_routines sr WHERE sr.user_id NOT IN (:blockedIds)",
-        nativeQuery = true
-    )
-    Page<SharedRoutine> findAllOrderByPopularityExcludingBlocked(@Param("blockedIds") List<Long> blockedIds, Pageable pageable);
+            value = "SELECT * FROM shared_routines sr " + "WHERE sr.user_id NOT IN (:blockedIds) "
+                    + "ORDER BY (sr.import_count * 3.0 + sr.view_count) / "
+                    + "POWER((UNIX_TIMESTAMP() - UNIX_TIMESTAMP(sr.created_at)) / 3600.0 + 2, 1.5) DESC",
+            countQuery = "SELECT COUNT(*) FROM shared_routines sr WHERE sr.user_id NOT IN (:blockedIds)",
+            nativeQuery = true)
+    Page<SharedRoutine> findAllOrderByPopularityExcludingBlocked(
+            @Param("blockedIds") List<Long> blockedIds, Pageable pageable);
 
     @Query(
-        value = "SELECT * FROM shared_routines sr " +
-                "WHERE LOWER(sr.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-                "OR LOWER(sr.description) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-                "ORDER BY (sr.import_count * 3.0 + sr.view_count) / " +
-                "POWER((UNIX_TIMESTAMP() - UNIX_TIMESTAMP(sr.created_at)) / 3600.0 + 2, 1.5) DESC",
-        countQuery = "SELECT COUNT(*) FROM shared_routines sr " +
-                     "WHERE LOWER(sr.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-                     "OR LOWER(sr.description) LIKE LOWER(CONCAT('%', :keyword, '%'))",
-        nativeQuery = true
-    )
+            value = "SELECT * FROM shared_routines sr "
+                    + "WHERE LOWER(sr.title) LIKE LOWER(CONCAT('%', :keyword, '%')) "
+                    + "OR LOWER(sr.description) LIKE LOWER(CONCAT('%', :keyword, '%')) "
+                    + "ORDER BY (sr.import_count * 3.0 + sr.view_count) / "
+                    + "POWER((UNIX_TIMESTAMP() - UNIX_TIMESTAMP(sr.created_at)) / 3600.0 + 2, 1.5) DESC",
+            countQuery = "SELECT COUNT(*) FROM shared_routines sr "
+                    + "WHERE LOWER(sr.title) LIKE LOWER(CONCAT('%', :keyword, '%')) "
+                    + "OR LOWER(sr.description) LIKE LOWER(CONCAT('%', :keyword, '%'))",
+            nativeQuery = true)
     Page<SharedRoutine> findAllByKeywordOrderByPopularity(@Param("keyword") String keyword, Pageable pageable);
 
     @Query(
-        value = "SELECT * FROM shared_routines sr " +
-                "WHERE sr.user_id NOT IN (:blockedIds) " +
-                "AND (LOWER(sr.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-                "OR LOWER(sr.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-                "ORDER BY (sr.import_count * 3.0 + sr.view_count) / " +
-                "POWER((UNIX_TIMESTAMP() - UNIX_TIMESTAMP(sr.created_at)) / 3600.0 + 2, 1.5) DESC",
-        countQuery = "SELECT COUNT(*) FROM shared_routines sr " +
-                     "WHERE sr.user_id NOT IN (:blockedIds) " +
-                     "AND (LOWER(sr.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-                     "OR LOWER(sr.description) LIKE LOWER(CONCAT('%', :keyword, '%')))",
-        nativeQuery = true
-    )
+            value = "SELECT * FROM shared_routines sr " + "WHERE sr.user_id NOT IN (:blockedIds) "
+                    + "AND (LOWER(sr.title) LIKE LOWER(CONCAT('%', :keyword, '%')) "
+                    + "OR LOWER(sr.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
+                    + "ORDER BY (sr.import_count * 3.0 + sr.view_count) / "
+                    + "POWER((UNIX_TIMESTAMP() - UNIX_TIMESTAMP(sr.created_at)) / 3600.0 + 2, 1.5) DESC",
+            countQuery = "SELECT COUNT(*) FROM shared_routines sr " + "WHERE sr.user_id NOT IN (:blockedIds) "
+                    + "AND (LOWER(sr.title) LIKE LOWER(CONCAT('%', :keyword, '%')) "
+                    + "OR LOWER(sr.description) LIKE LOWER(CONCAT('%', :keyword, '%')))",
+            nativeQuery = true)
     Page<SharedRoutine> findAllByKeywordOrderByPopularityExcludingBlocked(
-            @Param("keyword") String keyword,
-            @Param("blockedIds") List<Long> blockedIds,
-            Pageable pageable);
+            @Param("keyword") String keyword, @Param("blockedIds") List<Long> blockedIds, Pageable pageable);
 }

@@ -1,5 +1,9 @@
 import { apiFetch } from "../api";
-import type { UpdateMarketingConsentRequest, UpdateProfileRequest, UserResponse } from "../types/auth";
+import type {
+  UpdateMarketingConsentRequest,
+  UpdateProfileRequest,
+  UserResponse,
+} from "../types/auth";
 
 export const userApi = {
   updateProfile(req: UpdateProfileRequest): Promise<UserResponse> {

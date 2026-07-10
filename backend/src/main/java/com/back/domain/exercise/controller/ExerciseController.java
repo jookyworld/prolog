@@ -5,12 +5,11 @@ import com.back.domain.exercise.dto.ExerciseResponse;
 import com.back.domain.exercise.dto.ExerciseUpdateRequest;
 import com.back.domain.exercise.service.ExerciseService;
 import com.back.global.security.principal.UserPrincipal;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,23 +28,25 @@ public class ExerciseController {
     }
 
     @PostMapping("/custom")
-    public ExerciseResponse createCustomExercise(@AuthenticationPrincipal UserPrincipal principal,
-                                                 @RequestBody ExerciseCreateRequest request) {
+    public ExerciseResponse createCustomExercise(
+            @AuthenticationPrincipal UserPrincipal principal, @RequestBody ExerciseCreateRequest request) {
         return exerciseService.createCustomExercise(principal.getId(), request);
     }
 
     @PutMapping("/custom/{id}")
-    public ExerciseResponse updateCustomExercise(@AuthenticationPrincipal UserPrincipal principal,
-                                                 @PathVariable Long id,
-                                                 @RequestBody ExerciseUpdateRequest request) {
+    public ExerciseResponse updateCustomExercise(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long id,
+            @RequestBody ExerciseUpdateRequest request) {
         return exerciseService.updateCustomExercise(principal.getId(), id, request);
     }
 
     @DeleteMapping("/custom/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCustomExercise(@AuthenticationPrincipal UserPrincipal principal,
-                                     @PathVariable Long id,
-                                     @RequestParam(defaultValue = "false") boolean force) {
+    public void deleteCustomExercise(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "false") boolean force) {
         exerciseService.deleteCustomExercise(principal.getId(), id, force);
     }
 }

@@ -17,9 +17,7 @@ export default function CustomTabBar({
   insets,
   onPressFAB,
 }: CustomTabBarProps) {
-  const visibleRoutes = state.routes.filter(
-    (route) => !HIDDEN_TABS.includes(route.name),
-  );
+  const visibleRoutes = state.routes.filter((route) => !HIDDEN_TABS.includes(route.name));
 
   const leftTabs = visibleRoutes.slice(0, 2);
   const rightTabs = visibleRoutes.slice(2);
@@ -40,8 +38,7 @@ export default function CustomTabBar({
     };
 
     const color = isFocused ? COLORS.white : COLORS.tabInactive;
-    const icon =
-      options.tabBarIcon?.({ focused: isFocused, color, size: 22 }) ?? null;
+    const icon = options.tabBarIcon?.({ focused: isFocused, color, size: 22 }) ?? null;
     const label =
       typeof options.tabBarLabel === "string"
         ? options.tabBarLabel

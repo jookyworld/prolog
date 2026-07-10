@@ -1,17 +1,12 @@
 package com.back.domain.stats.service;
 
+import com.back.domain.exercise.entity.BodyPart;
 import com.back.domain.stats.dto.HomeStatsResponse;
 import com.back.domain.workout.session.entity.WorkoutSession;
 import com.back.domain.workout.session.repository.WorkoutSessionRepository;
 import com.back.domain.workout.sessionexercise.entity.WorkoutSessionExercise;
 import com.back.domain.workout.set.entity.WorkoutSet;
 import com.back.domain.workout.set.repository.WorkoutSetRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.back.domain.exercise.entity.BodyPart;
-
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,6 +14,9 @@ import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Comparator;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,13 +44,7 @@ public class StatsService {
         // 5. exerciseProgress 계산
         List<HomeStatsResponse.ExerciseProgress> exerciseProgress = calculateExerciseProgress(userId);
 
-        return new HomeStatsResponse(
-                thisWeek,
-                thisMonth,
-                avgWorkoutDuration,
-                weeklyActivity,
-                exerciseProgress
-        );
+        return new HomeStatsResponse(thisWeek, thisMonth, avgWorkoutDuration, weeklyActivity, exerciseProgress);
     }
 
     private HomeStatsResponse.ThisWeek calculateThisWeek(Long userId, LocalDate today) {
@@ -83,8 +75,7 @@ public class StatsService {
         LocalDateTime monthStartDateTime = monthStart.atStartOfDay();
         LocalDateTime monthEndDateTime = today.atTime(LocalTime.MAX);
 
-        Double avg = workoutSessionRepository.findAvgWorkoutDuration(
-                userId, monthStartDateTime, monthEndDateTime);
+        Double avg = workoutSessionRepository.findAvgWorkoutDuration(userId, monthStartDateTime, monthEndDateTime);
 
         return avg != null ? avg.longValue() : 0L;
     }
@@ -109,8 +100,7 @@ public class StatsService {
                     com.back.global.util.DateTimeUtil.toKoreanDayOfWeek(date.getDayOfWeek()),
                     com.back.global.util.DateTimeUtil.formatToMd(date),
                     sessions.size(),
-                    bodyParts
-            ));
+                    bodyParts));
         }
 
         return activities;
@@ -135,8 +125,7 @@ public class StatsService {
                             exercise.getExerciseId(),
                             exercise.getExerciseName(),
                             BodyPart.valueOf(exercise.getBodyPart()),
-                            sessions
-                    );
+                            sessions);
                 })
                 .toList();
     }
@@ -147,8 +136,8 @@ public class StatsService {
 
         return sessionInfos.stream()
                 .map(info -> {
-                    List<WorkoutSet> sets = workoutSetRepository.findBySessionAndExercise(
-                            info.getSessionId(), exerciseId);
+                    List<WorkoutSet> sets =
+                            workoutSetRepository.findBySessionAndExercise(info.getSessionId(), exerciseId);
 
                     boolean isBodyweight = sets.stream().allMatch(s -> s.getWeight() == 0);
 
@@ -180,8 +169,7 @@ public class StatsService {
                             bestSet.getReps(),
                             isBodyweight,
                             routineName,
-                            setDetails
-                    );
+                            setDetails);
                 })
                 .toList();
     }
@@ -191,5 +179,4 @@ public class StatsService {
         int cappedReps = Math.min(reps, 20);
         return Math.round(weight * (1 + cappedReps / 30.0) * 10.0) / 10.0;
     }
-
 }

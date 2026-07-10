@@ -13,10 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle, Polyline, Text as SvgText } from "react-native-svg";
 
 function formatE1RM(kg: number): string {
@@ -45,9 +42,7 @@ function getBodyPartLabel(bodyParts: BodyPart[]): string {
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const [selectedSessions, setSelectedSessions] = useState<
-    Record<number, number | null>
-  >({});
+  const [selectedSessions, setSelectedSessions] = useState<Record<number, number | null>>({});
   const [homeData, setHomeData] = useState<HomeStatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,10 +93,7 @@ export default function HomeScreen() {
           <Text className="text-center text-white/60">
             {error || "데이터를 불러올 수 없습니다."}
           </Text>
-          <Pressable
-            onPress={loadHomeStats}
-            className="mt-4 rounded-lg bg-primary px-6 py-3"
-          >
+          <Pressable onPress={loadHomeStats} className="mt-4 rounded-lg bg-primary px-6 py-3">
             <Text className="font-semibold text-white">다시 시도</Text>
           </Pressable>
         </View>
@@ -179,23 +171,15 @@ export default function HomeScreen() {
                 <View key={idx} className="flex-1 items-center gap-2">
                   {/* 날짜 */}
                   <View className="items-center">
-                    <Text
-                      className={`text-xs ${
-                        hasWorkout ? "text-white/80" : "text-white/30"
-                      }`}
-                    >
+                    <Text className={`text-xs ${hasWorkout ? "text-white/80" : "text-white/30"}`}>
                       {day.dayOfWeek}
                     </Text>
-                    <Text className="text-[10px] text-white/20">
-                      {day.formattedDate}
-                    </Text>
+                    <Text className="text-[10px] text-white/20">{day.formattedDate}</Text>
                   </View>
                   {/* 부위 표시 */}
                   {hasWorkout && bodyPartLabel ? (
                     <View className="w-full items-center rounded-lg bg-primary/15 py-2">
-                      <Text className="text-[10px] font-bold text-primary">
-                        {bodyPartLabel}
-                      </Text>
+                      <Text className="text-[10px] font-bold text-primary">{bodyPartLabel}</Text>
                     </View>
                   ) : (
                     <View className="w-full items-center py-2">
@@ -211,9 +195,7 @@ export default function HomeScreen() {
         {/* 종목별 성장 추세 */}
         <View className="mx-5 mt-6">
           <View className="mb-3 flex-row items-center justify-between">
-            <Text className="text-base font-semibold text-white">
-              주요 운동 성장 추세
-            </Text>
+            <Text className="text-base font-semibold text-white">주요 운동 성장 추세</Text>
             <Text className="text-xs text-white/30">최근 5회</Text>
           </View>
 
@@ -247,13 +229,10 @@ export default function HomeScreen() {
                 : exercise.sessions[0].estimatedOneRM;
               const lastValue = isBodyweight
                 ? exercise.sessions[exercise.sessions.length - 1].bestSetReps
-                : exercise.sessions[exercise.sessions.length - 1]
-                    .estimatedOneRM;
+                : exercise.sessions[exercise.sessions.length - 1].estimatedOneRM;
               const growth = lastValue - firstValue;
               const growthPercent =
-                firstValue > 0
-                  ? ((growth / firstValue) * 100).toFixed(1)
-                  : "0.0";
+                firstValue > 0 ? ((growth / firstValue) * 100).toFixed(1) : "0.0";
 
               // 그래프 Y축 값
               const graphValues = exercise.sessions.map((s) =>
@@ -263,11 +242,9 @@ export default function HomeScreen() {
               const minVal = Math.min(...graphValues);
               const range = maxVal - minVal;
 
-              const selectedSessionIndex =
-                selectedSessions[exercise.exerciseId];
+              const selectedSessionIndex = selectedSessions[exercise.exerciseId];
               const selectedSession =
-                selectedSessionIndex !== null &&
-                selectedSessionIndex !== undefined
+                selectedSessionIndex !== null && selectedSessionIndex !== undefined
                   ? exercise.sessions[selectedSessionIndex]
                   : null;
 
@@ -289,9 +266,7 @@ export default function HomeScreen() {
                             {exercise.exerciseName}
                           </Text>
                           <View className="rounded-full bg-white/10 px-2 py-0.5">
-                            <Text className="text-[10px] text-white/50">
-                              {exercise.bodyPart}
-                            </Text>
+                            <Text className="text-[10px] text-white/50">{exercise.bodyPart}</Text>
                           </View>
                         </View>
                         <Text className="mt-0.5 text-xs text-white/40">
@@ -361,14 +336,8 @@ export default function HomeScreen() {
                                   ? session.bestSetReps
                                   : session.estimatedOneRM;
                                 const x =
-                                  (i /
-                                    Math.max(exercise.sessions.length - 1, 1)) *
-                                    280 +
-                                  10;
-                                const y =
-                                  range > 0
-                                    ? 10 + (1 - (val - minVal) / range) * 40
-                                    : 40;
+                                  (i / Math.max(exercise.sessions.length - 1, 1)) * 280 + 10;
+                                const y = range > 0 ? 10 + (1 - (val - minVal) / range) * 40 : 40;
                                 return `${x},${y}`;
                               })
                               .join(" ")}
@@ -381,17 +350,9 @@ export default function HomeScreen() {
 
                           {/* 점 */}
                           {exercise.sessions.map((session, i) => {
-                            const val = isBodyweight
-                              ? session.bestSetReps
-                              : session.estimatedOneRM;
-                            const x =
-                              (i / Math.max(exercise.sessions.length - 1, 1)) *
-                                280 +
-                              10;
-                            const y =
-                              range > 0
-                                ? 10 + (1 - (val - minVal) / range) * 40
-                                : 40;
+                            const val = isBodyweight ? session.bestSetReps : session.estimatedOneRM;
+                            const x = (i / Math.max(exercise.sessions.length - 1, 1)) * 280 + 10;
+                            const y = range > 0 ? 10 + (1 - (val - minVal) / range) * 40 : 40;
                             const isLast = i === exercise.sessions.length - 1;
                             const isSelected = selectedSessionIndex === i;
                             return (
@@ -400,26 +361,17 @@ export default function HomeScreen() {
                                 cx={x}
                                 cy={y}
                                 r={isSelected ? 8 : isLast ? 6 : 4}
-                                fill={
-                                  isSelected || isLast
-                                    ? COLORS.primary
-                                    : COLORS.card
-                                }
+                                fill={isSelected || isLast ? COLORS.primary : COLORS.card}
                                 stroke={COLORS.primary}
                                 strokeWidth={isSelected ? 3 : isLast ? 2.5 : 2}
-                                onPress={() =>
-                                  toggleSession(exercise.exerciseId, i)
-                                }
+                                onPress={() => toggleSession(exercise.exerciseId, i)}
                               />
                             );
                           })}
 
                           {/* 날짜 */}
                           {exercise.sessions.map((session, i) => {
-                            const x =
-                              (i / Math.max(exercise.sessions.length - 1, 1)) *
-                                280 +
-                              10;
+                            const x = (i / Math.max(exercise.sessions.length - 1, 1)) * 280 + 10;
                             const isSelected = selectedSessionIndex === i;
                             return (
                               <SvgText
@@ -427,16 +379,10 @@ export default function HomeScreen() {
                                 x={x}
                                 y="80"
                                 fontSize="11"
-                                fill={
-                                  isSelected
-                                    ? COLORS.primary
-                                    : "rgba(255,255,255,0.4)"
-                                }
+                                fill={isSelected ? COLORS.primary : "rgba(255,255,255,0.4)"}
                                 fontWeight={isSelected ? "bold" : "normal"}
                                 textAnchor="middle"
-                                onPress={() =>
-                                  toggleSession(exercise.exerciseId, i)
-                                }
+                                onPress={() => toggleSession(exercise.exerciseId, i)}
                               >
                                 {session.date}
                               </SvgText>
@@ -482,9 +428,7 @@ export default function HomeScreen() {
                                   </Text>
                                 </View>
                                 <TouchableOpacity
-                                  onPress={() =>
-                                    toggleSession(exercise.exerciseId, -1)
-                                  }
+                                  onPress={() => toggleSession(exercise.exerciseId, -1)}
                                   className="ml-2"
                                 >
                                   <X size={16} color="rgba(255,255,255,0.5)" />
@@ -493,9 +437,7 @@ export default function HomeScreen() {
 
                               {/* 최고 세트 */}
                               <View className="mb-2 rounded-lg bg-primary/10 px-2 py-1.5">
-                                <Text className="text-xs text-white/50">
-                                  최고 세트
-                                </Text>
+                                <Text className="text-xs text-white/50">최고 세트</Text>
                                 <Text className="text-sm font-bold text-primary">
                                   {isBodyweight
                                     ? `${selectedSession.bestSetReps}회`
@@ -506,17 +448,10 @@ export default function HomeScreen() {
                               {/* 전체 세트 목록 */}
                               <View className="gap-1">
                                 {selectedSession.sets.map((set, idx) => (
-                                  <View
-                                    key={idx}
-                                    className="flex-row items-center justify-between"
-                                  >
-                                    <Text className="w-6 text-xs text-white/40">
-                                      {idx + 1}
-                                    </Text>
+                                  <View key={idx} className="flex-row items-center justify-between">
+                                    <Text className="w-6 text-xs text-white/40">{idx + 1}</Text>
                                     <Text className="w-16 text-sm font-medium text-white">
-                                      {set.weight > 0
-                                        ? `${set.weight}kg`
-                                        : "맨몸"}
+                                      {set.weight > 0 ? `${set.weight}kg` : "맨몸"}
                                     </Text>
                                     <Text className="w-12 text-sm font-medium text-white">
                                       ×{set.reps}

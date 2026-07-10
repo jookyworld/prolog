@@ -11,16 +11,14 @@ import com.back.domain.routine.routineItem.entity.RoutineItem;
 import com.back.domain.routine.routineItem.repository.RoutineItemRepository;
 import com.back.domain.user.user.entity.User;
 import com.back.domain.user.user.repository.UserRepository;
-import com.back.domain.workout.session.entity.WorkoutSession;
 import com.back.domain.workout.session.repository.WorkoutSessionRepository;
 import com.back.global.exception.type.BadRequestException;
 import com.back.global.exception.type.ForbiddenException;
 import com.back.global.exception.type.NotFoundException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +44,8 @@ public class RoutineService {
 
         int order = 1;
         for (RoutineItemCreateRequest i : request.routineItems()) {
-            Exercise exercise = exerciseRepository.findById(i.exerciseId())
+            Exercise exercise = exerciseRepository
+                    .findById(i.exerciseId())
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 운동 종목입니다."));
 
             RoutineItem routineItem = RoutineItem.builder()
@@ -69,9 +68,8 @@ public class RoutineService {
 
         List<RoutineItem> routineItems = routineItemRepository.findByRoutineIdOrderByOrderInRoutineAsc(routineId);
 
-        List<RoutineItemDetailResponse> routineItemDetailResponses = routineItems.stream()
-                .map(RoutineItemDetailResponse::from)
-                .toList();
+        List<RoutineItemDetailResponse> routineItemDetailResponses =
+                routineItems.stream().map(RoutineItemDetailResponse::from).toList();
 
         return RoutineDetailResponse.of(routine, routineItemDetailResponses);
     }
@@ -81,18 +79,13 @@ public class RoutineService {
         List<Routine> routines;
 
         switch (status) {
-            case ACTIVE -> routines =
-                    routineRepository.findByUserIdAndActiveTrueOrderByCreatedAtDesc(userId);
-            case ARCHIVED -> routines =
-                    routineRepository.findByUserIdAndActiveFalseOrderByCreatedAtDesc(userId);
-            case ALL -> routines =
-                    routineRepository.findByUserIdOrderByCreatedAtDesc(userId);
+            case ACTIVE -> routines = routineRepository.findByUserIdAndActiveTrueOrderByCreatedAtDesc(userId);
+            case ARCHIVED -> routines = routineRepository.findByUserIdAndActiveFalseOrderByCreatedAtDesc(userId);
+            case ALL -> routines = routineRepository.findByUserIdOrderByCreatedAtDesc(userId);
             default -> throw new BadRequestException("지원하지 않는 루틴 상태입니다: " + status);
         }
 
-        return routines.stream()
-                .map(RoutineResponse::from)
-                .toList();
+        return routines.stream().map(RoutineResponse::from).toList();
     }
 
     @Transactional
@@ -116,13 +109,12 @@ public class RoutineService {
         routine.update(request.title(), request.description());
 
         // 기존 루틴 아이템 삭제 후 새로 생성
-        routineItemRepository.deleteAll(
-                routineItemRepository.findByRoutineIdOrderByOrderInRoutineAsc(routineId)
-        );
+        routineItemRepository.deleteAll(routineItemRepository.findByRoutineIdOrderByOrderInRoutineAsc(routineId));
 
         int order = 1;
         for (RoutineItemCreateRequest i : request.routineItems()) {
-            Exercise exercise = exerciseRepository.findById(i.exerciseId())
+            Exercise exercise = exerciseRepository
+                    .findById(i.exerciseId())
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 운동 종목입니다."));
 
             RoutineItem routineItem = RoutineItem.builder()
@@ -137,9 +129,8 @@ public class RoutineService {
         }
 
         List<RoutineItem> updatedItems = routineItemRepository.findByRoutineIdOrderByOrderInRoutineAsc(routineId);
-        List<RoutineItemDetailResponse> itemResponses = updatedItems.stream()
-                .map(RoutineItemDetailResponse::from)
-                .toList();
+        List<RoutineItemDetailResponse> itemResponses =
+                updatedItems.stream().map(RoutineItemDetailResponse::from).toList();
 
         return RoutineDetailResponse.of(routine, itemResponses);
     }
@@ -149,9 +140,7 @@ public class RoutineService {
         Routine routine = getRoutineAndValidateOwner(userId, routineId);
 
         // 1. RoutineItem 삭제
-        routineItemRepository.deleteAll(
-                routineItemRepository.findByRoutineIdOrderByOrderInRoutineAsc(routineId)
-        );
+        routineItemRepository.deleteAll(routineItemRepository.findByRoutineIdOrderByOrderInRoutineAsc(routineId));
 
         // 2. Routine 삭제
         // WorkoutSession에 routineTitleSnapshot이 있으므로
@@ -160,8 +149,8 @@ public class RoutineService {
     }
 
     private Routine getRoutineAndValidateOwner(Long userId, Long routineId) {
-        Routine routine = routineRepository.findById(routineId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 루틴입니다."));
+        Routine routine =
+                routineRepository.findById(routineId).orElseThrow(() -> new NotFoundException("존재하지 않는 루틴입니다."));
 
         if (!userId.equals(routine.getUser().getId())) {
             throw new ForbiddenException("권한이 없습니다.");

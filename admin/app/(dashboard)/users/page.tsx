@@ -93,7 +93,10 @@ export default function UsersPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => { handleSearch(""); handleRoleFilter("ALL"); }}
+            onClick={() => {
+              handleSearch("");
+              handleRoleFilter("ALL");
+            }}
           >
             초기화
           </Button>
@@ -140,11 +143,7 @@ export default function UsersPage() {
         </>
       )}
 
-      <UserDetailModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        user={selectedUser}
-      />
+      <UserDetailModal open={modalOpen} onOpenChange={setModalOpen} user={selectedUser} />
     </div>
   );
 }

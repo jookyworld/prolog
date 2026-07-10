@@ -23,9 +23,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException e) {
-        String message = e.getBindingResult()
-                .getFieldErrors()
-                .stream()
+        String message = e.getBindingResult().getFieldErrors().stream()
                 .findFirst()
                 .map(error -> error.getDefaultMessage())
                 .orElse("입력 값을 확인해주세요.");

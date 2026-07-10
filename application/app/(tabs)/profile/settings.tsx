@@ -3,7 +3,15 @@ import { COLORS } from "@/lib/constants";
 import { TERMS_URLS } from "@/lib/constants/terms";
 import { userApi } from "@/lib/api/user";
 import Constants from "expo-constants";
-import { Ban, ChevronLeft, ChevronRight, FileText, Pencil, Shield, UserCog } from "lucide-react-native";
+import {
+  Ban,
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  Pencil,
+  Shield,
+  UserCog,
+} from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Linking, Pressable, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

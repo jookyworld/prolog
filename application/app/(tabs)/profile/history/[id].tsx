@@ -1,10 +1,7 @@
 import { workoutApi } from "@/lib/api/workout";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatElapsedTime, formatShortDate } from "@/lib/format";
-import {
-  WorkoutSessionDetail,
-  toWorkoutSessionDetail,
-} from "@/lib/types/workout";
+import { WorkoutSessionDetail, toWorkoutSessionDetail } from "@/lib/types/workout";
 import { ChevronLeft, EllipsisVertical } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -17,10 +14,7 @@ import {
   Text,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 export default function WorkoutHistoryDetailScreen() {
@@ -40,9 +34,7 @@ export default function WorkoutHistoryDetailScreen() {
       const data = await workoutApi.getSessionDetail(id);
       setSession(toWorkoutSessionDetail(data));
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "데이터를 불러오지 못했습니다.",
-      );
+      setError(err instanceof Error ? err.message : "데이터를 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
@@ -54,28 +46,21 @@ export default function WorkoutHistoryDetailScreen() {
 
   const handleOptions = () => {
     const doDelete = () => {
-      Alert.alert(
-        "기록 삭제",
-        "이 운동 기록을 삭제하시겠습니까?\n삭제 후 복구할 수 없습니다.",
-        [
-          { text: "취소", style: "cancel" },
-          {
-            text: "삭제",
-            style: "destructive",
-            onPress: async () => {
-              try {
-                await workoutApi.deleteSession(Number(id));
-                router.back();
-              } catch (err) {
-                Alert.alert(
-                  "오류",
-                  err instanceof Error ? err.message : "삭제에 실패했습니다.",
-                );
-              }
-            },
+      Alert.alert("기록 삭제", "이 운동 기록을 삭제하시겠습니까?\n삭제 후 복구할 수 없습니다.", [
+        { text: "취소", style: "cancel" },
+        {
+          text: "삭제",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await workoutApi.deleteSession(Number(id));
+              router.back();
+            } catch (err) {
+              Alert.alert("오류", err instanceof Error ? err.message : "삭제에 실패했습니다.");
+            }
           },
-        ],
-      );
+        },
+      ]);
     };
 
     if (Platform.OS === "ios") {
@@ -112,20 +97,12 @@ export default function WorkoutHistoryDetailScreen() {
         <Text className="mb-2 text-lg font-semibold text-white">
           {error ?? "기록을 찾을 수 없어요"}
         </Text>
-        <Text className="mb-6 text-sm text-white/50">
-          삭제되었거나 존재하지 않는 기록입니다.
-        </Text>
+        <Text className="mb-6 text-sm text-white/50">삭제되었거나 존재하지 않는 기록입니다.</Text>
         <View className="flex-row gap-3">
-          <Pressable
-            onPress={fetchDetail}
-            className="rounded-full bg-white/10 px-5 py-2.5"
-          >
+          <Pressable onPress={fetchDetail} className="rounded-full bg-white/10 px-5 py-2.5">
             <Text className="text-sm font-medium text-white">다시 시도</Text>
           </Pressable>
-          <Pressable
-            onPress={() => router.back()}
-            className="rounded-full bg-primary px-5 py-2.5"
-          >
+          <Pressable onPress={() => router.back()} className="rounded-full bg-primary px-5 py-2.5">
             <Text className="text-sm font-medium text-white">목록으로</Text>
           </Pressable>
         </View>
@@ -133,24 +110,16 @@ export default function WorkoutHistoryDetailScreen() {
     );
   }
 
-  const sortedExercises = [...session.exercises].sort(
-    (a, b) => a.orderNo - b.orderNo,
-  );
+  const sortedExercises = [...session.exercises].sort((a, b) => a.orderNo - b.orderNo);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       {/* 네비게이션 바 */}
       <View className="flex-row items-center justify-between px-4 pt-1">
-        <Pressable
-          onPress={() => router.back()}
-          className="h-10 w-10 items-center justify-center"
-        >
+        <Pressable onPress={() => router.back()} className="h-10 w-10 items-center justify-center">
           <ChevronLeft size={24} color={COLORS.white} />
         </Pressable>
-        <Pressable
-          onPress={handleOptions}
-          className="h-10 w-10 items-center justify-center"
-        >
+        <Pressable onPress={handleOptions} className="h-10 w-10 items-center justify-center">
           <EllipsisVertical size={20} color={COLORS.mutedForeground} />
         </Pressable>
       </View>
@@ -177,14 +146,9 @@ export default function WorkoutHistoryDetailScreen() {
                 {session.type === "routine" ? "루틴" : "자유 운동"}
               </Text>
             </View>
-            <Text className="text-sm text-white/35">
-              {formatShortDate(session.completedAt)}
-            </Text>
+            <Text className="text-sm text-white/35">{formatShortDate(session.completedAt)}</Text>
           </View>
-          <Text
-            className="text-3xl font-bold leading-tight text-white"
-            numberOfLines={2}
-          >
+          <Text className="text-3xl font-bold leading-tight text-white" numberOfLines={2}>
             {session.title}
           </Text>
         </View>
@@ -194,9 +158,7 @@ export default function WorkoutHistoryDetailScreen() {
           <View className="flex-row">
             <View className="flex-1 items-center py-5">
               <Text className="text-2xl font-bold tracking-tight text-white">
-                {session.elapsedTime > 0
-                  ? formatElapsedTime(session.elapsedTime)
-                  : "—"}
+                {session.elapsedTime > 0 ? formatElapsedTime(session.elapsedTime) : "—"}
               </Text>
               <Text className="mt-1.5 text-xs text-white/40">운동 시간</Text>
             </View>
@@ -210,9 +172,7 @@ export default function WorkoutHistoryDetailScreen() {
             <View className="my-4 w-px bg-white/5" />
             <View className="flex-1 items-center py-5">
               <Text className="text-2xl font-bold tracking-tight text-white">
-                {session.totalVolume > 0
-                  ? session.totalVolume.toLocaleString()
-                  : "—"}
+                {session.totalVolume > 0 ? session.totalVolume.toLocaleString() : "—"}
               </Text>
               <Text className="mt-1.5 text-xs text-white/40">볼륨 (kg)</Text>
             </View>
@@ -222,10 +182,7 @@ export default function WorkoutHistoryDetailScreen() {
         {/* 종목 목록 */}
         <View className="px-5">
           {sortedExercises.map((exercise, exIdx) => {
-            const volume = exercise.sets.reduce(
-              (sum, s) => sum + s.weight * s.reps,
-              0,
-            );
+            const volume = exercise.sets.reduce((sum, s) => sum + s.weight * s.reps, 0);
             const isLast = exIdx === sortedExercises.length - 1;
             return (
               <View key={exercise.id}>
@@ -243,10 +200,7 @@ export default function WorkoutHistoryDetailScreen() {
 
                 {/* 세트 행 */}
                 {exercise.sets.map((set) => (
-                  <View
-                    key={set.id}
-                    className="flex-row items-center py-3"
-                  >
+                  <View key={set.id} className="flex-row items-center py-3">
                     {/* 세트 번호 */}
                     <Text className="w-5 text-center text-sm font-semibold text-white/25">
                       {set.setNo}
@@ -258,23 +212,16 @@ export default function WorkoutHistoryDetailScreen() {
                         <Text className="text-lg font-bold text-white">
                           {set.weight > 0 ? set.weight : "맨몸"}
                         </Text>
-                        {set.weight > 0 && (
-                          <Text className="ml-1 text-sm text-white/35">kg</Text>
-                        )}
+                        {set.weight > 0 && <Text className="ml-1 text-sm text-white/35">kg</Text>}
                       </View>
                       <View className="flex-row items-baseline">
-                        <Text className="text-lg font-bold text-white">
-                          {set.reps}
-                        </Text>
+                        <Text className="text-lg font-bold text-white">{set.reps}</Text>
                         <Text className="ml-1 text-sm text-white/35">회</Text>
                       </View>
                     </View>
 
                     {/* 메모 */}
-                    <Text
-                      className="ml-4 flex-1 text-sm text-white/25"
-                      numberOfLines={1}
-                    >
+                    <Text className="ml-4 flex-1 text-sm text-white/25" numberOfLines={1}>
                       {set.memo ?? ""}
                     </Text>
                   </View>

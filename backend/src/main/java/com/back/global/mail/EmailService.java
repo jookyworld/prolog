@@ -1,8 +1,8 @@
 package com.back.global.mail;
 
+import com.back.global.exception.type.BadRequestException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import com.back.global.exception.type.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -25,7 +25,8 @@ public class EmailService {
             helper.setFrom(from, "ProLog");
             helper.setTo(to);
             helper.setSubject("[ProLog] 회원가입 이메일 인증 코드");
-            helper.setText("""
+            helper.setText(
+                    """
                     안녕하세요, ProLog입니다.
 
                     회원가입 이메일 인증 코드를 알려드립니다.
@@ -34,7 +35,8 @@ public class EmailService {
 
                     해당 코드는 10분간 유효합니다.
                     본인이 요청하지 않으셨다면 이 메일을 무시해주세요.
-                    """.formatted(code));
+                    """
+                            .formatted(code));
             mailSender.send(message);
         } catch (MessagingException | java.io.UnsupportedEncodingException e) {
             throw new BadRequestException("이메일 전송에 실패했습니다.");
@@ -48,7 +50,8 @@ public class EmailService {
             helper.setFrom(from, "ProLog");
             helper.setTo(to);
             helper.setSubject("[ProLog] 비밀번호 재설정 인증 코드");
-            helper.setText("""
+            helper.setText(
+                    """
                     안녕하세요, ProLog입니다.
 
                     비밀번호 재설정 인증 코드를 알려드립니다.
@@ -57,7 +60,8 @@ public class EmailService {
 
                     해당 코드는 10분간 유효합니다.
                     본인이 요청하지 않으셨다면 이 메일을 무시해주세요.
-                    """.formatted(code));
+                    """
+                            .formatted(code));
             mailSender.send(message);
         } catch (MessagingException | java.io.UnsupportedEncodingException e) {
             throw new BadRequestException("이메일 전송에 실패했습니다.");

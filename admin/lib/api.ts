@@ -1,5 +1,13 @@
 import { clearAuth } from "./auth";
-import type { AdminExerciseResponse, AdminReportResponse, AdminWorkoutSessionResponse, LoginResponse, PageResponse, ReportStatus, UserResponse } from "./types";
+import type {
+  AdminExerciseResponse,
+  AdminReportResponse,
+  AdminWorkoutSessionResponse,
+  LoginResponse,
+  PageResponse,
+  ReportStatus,
+  UserResponse,
+} from "./types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 
@@ -36,9 +44,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
     if (!retryRes.ok) {
       const error = await retryRes.json().catch(() => ({}));
-      throw new Error(
-        (error as { message?: string }).message ?? `HTTP ${retryRes.status}`,
-      );
+      throw new Error((error as { message?: string }).message ?? `HTTP ${retryRes.status}`);
     }
 
     if (retryRes.status === 204) return undefined as T;
@@ -47,9 +53,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(
-      (error as { message?: string }).message ?? `HTTP ${res.status}`,
-    );
+    throw new Error((error as { message?: string }).message ?? `HTTP ${res.status}`);
   }
 
   if (res.status === 204) return undefined as T;
@@ -62,8 +66,7 @@ export const authApi = {
       method: "POST",
       body: JSON.stringify({ username, password }),
     }),
-  logout: () =>
-    request<void>("/api/auth/logout", { method: "POST" }),
+  logout: () => request<void>("/api/auth/logout", { method: "POST" }),
 };
 
 export const userApi = {
@@ -91,7 +94,13 @@ export const dashboardApi = {
 };
 
 export const sessionApi = {
-  getSessions: (params: { keyword?: string; from?: string; to?: string; page?: number; size?: number }) => {
+  getSessions: (params: {
+    keyword?: string;
+    from?: string;
+    to?: string;
+    page?: number;
+    size?: number;
+  }) => {
     const query = new URLSearchParams();
     if (params.keyword) query.set("keyword", params.keyword);
     if (params.from) query.set("from", params.from);
@@ -133,10 +142,7 @@ export const exerciseApi = {
       body: JSON.stringify(data),
     }),
 
-  update: (
-    id: number,
-    data: { name: string; bodyPart: string; partDetail?: string }
-  ) =>
+  update: (id: number, data: { name: string; bodyPart: string; partDetail?: string }) =>
     request<AdminExerciseResponse>(`/api/admin/exercises/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),

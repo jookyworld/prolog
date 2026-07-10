@@ -2,12 +2,11 @@ package com.back.domain.routine.routine.entity;
 
 import com.back.domain.user.user.entity.User;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Entity
@@ -28,18 +27,20 @@ public class Routine {
 
     @Column(nullable = false, length = 100)
     private String title;
+
     @Column(columnDefinition = "TEXT")
     private String description;
+
     @Column(nullable = false)
     private boolean active = true;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-
 
     public void activate() {
         this.active = true;

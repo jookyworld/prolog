@@ -8,7 +8,11 @@ import type {
 import type { PageResponse } from "../types/common";
 
 export const workoutApi = {
-  getSessions(page: number = 0, size: number = 20, bodyPart?: string): Promise<PageResponse<WorkoutSessionListItemRes>> {
+  getSessions(
+    page: number = 0,
+    size: number = 20,
+    bodyPart?: string,
+  ): Promise<PageResponse<WorkoutSessionListItemRes>> {
     const params = new URLSearchParams({ page: String(page), size: String(size) });
     if (bodyPart) params.append("bodyPart", bodyPart);
     return apiFetch(`/api/workouts/sessions?${params}`);
@@ -31,10 +35,7 @@ export const workoutApi = {
     });
   },
 
-  completeSession(
-    sessionId: number,
-    body: WorkoutSessionCompleteReq,
-  ): Promise<void> {
+  completeSession(sessionId: number, body: WorkoutSessionCompleteReq): Promise<void> {
     return apiFetch(`/api/workouts/sessions/${sessionId}/complete`, {
       method: "PATCH",
       body: JSON.stringify(body),

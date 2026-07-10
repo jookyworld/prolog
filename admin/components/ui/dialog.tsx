@@ -23,10 +23,7 @@ function Dialog({ open, onOpenChange, children }: DialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="fixed inset-0 bg-black/60"
-        onClick={() => onOpenChange(false)}
-      />
+      <div className="fixed inset-0 bg-black/60" onClick={() => onOpenChange(false)} />
       <div className="relative z-50">{children}</div>
     </div>
   );
@@ -41,7 +38,7 @@ function DialogContent({ className, children, onClose, ...props }: DialogContent
     <div
       className={cn(
         "relative w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-xl",
-        className
+        className,
       )}
       {...props}
     >
@@ -67,9 +64,7 @@ function DialogTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingEl
 }
 
 function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div className={cn("mt-6 flex justify-end gap-2", className)} {...props} />
-  );
+  return <div className={cn("mt-6 flex justify-end gap-2", className)} {...props} />;
 }
 
 export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter };

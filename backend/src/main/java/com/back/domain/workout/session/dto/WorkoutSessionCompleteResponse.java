@@ -2,16 +2,10 @@ package com.back.domain.workout.session.dto;
 
 import com.back.domain.routine.routine.entity.Routine;
 import com.back.domain.workout.session.entity.WorkoutSession;
-
 import java.time.LocalDateTime;
 
 public record WorkoutSessionCompleteResponse(
-        Long sessionId,
-        LocalDateTime startedAt,
-        LocalDateTime completedAt,
-        Long routineId,
-        String routineTitle
-) {
+        Long sessionId, LocalDateTime startedAt, LocalDateTime completedAt, Long routineId, String routineTitle) {
     public static WorkoutSessionCompleteResponse from(WorkoutSession session) {
         Routine routine = session.getRoutine();
         return new WorkoutSessionCompleteResponse(
@@ -19,8 +13,7 @@ public record WorkoutSessionCompleteResponse(
                 session.getStartedAt(),
                 session.getCompletedAt(),
                 routine != null ? routine.getId() : null,
-                getRoutineTitle(session)
-        );
+                getRoutineTitle(session));
     }
 
     private static String getRoutineTitle(WorkoutSession session) {

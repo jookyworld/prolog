@@ -68,9 +68,7 @@ export default function SignupScreen() {
         <View className="gap-8">
           <View className="items-center gap-2">
             <Text className="text-3xl font-bold text-white">회원가입</Text>
-            <Text className="text-sm text-muted-foreground">
-              {STEP_LABELS[step]}
-            </Text>
+            <Text className="text-sm text-muted-foreground">{STEP_LABELS[step]}</Text>
             <View className="flex-row justify-center gap-2 pt-2">
               {([1, 2, 3, 4] as const).map((s) => (
                 <View
@@ -81,9 +79,7 @@ export default function SignupScreen() {
             </View>
           </View>
 
-          {error ? (
-            <Text className="text-center text-sm text-red-400">{error}</Text>
-          ) : null}
+          {error ? <Text className="text-center text-sm text-red-400">{error}</Text> : null}
 
           {step === 1 ? (
             <TermsStep
@@ -136,9 +132,7 @@ export default function SignupScreen() {
           )}
 
           <View className="flex-row justify-center gap-1">
-            <Text className="text-sm text-muted-foreground">
-              이미 계정이 있으신가요?
-            </Text>
+            <Text className="text-sm text-muted-foreground">이미 계정이 있으신가요?</Text>
             <Link href="/(auth)/login">
               <Text className="text-sm text-primary">로그인</Text>
             </Link>
@@ -223,11 +217,7 @@ function TermsStep({ onNext }: { onNext: (marketingConsent: boolean) => void }) 
         />
       </View>
 
-      <Button
-        onPress={() => onNext(marketingAgreed)}
-        disabled={!allRequired}
-        className="w-full"
-      >
+      <Button onPress={() => onNext(marketingAgreed)} disabled={!allRequired} className="w-full">
         다음
       </Button>
 
@@ -361,9 +351,7 @@ function Step1Form({
             />
           )}
         />
-        {errors.username && (
-          <Text className="text-xs text-red-400">{errors.username.message}</Text>
-        )}
+        {errors.username && <Text className="text-xs text-red-400">{errors.username.message}</Text>}
       </View>
 
       <View className="gap-2">
@@ -382,9 +370,7 @@ function Step1Form({
             />
           )}
         />
-        {errors.password && (
-          <Text className="text-xs text-red-400">{errors.password.message}</Text>
-        )}
+        {errors.password && <Text className="text-xs text-red-400">{errors.password.message}</Text>}
       </View>
 
       <View className="gap-2">
@@ -404,9 +390,7 @@ function Step1Form({
             />
           )}
         />
-        {errors.email && (
-          <Text className="text-xs text-red-400">{errors.email.message}</Text>
-        )}
+        {errors.email && <Text className="text-xs text-red-400">{errors.email.message}</Text>}
       </View>
 
       <View className="gap-2">
@@ -415,22 +399,13 @@ function Step1Form({
           control={control}
           name="nickname"
           render={({ field: { onChange, onBlur, value } }) => (
-            <Input
-              placeholder="4~30자"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
+            <Input placeholder="4~30자" onBlur={onBlur} onChangeText={onChange} value={value} />
           )}
         />
-        {errors.nickname && (
-          <Text className="text-xs text-red-400">{errors.nickname.message}</Text>
-        )}
+        {errors.nickname && <Text className="text-xs text-red-400">{errors.nickname.message}</Text>}
       </View>
 
-      {submitError ? (
-        <Text className="text-center text-sm text-red-400">{submitError}</Text>
-      ) : null}
+      {submitError ? <Text className="text-center text-sm text-red-400">{submitError}</Text> : null}
 
       <View className="flex-row gap-3">
         <Button variant="outline" size="icon" onPress={onBack}>
@@ -535,9 +510,7 @@ function Step2Form({
   if (isVerified) {
     return (
       <View className="gap-4">
-        <Text className="text-sm text-muted-foreground">
-          {email} 인증이 완료되었습니다.
-        </Text>
+        <Text className="text-sm text-muted-foreground">{email} 인증이 완료되었습니다.</Text>
         <Button className="w-full" onPress={onNext}>
           다음
         </Button>
@@ -550,21 +523,12 @@ function Step2Form({
 
   return (
     <View className="gap-4">
-      <Text className="text-sm text-muted-foreground">
-        {email}로 인증 코드를 전송합니다.
-      </Text>
+      <Text className="text-sm text-muted-foreground">{email}로 인증 코드를 전송합니다.</Text>
 
       {!sent ? (
         <>
-          {sendError ? (
-            <Text className="text-center text-sm text-red-400">{sendError}</Text>
-          ) : null}
-          <Button
-            onPress={handleSend}
-            loading={isSending}
-            disabled={isSending}
-            className="w-full"
-          >
+          {sendError ? <Text className="text-center text-sm text-red-400">{sendError}</Text> : null}
+          <Button onPress={handleSend} loading={isSending} disabled={isSending} className="w-full">
             {isSending ? "전송 중..." : "인증 코드 전송"}
           </Button>
           <Button variant="outline" onPress={onBack} className="w-full">
@@ -590,9 +554,7 @@ function Step2Form({
                 />
               )}
             />
-            {errors.code && (
-              <Text className="text-xs text-red-400">{errors.code.message}</Text>
-            )}
+            {errors.code && <Text className="text-xs text-red-400">{errors.code.message}</Text>}
           </View>
 
           {verifyError ? (
@@ -625,9 +587,7 @@ function Step2Form({
             <TouchableOpacity onPress={handleResend} disabled={isResending}>
               <Text className="text-sm text-muted-foreground">
                 코드를 받지 못하셨나요?{" "}
-                <Text className="text-primary">
-                  {isResending ? "전송 중..." : "재전송"}
-                </Text>
+                <Text className="text-primary">{isResending ? "전송 중..." : "재전송"}</Text>
               </Text>
             </TouchableOpacity>
           </View>
@@ -669,9 +629,7 @@ function Step3Form({
               key={g}
               onPress={() => setValue("gender", g, { shouldValidate: true })}
               className={`h-12 flex-1 items-center justify-center rounded-xl border ${
-                gender === g
-                  ? "border-primary bg-primary"
-                  : "border-border bg-card"
+                gender === g ? "border-primary bg-primary" : "border-border bg-card"
               }`}
             >
               <Text
@@ -684,9 +642,7 @@ function Step3Form({
             </Pressable>
           ))}
         </View>
-        {errors.gender && (
-          <Text className="text-xs text-red-400">{errors.gender.message}</Text>
-        )}
+        {errors.gender && <Text className="text-xs text-red-400">{errors.gender.message}</Text>}
       </View>
 
       <View className="gap-2">
@@ -731,9 +687,7 @@ function Step3Form({
             />
           )}
         />
-        {errors.height && (
-          <Text className="text-xs text-red-400">{errors.height.message}</Text>
-        )}
+        {errors.height && <Text className="text-xs text-red-400">{errors.height.message}</Text>}
       </View>
 
       <View className="gap-2">
@@ -754,9 +708,7 @@ function Step3Form({
             />
           )}
         />
-        {errors.weight && (
-          <Text className="text-xs text-red-400">{errors.weight.message}</Text>
-        )}
+        {errors.weight && <Text className="text-xs text-red-400">{errors.weight.message}</Text>}
       </View>
 
       <View className="flex-row gap-3">

@@ -4,34 +4,12 @@ import com.back.domain.user.user.entity.Gender;
 import jakarta.validation.constraints.*;
 
 public record SignupRequest(
-        @NotBlank
-        @Size(min = 5, max = 20)
-        String username,
-
-        @NotBlank
-        @Size(min = 8, max = 30)
-        String password,
-
-        @NotBlank
-        @Email
-        String email,
-
-        @NotBlank
-        @Size(min = 4, max = 30)
-        String nickname,
-
+        @NotBlank @Size(min = 5, max = 20) String username,
+        @NotBlank @Size(min = 8, max = 30) String password,
+        @NotBlank @Email String email,
+        @NotBlank @Size(min = 4, max = 30) String nickname,
         Gender gender,
-
-        @Positive
-        double height,
-
-        @Positive
-        double weight,
-
+        @Positive double height,
+        @Positive double weight,
         boolean marketingConsent,
-
-        @Min(1930)
-        @Max(2016)
-        Integer birthYear
-) {
-}
+        @Min(1930) @Max(2016) Integer birthYear) {}

@@ -3,13 +3,7 @@ import { COLORS } from "@/lib/constants";
 import type { SharedRoutineListItem } from "@/lib/types/community";
 import type { BodyPart } from "@/lib/types/exercise";
 import { useFocusEffect, useRouter } from "expo-router";
-import {
-  ChevronLeft,
-  EllipsisVertical,
-  Eye,
-  MessageCircle,
-  Share2,
-} from "lucide-react-native";
+import { ChevronLeft, EllipsisVertical, Eye, MessageCircle, Share2 } from "lucide-react-native";
 import { useCallback, useRef, useState } from "react";
 import {
   ActionSheetIOS,
@@ -22,10 +16,7 @@ import {
   Text,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 const PAGE_SIZE = 20;
 
@@ -72,10 +63,7 @@ function RoutineCard({ routine, onPress, onDelete }: RoutineCardProps) {
   };
 
   return (
-    <Pressable
-      onPress={() => onPress(routine.id)}
-      className="rounded-2xl bg-card p-3"
-    >
+    <Pressable onPress={() => onPress(routine.id)} className="rounded-2xl bg-card p-3">
       {/* 날짜 + 메뉴 버튼 */}
       <View className="mb-2 flex-row items-center justify-between">
         <Text className="text-xs text-white/30">
@@ -95,10 +83,7 @@ function RoutineCard({ routine, onPress, onDelete }: RoutineCardProps) {
       </View>
 
       {/* 루틴 제목 */}
-      <Text
-        className="mb-1.5 ml-2 text-base font-bold text-white"
-        numberOfLines={1}
-      >
+      <Text className="mb-1.5 ml-2 text-base font-bold text-white" numberOfLines={1}>
         {routine.title}
       </Text>
 
@@ -117,10 +102,7 @@ function RoutineCard({ routine, onPress, onDelete }: RoutineCardProps) {
       <View className="flex-row items-center justify-between">
         <View className="flex-row flex-wrap items-center gap-1.5 ml-1">
           {bodyPartLabels.map((label) => (
-            <View
-              key={label}
-              className="rounded-full bg-primary/10 px-2 py-0.5"
-            >
+            <View key={label} className="rounded-full bg-primary/10 px-2 py-0.5">
               <Text className="text-xs font-medium text-primary">{label}</Text>
             </View>
           ))}
@@ -129,15 +111,11 @@ function RoutineCard({ routine, onPress, onDelete }: RoutineCardProps) {
         <View className="flex-row items-center gap-2.5">
           <View className="flex-row items-center gap-1">
             <Eye size={12} color={COLORS.mutedForeground} />
-            <Text className="text-xs text-white/40">
-              {formatNumber(routine.viewCount)}
-            </Text>
+            <Text className="text-xs text-white/40">{formatNumber(routine.viewCount)}</Text>
           </View>
           <View className="flex-row items-center gap-1">
             <MessageCircle size={12} color={COLORS.mutedForeground} />
-            <Text className="text-xs text-white/40">
-              {formatNumber(routine.commentCount)}
-            </Text>
+            <Text className="text-xs text-white/40">{formatNumber(routine.commentCount)}</Text>
           </View>
         </View>
       </View>
@@ -182,10 +160,7 @@ export default function MySharedRoutinesScreen() {
     setLoadingMore(true);
     try {
       const nextPage = page + 1;
-      const response = await communityApi.getMySharedRoutines(
-        nextPage,
-        PAGE_SIZE,
-      );
+      const response = await communityApi.getMySharedRoutines(nextPage, PAGE_SIZE);
       setRoutines((prev) => [...prev, ...response.content]);
       setPage(nextPage);
       setHasMore(!response.last);
@@ -206,10 +181,7 @@ export default function MySharedRoutinesScreen() {
   const handleScroll = useCallback(
     ({ nativeEvent }: { nativeEvent: any }) => {
       const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-      if (
-        layoutMeasurement.height + contentOffset.y >=
-        contentSize.height - 300
-      ) {
+      if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 300) {
         loadMore();
       }
     },
