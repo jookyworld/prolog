@@ -22,11 +22,13 @@ npm run dev   # http://localhost:3001
 ## 환경 변수
 
 `admin/.env.local` (로컬 개발용):
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8080
 ```
 
 프로덕션은 Vercel 환경 변수에서 관리:
+
 ```
 NEXT_PUBLIC_API_URL=https://api.prolog.jooky.site
 ```
@@ -84,35 +86,36 @@ admin/
 
 ### 대시보드
 
-| Method | URL | 설명 |
-|--------|-----|------|
-| `GET` | `/api/admin/dashboard/stats` | 전체 유저 수, 공식 종목 수, 미처리 신고 수, 이번 달 세션 수 |
+| Method | URL                          | 설명                                                        |
+| ------ | ---------------------------- | ----------------------------------------------------------- |
+| `GET`  | `/api/admin/dashboard/stats` | 전체 유저 수, 공식 종목 수, 미처리 신고 수, 이번 달 세션 수 |
 
 ### 유저 관리
 
-| Method | URL | 설명 |
-|--------|-----|------|
-| `GET` | `/api/admin/users` | 유저 목록 |
-| `GET` | `/api/admin/users/{id}` | 유저 상세 조회 |
+| Method | URL                     | 설명           |
+| ------ | ----------------------- | -------------- |
+| `GET`  | `/api/admin/users`      | 유저 목록      |
+| `GET`  | `/api/admin/users/{id}` | 유저 상세 조회 |
 
 **Query Parameters (GET /users)**
 
-| 파라미터 | 타입 | 설명 |
-|---------|------|------|
-| `keyword` | string | 닉네임 / 아이디 / 이메일 검색 |
-| `role` | `USER` \| `ADMIN` | 역할 필터 (생략 시 전체) |
-| `page` | number | 0부터 시작 (default: 0) |
-| `size` | number | 페이지 크기 (default: 20) |
+| 파라미터  | 타입              | 설명                          |
+| --------- | ----------------- | ----------------------------- |
+| `keyword` | string            | 닉네임 / 아이디 / 이메일 검색 |
+| `role`    | `USER` \| `ADMIN` | 역할 필터 (생략 시 전체)      |
+| `page`    | number            | 0부터 시작 (default: 0)       |
+| `size`    | number            | 페이지 크기 (default: 20)     |
 
 ### 운동 종목 관리
 
-| Method | URL | 설명 |
-|--------|-----|------|
-| `GET` | `/api/admin/exercises` | 전체 종목 목록 |
-| `POST` | `/api/admin/exercises` | 공식 종목 추가 |
-| `PUT` | `/api/admin/exercises/{id}` | 공식 종목 수정 (커스텀 종목 수정 불가) |
+| Method | URL                         | 설명                                   |
+| ------ | --------------------------- | -------------------------------------- |
+| `GET`  | `/api/admin/exercises`      | 전체 종목 목록                         |
+| `POST` | `/api/admin/exercises`      | 공식 종목 추가                         |
+| `PUT`  | `/api/admin/exercises/{id}` | 공식 종목 수정 (커스텀 종목 수정 불가) |
 
 **Request Body (POST / PUT)**
+
 ```json
 {
   "name": "벤치프레스",
@@ -125,22 +128,23 @@ admin/
 
 ### 신고 관리
 
-| Method | URL | 설명 |
-|--------|-----|------|
-| `GET` | `/api/admin/reports` | 신고 목록 |
-| `PATCH` | `/api/admin/reports/{id}/status` | 신고 상태 변경 |
+| Method   | URL                                  | 설명                                                 |
+| -------- | ------------------------------------ | ---------------------------------------------------- |
+| `GET`    | `/api/admin/reports`                 | 신고 목록                                            |
+| `PATCH`  | `/api/admin/reports/{id}/status`     | 신고 상태 변경                                       |
 | `DELETE` | `/api/admin/community/routines/{id}` | 공유 루틴 삭제 → 해당 대상의 모든 신고 자동 RESOLVED |
-| `DELETE` | `/api/admin/community/comments/{id}` | 댓글 삭제 → 해당 대상의 모든 신고 자동 RESOLVED |
+| `DELETE` | `/api/admin/community/comments/{id}` | 댓글 삭제 → 해당 대상의 모든 신고 자동 RESOLVED      |
 
 **Query Parameters (GET /reports)**
 
-| 파라미터 | 타입 | 설명 |
-|---------|------|------|
+| 파라미터 | 타입                                   | 설명                     |
+| -------- | -------------------------------------- | ------------------------ |
 | `status` | `PENDING` \| `RESOLVED` \| `DISMISSED` | 상태 필터 (생략 시 전체) |
-| `page` | number | default: 0 |
-| `size` | number | default: 20 |
+| `page`   | number                                 | default: 0               |
+| `size`   | number                                 | default: 20              |
 
 **Request Body (PATCH /reports/{id}/status)**
+
 ```json
 { "status": "DISMISSED" }
 ```
@@ -157,29 +161,29 @@ RESOLVED → 변경 불가       (콘텐츠 이미 삭제됨)
 
 ### 세션 조회
 
-| Method | URL | 설명 |
-|--------|-----|------|
-| `GET` | `/api/admin/sessions` | 완료된 워크아웃 세션 목록 |
+| Method | URL                   | 설명                      |
+| ------ | --------------------- | ------------------------- |
+| `GET`  | `/api/admin/sessions` | 완료된 워크아웃 세션 목록 |
 
 **Query Parameters**
 
-| 파라미터 | 타입 | 설명 |
-|---------|------|------|
-| `keyword` | string | 닉네임 / 아이디 검색 |
-| `from` | date (YYYY-MM-DD) | 조회 시작일 |
-| `to` | date (YYYY-MM-DD) | 조회 종료일 |
-| `page` | number | default: 0 |
-| `size` | number | default: 20 |
+| 파라미터  | 타입              | 설명                 |
+| --------- | ----------------- | -------------------- |
+| `keyword` | string            | 닉네임 / 아이디 검색 |
+| `from`    | date (YYYY-MM-DD) | 조회 시작일          |
+| `to`      | date (YYYY-MM-DD) | 조회 종료일          |
+| `page`    | number            | default: 0           |
+| `size`    | number            | default: 20          |
 
 ---
 
 ## 구현 현황
 
-| 단계 | 기능 | 상태 |
-|------|------|------|
-| 1 | 프로젝트 세팅 + 로그인 | ✅ 완료 |
-| 2 | 운동 종목 관리 | ✅ 완료 |
-| 3 | 유저 관리 | ✅ 완료 |
-| 4 | 신고 관리 | ✅ 완료 |
-| 5 | 대시보드 통계 | ✅ 완료 |
-| - | 세션 조회 | ✅ 완료 |
+| 단계 | 기능                   | 상태    |
+| ---- | ---------------------- | ------- |
+| 1    | 프로젝트 세팅 + 로그인 | ✅ 완료 |
+| 2    | 운동 종목 관리         | ✅ 완료 |
+| 3    | 유저 관리              | ✅ 완료 |
+| 4    | 신고 관리              | ✅ 완료 |
+| 5    | 대시보드 통계          | ✅ 완료 |
+| -    | 세션 조회              | ✅ 완료 |

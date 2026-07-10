@@ -3,7 +3,6 @@ package com.back.domain.user.user.dto;
 import com.back.domain.user.user.entity.Gender;
 import com.back.domain.user.user.entity.Role;
 import com.back.domain.user.user.entity.User;
-
 import java.time.LocalDateTime;
 
 public record UserResponse(
@@ -17,8 +16,7 @@ public record UserResponse(
         Role role,
         LocalDateTime createdAt,
         Integer birthYear,
-        LocalDateTime marketingConsentedAt
-) {
+        LocalDateTime marketingConsentedAt) {
 
     public static UserResponse from(User user) {
         return new UserResponse(
@@ -32,7 +30,6 @@ public record UserResponse(
                 user.getRole(),
                 user.getCreatedAt(),
                 user.getBirthYear(),
-                user.getMarketingConsentedAt()
-        );
+                user.getMarketingConsentedAt());
     }
 }

@@ -18,7 +18,7 @@ export default function TabsLayout() {
       const targetPath = `/(tabs)/workout/session`;
 
       // If already on workout session screen, don't push again
-      if (pathname.includes('/workout/session')) {
+      if (pathname.includes("/workout/session")) {
         return;
       }
 
@@ -31,9 +31,7 @@ export default function TabsLayout() {
   return (
     <>
       <Tabs
-        tabBar={(props) => (
-          <CustomTabBar {...props} onPressFAB={handlePressFAB} />
-        )}
+        tabBar={(props) => <CustomTabBar {...props} onPressFAB={handlePressFAB} />}
         screenOptions={{
           headerShown: false,
         }}
@@ -74,10 +72,7 @@ export default function TabsLayout() {
         />
       </Tabs>
 
-      <WorkoutStartSheet
-        visible={sheetVisible}
-        onClose={() => setSheetVisible(false)}
-      />
+      <WorkoutStartSheet visible={sheetVisible} onClose={() => setSheetVisible(false)} />
     </>
   );
 }

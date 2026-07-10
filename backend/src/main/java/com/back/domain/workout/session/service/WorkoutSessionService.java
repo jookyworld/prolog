@@ -12,30 +12,28 @@ import com.back.domain.routine.routineItem.dto.RoutineItemCreateRequest;
 import com.back.domain.user.user.entity.User;
 import com.back.domain.user.user.repository.UserRepository;
 import com.back.domain.workout.session.dto.*;
-import com.back.global.dto.PageResponse;
-import org.springframework.data.domain.PageRequest;
 import com.back.domain.workout.session.entity.WorkoutSession;
 import com.back.domain.workout.session.repository.WorkoutSessionRepository;
 import com.back.domain.workout.sessionexercise.entity.WorkoutSessionExercise;
 import com.back.domain.workout.sessionexercise.repository.WorkoutSessionExerciseRepository;
-import com.back.domain.workout.set.dto.WorkoutSetCompleteRequest;
 import com.back.domain.workout.set.entity.WorkoutSet;
 import com.back.domain.workout.set.repository.WorkoutSetRepository;
+import com.back.global.dto.PageResponse;
 import com.back.global.exception.type.BadRequestException;
 import com.back.global.exception.type.ForbiddenException;
 import com.back.global.exception.type.NotFoundException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -51,8 +49,8 @@ public class WorkoutSessionService {
     @Transactional
     public WorkoutSessionResponse startSession(Long userId, Long routineId) {
         workoutSessionRepository.findByUser_IdAndCompletedAtIsNull(userId).ifPresent(existing -> {
-            boolean isAbandoned = existing.getStartedAt()
-                    .isBefore(LocalDateTime.now().minusHours(24));
+            boolean isAbandoned =
+                    existing.getStartedAt().isBefore(LocalDateTime.now().minusHours(24));
             if (isAbandoned) {
                 existing.complete(LocalDateTime.now());
             } else {
@@ -60,13 +58,11 @@ public class WorkoutSessionService {
             }
         });
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
 
         Routine routine = null;
         if (routineId != null) {
-            routine = routineRepository.findById(routineId)
-                    .orElseThrow(() -> new NotFoundException("존재하지 않는 루틴입니다."));
+            routine = routineRepository.findById(routineId).orElseThrow(() -> new NotFoundException("존재하지 않는 루틴입니다."));
 
             if (!routine.getUser().getId().equals(userId)) {
                 throw new ForbiddenException("루틴 소유자가 아닙니다.");
@@ -81,14 +77,17 @@ public class WorkoutSessionService {
 
     @Transactional(readOnly = true)
     public WorkoutSessionResponse getActiveSession(Long userId) {
-        return workoutSessionRepository.findByUser_IdAndCompletedAtIsNull(userId)
+        return workoutSessionRepository
+                .findByUser_IdAndCompletedAtIsNull(userId)
                 .map(WorkoutSessionResponse::from)
                 .orElse(null);
     }
 
     @Transactional
-    public WorkoutSessionCompleteResponse completeSession(Long userId, Long sessionId, WorkoutSessionCompleteRequest request) {
-        WorkoutSession workoutSession = workoutSessionRepository.findById(sessionId)
+    public WorkoutSessionCompleteResponse completeSession(
+            Long userId, Long sessionId, WorkoutSessionCompleteRequest request) {
+        WorkoutSession workoutSession = workoutSessionRepository
+                .findById(sessionId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 세션입니다."));
 
         if (!workoutSession.getUser().getId().equals(userId)) {
@@ -99,12 +98,13 @@ public class WorkoutSessionService {
             return WorkoutSessionCompleteResponse.from(workoutSession);
         }
 
-        if (request == null || request.exercises() == null || request.exercises().isEmpty()) {
+        if (request == null
+                || request.exercises() == null
+                || request.exercises().isEmpty()) {
             throw new BadRequestException("세트 기록이 없습니다.");
         }
 
-        WorkoutCompleteAction action = request.action() == null ?
-                WorkoutCompleteAction.RECORD_ONLY : request.action();
+        WorkoutCompleteAction action = request.action() == null ? WorkoutCompleteAction.RECORD_ONLY : request.action();
 
         boolean hasRoutine = workoutSession.getRoutine() != null;
 
@@ -114,8 +114,9 @@ public class WorkoutSessionService {
             throw new BadRequestException("루틴 기반 세션에서는 새로운 루틴을 생성할 수 없습니다.");
         }
 
-        if (!hasRoutine && (action == WorkoutCompleteAction.DETACH_AND_RECORD
-                || action == WorkoutCompleteAction.UPDATE_ROUTINE_AND_RECORD)) {
+        if (!hasRoutine
+                && (action == WorkoutCompleteAction.DETACH_AND_RECORD
+                        || action == WorkoutCompleteAction.UPDATE_ROUTINE_AND_RECORD)) {
             throw new BadRequestException("자유 운동 세션에서는 사용할 수 없는 액션입니다.");
         }
 
@@ -126,7 +127,7 @@ public class WorkoutSessionService {
         workoutSession.complete(LocalDateTime.now());
 
         switch (action) {
-            case RECORD_ONLY -> { }
+            case RECORD_ONLY -> {}
             case CREATE_ROUTINE_AND_RECORD -> {
                 String routineTitle = request.routineTitle();
                 if (routineTitle == null || routineTitle.isBlank()) {
@@ -148,7 +149,8 @@ public class WorkoutSessionService {
 
     @Transactional
     public void cancelSession(Long userId, Long sessionId) {
-        WorkoutSession workoutSession = workoutSessionRepository.findById(sessionId)
+        WorkoutSession workoutSession = workoutSessionRepository
+                .findById(sessionId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 세션입니다."));
 
         if (!workoutSession.getUser().getId().equals(userId)) {
@@ -164,7 +166,8 @@ public class WorkoutSessionService {
 
     @Transactional
     public void deleteSession(Long userId, Long sessionId) {
-        WorkoutSession workoutSession = workoutSessionRepository.findById(sessionId)
+        WorkoutSession workoutSession = workoutSessionRepository
+                .findById(sessionId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 세션입니다."));
 
         if (!workoutSession.getUser().getId().equals(userId)) {
@@ -179,33 +182,42 @@ public class WorkoutSessionService {
     }
 
     @Transactional(readOnly = true)
-    public Page<WorkoutSessionListItemResponse> getWorkoutSessions(Long userId, String type, String bodyPart, Pageable pageable) {
+    public Page<WorkoutSessionListItemResponse> getWorkoutSessions(
+            Long userId, String type, String bodyPart, Pageable pageable) {
         Page<WorkoutSession> sessions;
         if (bodyPart != null && !bodyPart.isBlank()) {
             String bodyPartName = BodyPart.fromLabel(bodyPart).name();
-            sessions = workoutSessionRepository.findByUser_IdAndBodyPartOrderByCompletedAtDesc(userId, bodyPartName, pageable);
+            sessions = workoutSessionRepository.findByUser_IdAndBodyPartOrderByCompletedAtDesc(
+                    userId, bodyPartName, pageable);
         } else {
             sessions = switch (type == null ? "all" : type) {
-                case "routine" -> workoutSessionRepository.findByUser_IdAndCompletedAtIsNotNullAndRoutineIsNotNullOrderByCompletedAtDesc(userId, pageable);
-                case "free" -> workoutSessionRepository.findByUser_IdAndCompletedAtIsNotNullAndRoutineIsNullOrderByCompletedAtDesc(userId, pageable);
-                default -> workoutSessionRepository.findByUser_IdAndCompletedAtIsNotNullOrderByCompletedAtDesc(userId, pageable);
+                case "routine" -> workoutSessionRepository
+                        .findByUser_IdAndCompletedAtIsNotNullAndRoutineIsNotNullOrderByCompletedAtDesc(
+                                userId, pageable);
+                case "free" -> workoutSessionRepository
+                        .findByUser_IdAndCompletedAtIsNotNullAndRoutineIsNullOrderByCompletedAtDesc(userId, pageable);
+                default -> workoutSessionRepository.findByUser_IdAndCompletedAtIsNotNullOrderByCompletedAtDesc(
+                        userId, pageable);
             };
         }
 
-        List<Long> sessionIds = sessions.getContent().stream().map(WorkoutSession::getId).toList();
-        Map<Long, List<BodyPart>> bodyPartsMap = sessionIds.isEmpty() ? Map.of() :
-                workoutSessionExerciseRepository.findBodyPartsBySessionIds(sessionIds).stream()
+        List<Long> sessionIds =
+                sessions.getContent().stream().map(WorkoutSession::getId).toList();
+        Map<Long, List<BodyPart>> bodyPartsMap = sessionIds.isEmpty()
+                ? Map.of()
+                : workoutSessionExerciseRepository.findBodyPartsBySessionIds(sessionIds).stream()
                         .collect(Collectors.groupingBy(
                                 row -> (Long) row[0],
-                                Collectors.mapping(row -> (BodyPart) row[1], Collectors.toList())
-                        ));
+                                Collectors.mapping(row -> (BodyPart) row[1], Collectors.toList())));
 
-        return sessions.map(s -> WorkoutSessionListItemResponse.from(s, bodyPartsMap.getOrDefault(s.getId(), List.of())));
+        return sessions.map(
+                s -> WorkoutSessionListItemResponse.from(s, bodyPartsMap.getOrDefault(s.getId(), List.of())));
     }
 
     @Transactional(readOnly = true)
     public WorkoutSessionDetailResponse getWorkoutSessionDetail(Long userId, Long sessionId) {
-        WorkoutSession session = workoutSessionRepository.findById(sessionId)
+        WorkoutSession session = workoutSessionRepository
+                .findById(sessionId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 세션입니다."));
 
         if (!session.getUser().getId().equals(userId)) {
@@ -232,25 +244,25 @@ public class WorkoutSessionService {
         List<WorkoutSessionExercise> sessionExercises =
                 workoutSessionExerciseRepository.findByWorkoutSession_IdOrderByOrderInSessionAsc(session.getId());
 
-        List<Long> sessionExerciseIds = sessionExercises.stream().map(WorkoutSessionExercise::getId).toList();
+        List<Long> sessionExerciseIds =
+                sessionExercises.stream().map(WorkoutSessionExercise::getId).toList();
 
-        Map<Long, List<WorkoutSet>> setsMap = sessionExerciseIds.isEmpty() ? Map.of() :
-                workoutSetRepository.findByWorkoutSessionExercise_IdInOrderBySetNumberAsc(sessionExerciseIds)
-                        .stream()
-                        .collect(Collectors.groupingBy(ws -> ws.getWorkoutSessionExercise().getId()));
+        Map<Long, List<WorkoutSet>> setsMap = sessionExerciseIds.isEmpty()
+                ? Map.of()
+                : workoutSetRepository.findByWorkoutSessionExercise_IdInOrderBySetNumberAsc(sessionExerciseIds).stream()
+                        .collect(Collectors.groupingBy(
+                                ws -> ws.getWorkoutSessionExercise().getId()));
 
         List<WorkoutExerciseDetailResponse> exercises = sessionExercises.stream()
                 .map(se -> {
-                    List<WorkoutSetDetailResponse> sets = setsMap.getOrDefault(se.getId(), List.of())
-                            .stream()
+                    List<WorkoutSetDetailResponse> sets = setsMap.getOrDefault(se.getId(), List.of()).stream()
                             .map(WorkoutSetDetailResponse::from)
                             .toList();
                     return new WorkoutExerciseDetailResponse(
                             se.getExercise().getId(),
                             se.getExerciseName(),
                             se.getBodyPartSnapshot().getLabel(),
-                            sets
-                    );
+                            sets);
                 })
                 .toList();
 
@@ -271,7 +283,9 @@ public class WorkoutSessionService {
         }
 
         // exercise 일괄 조회
-        List<Long> exerciseIds = requests.stream().map(WorkoutExerciseCompleteRequest::exerciseId).toList();
+        List<Long> exerciseIds = requests.stream()
+                .map(WorkoutExerciseCompleteRequest::exerciseId)
+                .toList();
         List<Exercise> exercises = exerciseRepository.findAllById(exerciseIds);
         if (exercises.size() != exerciseIds.size()) {
             throw new NotFoundException("존재하지 않는 운동 종목이 포함되어 있습니다.");
@@ -329,10 +343,7 @@ public class WorkoutSessionService {
 
         List<RoutineItemCreateRequest> routineItems = summaries.stream()
                 .map(s -> new RoutineItemCreateRequest(
-                        s.getExerciseId(),
-                        s.getSetCount().intValue(),
-                        0
-                ))
+                        s.getExerciseId(), s.getSetCount().intValue(), 0))
                 .toList();
 
         RoutineCreateRequest req = new RoutineCreateRequest(routineTitle, null, routineItems);
@@ -352,17 +363,11 @@ public class WorkoutSessionService {
 
         List<RoutineItemCreateRequest> routineItems = summaries.stream()
                 .map(s -> new RoutineItemCreateRequest(
-                        s.getExerciseId(),
-                        s.getSetCount().intValue(),
-                        0
-                ))
+                        s.getExerciseId(), s.getSetCount().intValue(), 0))
                 .toList();
 
-        RoutineUpdateRequest updateRequest = new RoutineUpdateRequest(
-                routine.getTitle(),
-                routine.getDescription(),
-                routineItems
-        );
+        RoutineUpdateRequest updateRequest =
+                new RoutineUpdateRequest(routine.getTitle(), routine.getDescription(), routineItems);
 
         routineService.updateRoutine(userId, routine.getId(), updateRequest);
     }
@@ -370,8 +375,8 @@ public class WorkoutSessionService {
     @Transactional(readOnly = true)
     public PageResponse<AdminWorkoutSessionResponse> adminGetSessions(
             String keyword, LocalDateTime from, LocalDateTime to, int page, int size) {
-        Page<WorkoutSession> sessions = workoutSessionRepository.findAdminSessions(
-                keyword, from, to, PageRequest.of(page, size));
+        Page<WorkoutSession> sessions =
+                workoutSessionRepository.findAdminSessions(keyword, from, to, PageRequest.of(page, size));
         return PageResponse.from(sessions.map(AdminWorkoutSessionResponse::from));
     }
 }

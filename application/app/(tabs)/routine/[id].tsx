@@ -3,12 +3,7 @@ import { routineApi } from "@/lib/api/routine";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import type { RoutineDetail } from "@/lib/types/routine";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import {
-  ChevronLeft,
-  EllipsisVertical,
-  Play,
-  Share2,
-} from "lucide-react-native";
+import { ChevronLeft, EllipsisVertical, Play, Share2 } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -20,10 +15,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function RoutineDetailScreen() {
   const router = useRouter();
@@ -48,9 +40,7 @@ export default function RoutineDetailScreen() {
       const data = await routineApi.getRoutineDetail(Number(id));
       setRoutine(data);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "데이터를 불러오지 못했습니다.",
-      );
+      setError(err instanceof Error ? err.message : "데이터를 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
@@ -74,9 +64,7 @@ export default function RoutineDetailScreen() {
             await routineApi.deleteRoutine(Number(id));
             router.back();
           } catch {
-            Alert.alert(
-              "루틴을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.",
-            );
+            Alert.alert("루틴을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
           } finally {
             setActionLoading(false);
           }
@@ -199,20 +187,12 @@ export default function RoutineDetailScreen() {
         <Text className="mb-2 text-lg font-semibold text-white">
           {error ?? "루틴을 찾을 수 없어요"}
         </Text>
-        <Text className="mb-6 text-sm text-white/50">
-          삭제되었거나 존재하지 않는 루틴입니다.
-        </Text>
+        <Text className="mb-6 text-sm text-white/50">삭제되었거나 존재하지 않는 루틴입니다.</Text>
         <View className="flex-row gap-3">
-          <Pressable
-            onPress={fetchDetail}
-            className="rounded-full bg-white/10 px-5 py-2.5"
-          >
+          <Pressable onPress={fetchDetail} className="rounded-full bg-white/10 px-5 py-2.5">
             <Text className="text-sm font-medium text-white">다시 시도</Text>
           </Pressable>
-          <Pressable
-            onPress={() => router.back()}
-            className="rounded-full bg-primary px-5 py-2.5"
-          >
+          <Pressable onPress={() => router.back()} className="rounded-full bg-primary px-5 py-2.5">
             <Text className="text-sm font-medium text-white">목록으로</Text>
           </Pressable>
         </View>
@@ -220,9 +200,7 @@ export default function RoutineDetailScreen() {
     );
   }
 
-  const sortedItems = [...routine.routineItems].sort(
-    (a, b) => a.orderInRoutine - b.orderInRoutine,
-  );
+  const sortedItems = [...routine.routineItems].sort((a, b) => a.orderInRoutine - b.orderInRoutine);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
@@ -235,17 +213,11 @@ export default function RoutineDetailScreen() {
           >
             <ChevronLeft size={24} color={COLORS.white} />
           </Pressable>
-          <Text
-            className="flex-1 text-2xl font-bold text-white"
-            numberOfLines={1}
-          >
+          <Text className="flex-1 text-2xl font-bold text-white" numberOfLines={1}>
             {routine.title}
           </Text>
         </View>
-        <Pressable
-          onPress={handleSettingsMenu}
-          className="h-10 w-10 items-center justify-center"
-        >
+        <Pressable onPress={handleSettingsMenu} className="h-10 w-10 items-center justify-center">
           <EllipsisVertical size={20} color={COLORS.white} />
         </Pressable>
       </View>
@@ -255,25 +227,19 @@ export default function RoutineDetailScreen() {
         {(routine.description || !routine.active) && (
           <View className="mb-7 rounded-xl border border-white/10 bg-card p-4">
             <View className="mb-3 flex-row items-center justify-between">
-              <Text className="text-xs font-semibold text-white/40">
-                루틴 정보
-              </Text>
+              <Text className="text-xs font-semibold text-white/40">루틴 정보</Text>
               {routine.active ? (
                 <View className="rounded-md bg-primary/15 px-2.5 py-1">
                   <Text className="text-xs font-medium text-primary">활성</Text>
                 </View>
               ) : (
                 <View className="rounded-md bg-white/10 px-2.5 py-1">
-                  <Text className="text-xs font-medium text-white/50">
-                    보관됨
-                  </Text>
+                  <Text className="text-xs font-medium text-white/50">보관됨</Text>
                 </View>
               )}
             </View>
             {routine.description ? (
-              <Text className="text-sm leading-5 text-white/60">
-                {routine.description}
-              </Text>
+              <Text className="text-sm leading-5 text-white/60">{routine.description}</Text>
             ) : null}
           </View>
         )}
@@ -294,9 +260,7 @@ export default function RoutineDetailScreen() {
               <View className="flex-row items-start justify-between gap-3">
                 <View className="flex-1 flex-row items-center gap-3">
                   <View className="h-9 w-9 items-center justify-center rounded-xl bg-white/10">
-                    <Text className="text-base font-bold text-white">
-                      {idx + 1}
-                    </Text>
+                    <Text className="text-base font-bold text-white">{idx + 1}</Text>
                   </View>
                   <View className="flex-1">
                     <Text className="mb-1 text-lg font-semibold text-white">
@@ -304,30 +268,20 @@ export default function RoutineDetailScreen() {
                     </Text>
                     <View className="flex-row items-center gap-1.5">
                       <View className="rounded-md bg-white/10 px-2 py-0.5">
-                        <Text className="text-xs text-white/60">
-                          {item.bodyPart}
-                        </Text>
+                        <Text className="text-xs text-white/60">{item.bodyPart}</Text>
                       </View>
                       {item.partDetail ? (
                         <View className="rounded-md bg-white/10 px-2 py-0.5">
-                          <Text className="text-xs text-white/60">
-                            {item.partDetail}
-                          </Text>
+                          <Text className="text-xs text-white/60">{item.partDetail}</Text>
                         </View>
                       ) : null}
-                      <Text className="text-[11px] text-white/25">
-                        • 휴식 {item.restSeconds}초
-                      </Text>
+                      <Text className="text-[11px] text-white/25">• 휴식 {item.restSeconds}초</Text>
                     </View>
                   </View>
                 </View>
                 <View className="items-center justify-center rounded-xl bg-primary/20 px-3 py-2">
-                  <Text className="text-lg font-bold text-primary">
-                    {item.sets}
-                  </Text>
-                  <Text className="text-[10px] font-medium text-primary/80">
-                    세트
-                  </Text>
+                  <Text className="text-lg font-bold text-primary">{item.sets}</Text>
+                  <Text className="text-[10px] font-medium text-primary/80">세트</Text>
                 </View>
               </View>
             </View>
@@ -368,9 +322,7 @@ export default function RoutineDetailScreen() {
             style={{ paddingBottom: insets.bottom + 20 }}
           >
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-xl font-bold text-white">
-                커뮤니티에 공유
-              </Text>
+              <Text className="text-xl font-bold text-white">커뮤니티에 공유</Text>
               <Pressable onPress={() => setShareModalVisible(false)}>
                 <Text className="text-base text-white/50">취소</Text>
               </Pressable>
@@ -408,9 +360,7 @@ export default function RoutineDetailScreen() {
               ) : (
                 <>
                   <Share2 size={18} color={COLORS.white} />
-                  <Text className="text-base font-semibold text-white">
-                    공유하기
-                  </Text>
+                  <Text className="text-base font-semibold text-white">공유하기</Text>
                 </>
               )}
             </Pressable>

@@ -17,9 +17,7 @@ export const communityApi = {
   ): Promise<PageResponse<SharedRoutineListItem>> => {
     const params = new URLSearchParams({ page: String(page), size: String(size), sort });
     if (keyword?.trim()) params.append("keyword", keyword.trim());
-    return apiFetch<PageResponse<SharedRoutineListItem>>(
-      `/api/community/routines?${params}`,
-    );
+    return apiFetch<PageResponse<SharedRoutineListItem>>(`/api/community/routines?${params}`);
   },
 
   // 공유 루틴 상세 조회
@@ -42,9 +40,7 @@ export const communityApi = {
   },
 
   // 공유 루틴 생성
-  createSharedRoutine: async (
-    data: CreateSharedRoutineRequest,
-  ): Promise<SharedRoutineDetail> => {
+  createSharedRoutine: async (data: CreateSharedRoutineRequest): Promise<SharedRoutineDetail> => {
     return apiFetch<SharedRoutineDetail>(`/api/community/routines`, {
       method: "POST",
       body: JSON.stringify(data),
@@ -74,9 +70,7 @@ export const communityApi = {
     size: number = 20,
   ): Promise<PageResponse<SharedRoutineListItem>> => {
     const params = new URLSearchParams({ page: String(page), size: String(size) });
-    return apiFetch<PageResponse<SharedRoutineListItem>>(
-      `/api/community/routines/my?${params}`,
-    );
+    return apiFetch<PageResponse<SharedRoutineListItem>>(`/api/community/routines/my?${params}`);
   },
 
   // 공유 루틴 삭제

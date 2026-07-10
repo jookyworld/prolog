@@ -1,8 +1,7 @@
 package com.back.global.dto;
 
-import org.springframework.data.domain.Page;
-
 import java.util.List;
+import org.springframework.data.domain.Page;
 
 /**
  * 안정적인 페이지네이션 응답을 위한 DTO
@@ -16,8 +15,7 @@ public record PageResponse<T>(
         int totalPages,
         boolean first,
         boolean last,
-        boolean empty
-) {
+        boolean empty) {
     /**
      * Spring Data의 Page 객체를 PageResponse로 변환
      *
@@ -33,7 +31,6 @@ public record PageResponse<T>(
                 page.getTotalPages(),
                 page.isFirst(),
                 page.isLast(),
-                page.isEmpty()
-        );
+                page.isEmpty());
     }
 }

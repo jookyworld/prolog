@@ -30,8 +30,12 @@ export default function TermsPage() {
 
       <footer className="border-t border-white/10 px-6 py-6">
         <div className="max-w-3xl mx-auto flex gap-6">
-          <Link href="/terms" className="text-sm text-primary">서비스 이용약관</Link>
-          <Link href="/privacy" className="text-sm text-muted hover:text-white transition-colors">개인정보 처리방침</Link>
+          <Link href="/terms" className="text-sm text-primary">
+            서비스 이용약관
+          </Link>
+          <Link href="/privacy" className="text-sm text-muted hover:text-white transition-colors">
+            개인정보 처리방침
+          </Link>
         </div>
       </footer>
     </div>

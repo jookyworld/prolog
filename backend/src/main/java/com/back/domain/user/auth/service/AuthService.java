@@ -23,9 +23,9 @@ import com.back.global.exception.type.BadRequestException;
 import com.back.global.exception.type.NotFoundException;
 import com.back.global.mail.EmailService;
 import com.back.global.mail.EmailVerificationService;
-import java.time.LocalDateTime;
 import com.back.global.security.token.PasswordResetTokenService;
 import com.back.global.security.token.RefreshTokenService;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -52,8 +52,7 @@ public class AuthService {
         return new CheckDuplicatesResponse(
                 !userRepository.existsByUsername(dto.username()),
                 !userRepository.existsByEmail(dto.email()),
-                !userRepository.existsByNickname(dto.nickname())
-        );
+                !userRepository.existsByNickname(dto.nickname()));
     }
 
     @Transactional(readOnly = true)
@@ -109,7 +108,8 @@ public class AuthService {
     }
 
     public User login(LoginRequest dto) {
-        User user = userRepository.findByUsername(dto.username())
+        User user = userRepository
+                .findByUsername(dto.username())
                 .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 올바르지 않습니다"));
 
         if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
@@ -138,8 +138,7 @@ public class AuthService {
             throw new BadRequestException("인증 코드가 올바르지 않거나 만료되었습니다.");
         }
 
-        User user = userRepository.findByEmail(dto.email())
-                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+        User user = userRepository.findByEmail(dto.email()).orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
         user.resetPassword(passwordEncoder.encode(dto.newPassword()));
         passwordResetTokenService.delete(dto.email());

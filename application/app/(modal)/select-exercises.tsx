@@ -18,10 +18,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function SelectExercisesScreen() {
   const router = useRouter();
@@ -45,9 +42,7 @@ export default function SelectExercisesScreen() {
       const data = await exerciseApi.getExercises();
       setExercises(data);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "운동 목록을 불러오지 못했습니다.",
-      );
+      setError(err instanceof Error ? err.message : "운동 목록을 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
@@ -74,9 +69,7 @@ export default function SelectExercisesScreen() {
     if (search.trim()) {
       const tokens = search.trim().toLowerCase().split(/\s+/);
       list = list.filter((e) => {
-        const haystack = [e.name, e.bodyPart, e.partDetail ?? ""]
-          .join(" ")
-          .toLowerCase();
+        const haystack = [e.name, e.bodyPart, e.partDetail ?? ""].join(" ").toLowerCase();
         return tokens.every((token) => haystack.includes(token));
       });
     }
@@ -127,10 +120,7 @@ export default function SelectExercisesScreen() {
       setNewPartDetail("");
       setNewBodyPart("가슴");
     } catch (err) {
-      Alert.alert(
-        "오류",
-        err instanceof Error ? err.message : "종목 생성에 실패했습니다.",
-      );
+      Alert.alert("오류", err instanceof Error ? err.message : "종목 생성에 실패했습니다.");
     } finally {
       setCreating(false);
     }
@@ -139,33 +129,23 @@ export default function SelectExercisesScreen() {
   const renderItem = useCallback(
     ({ item }: { item: ExerciseResponse }) => {
       const isSelected = selectedIds.includes(item.id);
-      const selectionOrder = isSelected
-        ? selectedIds.indexOf(item.id) + 1
-        : null;
+      const selectionOrder = isSelected ? selectedIds.indexOf(item.id) + 1 : null;
       return (
         <Pressable
           onPress={() => toggleSelect(item.id)}
           className="flex-row items-center gap-4 px-5 py-3.5 active:opacity-80"
-          style={
-            isSelected
-              ? { backgroundColor: "rgba(49,130,246,0.08)" }
-              : undefined
-          }
+          style={isSelected ? { backgroundColor: "rgba(49,130,246,0.08)" } : undefined}
         >
           <View
             className="h-6 w-6 items-center justify-center rounded-lg"
             style={{
-              backgroundColor: isSelected
-                ? COLORS.primary
-                : "rgba(255,255,255,0.08)",
+              backgroundColor: isSelected ? COLORS.primary : "rgba(255,255,255,0.08)",
               borderWidth: isSelected ? 0 : 1,
               borderColor: "rgba(255,255,255,0.15)",
             }}
           >
             {isSelected ? (
-              <Text className="text-xs font-bold text-white">
-                {selectionOrder}
-              </Text>
+              <Text className="text-xs font-bold text-white">{selectionOrder}</Text>
             ) : null}
           </View>
           <View className="flex-1">
@@ -206,17 +186,13 @@ export default function SelectExercisesScreen() {
           disabled={selectedIds.length === 0}
           className="rounded-xl px-4 py-2"
           style={{
-            backgroundColor:
-              selectedIds.length > 0
-                ? COLORS.primary
-                : "rgba(255,255,255,0.05)",
+            backgroundColor: selectedIds.length > 0 ? COLORS.primary : "rgba(255,255,255,0.05)",
           }}
         >
           <Text
             className="text-sm font-semibold"
             style={{
-              color:
-                selectedIds.length > 0 ? COLORS.white : "rgba(255,255,255,0.3)",
+              color: selectedIds.length > 0 ? COLORS.white : "rgba(255,255,255,0.3)",
             }}
           >
             확인{selectedIds.length > 0 ? ` (${selectedIds.length})` : ""}
@@ -255,19 +231,13 @@ export default function SelectExercisesScreen() {
             onPress={() => setFilterBodyPart(null)}
             className="rounded-full px-4 py-2"
             style={{
-              backgroundColor:
-                filterBodyPart === null
-                  ? COLORS.primary
-                  : "rgba(255,255,255,0.08)",
+              backgroundColor: filterBodyPart === null ? COLORS.primary : "rgba(255,255,255,0.08)",
             }}
           >
             <Text
               className="text-sm font-medium"
               style={{
-                color:
-                  filterBodyPart === null
-                    ? COLORS.white
-                    : "rgba(255,255,255,0.6)",
+                color: filterBodyPart === null ? COLORS.white : "rgba(255,255,255,0.6)",
               }}
             >
               전체
@@ -276,24 +246,16 @@ export default function SelectExercisesScreen() {
           {BODY_PARTS.map((bp) => (
             <Pressable
               key={bp}
-              onPress={() =>
-                setFilterBodyPart(bp === filterBodyPart ? null : bp)
-              }
+              onPress={() => setFilterBodyPart(bp === filterBodyPart ? null : bp)}
               className="rounded-full px-4 py-2"
               style={{
-                backgroundColor:
-                  filterBodyPart === bp
-                    ? COLORS.primary
-                    : "rgba(255,255,255,0.08)",
+                backgroundColor: filterBodyPart === bp ? COLORS.primary : "rgba(255,255,255,0.08)",
               }}
             >
               <Text
                 className="text-sm font-medium"
                 style={{
-                  color:
-                    filterBodyPart === bp
-                      ? COLORS.white
-                      : "rgba(255,255,255,0.6)",
+                  color: filterBodyPart === bp ? COLORS.white : "rgba(255,255,255,0.6)",
                 }}
               >
                 {bp}
@@ -322,9 +284,7 @@ export default function SelectExercisesScreen() {
             <View className="items-center py-20">
               <Search size={48} color="rgba(255,255,255,0.2)" />
               <Text className="mt-4 text-sm text-white/40">
-                {search.trim()
-                  ? "검색 결과가 없습니다"
-                  : "등록된 운동이 없습니다"}
+                {search.trim() ? "검색 결과가 없습니다" : "등록된 운동이 없습니다"}
               </Text>
               {!search.trim() && (
                 <Text className="mt-2 text-xs text-white/30">
@@ -358,9 +318,7 @@ export default function SelectExercisesScreen() {
           >
             {/* 모달 헤더 */}
             <View className="mb-5 flex-row items-center justify-between">
-              <Text className="text-xl font-bold text-white">
-                커스텀 종목 추가
-              </Text>
+              <Text className="text-xl font-bold text-white">커스텀 종목 추가</Text>
               <Pressable
                 onPress={() => setShowCreateModal(false)}
                 className="rounded-lg p-1 active:bg-white/5"
@@ -370,9 +328,7 @@ export default function SelectExercisesScreen() {
             </View>
 
             {/* 종목 이름 */}
-            <Text className="mb-2 text-sm font-medium text-white/60">
-              종목 이름
-            </Text>
+            <Text className="mb-2 text-sm font-medium text-white/60">종목 이름</Text>
             <TextInput
               value={newName}
               onChangeText={setNewName}
@@ -382,9 +338,7 @@ export default function SelectExercisesScreen() {
             />
 
             {/* 운동 부위 */}
-            <Text className="mb-2 text-sm font-medium text-white/60">
-              운동 부위
-            </Text>
+            <Text className="mb-2 text-sm font-medium text-white/60">운동 부위</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -397,19 +351,13 @@ export default function SelectExercisesScreen() {
                   onPress={() => setNewBodyPart(bp)}
                   className="rounded-full px-3.5 py-2"
                   style={{
-                    backgroundColor:
-                      newBodyPart === bp
-                        ? COLORS.primary
-                        : "rgba(255,255,255,0.08)",
+                    backgroundColor: newBodyPart === bp ? COLORS.primary : "rgba(255,255,255,0.08)",
                   }}
                 >
                   <Text
                     className="text-sm font-medium"
                     style={{
-                      color:
-                        newBodyPart === bp
-                          ? COLORS.white
-                          : "rgba(255,255,255,0.6)",
+                      color: newBodyPart === bp ? COLORS.white : "rgba(255,255,255,0.6)",
                     }}
                   >
                     {bp}
@@ -419,9 +367,7 @@ export default function SelectExercisesScreen() {
             </ScrollView>
 
             {/* 세부 부위 (선택) */}
-            <Text className="mb-2 text-sm font-medium text-white/60">
-              세부 부위 (선택)
-            </Text>
+            <Text className="mb-2 text-sm font-medium text-white/60">세부 부위 (선택)</Text>
             <TextInput
               value={newPartDetail}
               onChangeText={setNewPartDetail}
@@ -436,9 +382,7 @@ export default function SelectExercisesScreen() {
               disabled={creating || !newName.trim()}
               className="items-center rounded-xl py-3.5 active:opacity-80"
               style={{
-                backgroundColor: newName.trim()
-                  ? COLORS.primary
-                  : "rgba(255,255,255,0.05)",
+                backgroundColor: newName.trim() ? COLORS.primary : "rgba(255,255,255,0.05)",
               }}
             >
               {creating ? (
@@ -447,9 +391,7 @@ export default function SelectExercisesScreen() {
                 <Text
                   className="text-base font-semibold"
                   style={{
-                    color: newName.trim()
-                      ? COLORS.white
-                      : "rgba(255,255,255,0.3)",
+                    color: newName.trim() ? COLORS.white : "rgba(255,255,255,0.3)",
                   }}
                 >
                   추가하기

@@ -17,8 +17,8 @@ public class ReportController {
     private final ReportService reportService;
 
     @PostMapping
-    public ResponseEntity<Void> createReport(@AuthenticationPrincipal UserPrincipal principal,
-                                             @Valid @RequestBody ReportCreateRequest request) {
+    public ResponseEntity<Void> createReport(
+            @AuthenticationPrincipal UserPrincipal principal, @Valid @RequestBody ReportCreateRequest request) {
         reportService.createReport(principal.getId(), request);
         return ResponseEntity.noContent().build();
     }

@@ -5,13 +5,7 @@ export const metadata = {
   title: "사용자 설명서 | ProLog",
 };
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section
       style={{
@@ -35,13 +29,7 @@ function Section({
   );
 }
 
-function SubSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function SubSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 32 }}>
       <h3
@@ -267,21 +255,14 @@ export default function GuidePage() {
             />
           </SubSection>
           <SubSection title="프로필 설정">
-            <P>
-              하단 탭 프로필 → 프로필 수정에서 닉네임, 성별, 키, 체중을 설정할
-              수 있습니다.
-            </P>
-            <Callout>
-              신체 정보는 선택 사항이며, 나중에 언제든 수정할 수 있습니다.
-            </Callout>
+            <P>하단 탭 프로필 → 프로필 수정에서 닉네임, 성별, 키, 체중을 설정할 수 있습니다.</P>
+            <Callout>신체 정보는 선택 사항이며, 나중에 언제든 수정할 수 있습니다.</Callout>
           </SubSection>
         </Section>
 
         {/* 2. 루틴 관리 */}
         <Section title="루틴 관리">
-          <P>
-            루틴은 자주 하는 운동들의 묶음입니다. 예: "상체 루틴 A", "하체 데이"
-          </P>
+          <P>루틴은 자주 하는 운동들의 묶음입니다. 예: "상체 루틴 A", "하체 데이"</P>
           <SubSection title="루틴 만들기">
             <OL
               items={[
@@ -295,21 +276,18 @@ export default function GuidePage() {
           </SubSection>
           <SubSection title="루틴 수정">
             <P>
-              루틴 상세 페이지에서 수정 버튼을 눌러 종목 추가/삭제, 순서 변경,
-              세트 수를 조정할 수 있습니다.
+              루틴 상세 페이지에서 수정 버튼을 눌러 종목 추가/삭제, 순서 변경, 세트 수를 조정할 수
+              있습니다.
             </P>
-            <Callout>
-              루틴을 수정해도 이전에 기록된 운동 내역은 변경되지 않습니다.
-            </Callout>
+            <Callout>루틴을 수정해도 이전에 기록된 운동 내역은 변경되지 않습니다.</Callout>
           </SubSection>
           <SubSection title="루틴 보관 / 삭제">
             <P>
-              더 이상 사용하지 않는 루틴은 보관 처리하면 목록에서 숨겨집니다.
-              보관된 루틴은 다시 활성화하거나 완전히 삭제할 수 있습니다.
+              더 이상 사용하지 않는 루틴은 보관 처리하면 목록에서 숨겨집니다. 보관된 루틴은 다시
+              활성화하거나 완전히 삭제할 수 있습니다.
             </P>
             <Callout>
-              삭제는 보관 상태에서만 가능합니다. 실수 방지를 위한 2단계
-              프로세스입니다.
+              삭제는 보관 상태에서만 가능합니다. 실수 방지를 위한 2단계 프로세스입니다.
             </Callout>
           </SubSection>
         </Section>
@@ -330,10 +308,7 @@ export default function GuidePage() {
                 { label: "루틴으로 시작", desc: "저장한 루틴을 선택 후 시작" },
                 { label: "자유 운동", desc: "루틴 없이 그때그때 종목 선택" },
               ].map((opt) => (
-                <div
-                  key={opt.label}
-                  style={{ display: "flex", gap: 12, alignItems: "baseline" }}
-                >
+                <div key={opt.label} style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
                   <span
                     style={{
                       fontSize: 14,
@@ -345,25 +320,17 @@ export default function GuidePage() {
                   >
                     {opt.label}
                   </span>
-                  <span
-                    style={{ fontSize: 14, color: "rgba(255,255,255,0.45)" }}
-                  >
-                    {opt.desc}
-                  </span>
+                  <span style={{ fontSize: 14, color: "rgba(255,255,255,0.45)" }}>{opt.desc}</span>
                 </div>
               ))}
             </div>
           </SubSection>
           <SubSection title="운동 화면">
             <P>
-              진행 시간이 상단에 실시간으로 표시됩니다. 각 종목마다 이전 기록이
-              자동으로 표시되며(같은 루틴 기준), 세트별로 무게(kg)와
-              횟수(reps)를 입력 후 체크하면 됩니다.
+              진행 시간이 상단에 실시간으로 표시됩니다. 각 종목마다 이전 기록이 자동으로
+              표시되며(같은 루틴 기준), 세트별로 무게(kg)와 횟수(reps)를 입력 후 체크하면 됩니다.
             </P>
-            <P>
-              운동 화면 하단 종목 추가 버튼으로 진행 중에도 종목을 추가할 수
-              있습니다.
-            </P>
+            <P>운동 화면 하단 종목 추가 버튼으로 진행 중에도 종목을 추가할 수 있습니다.</P>
           </SubSection>
           <SubSection title="운동 완료 — 저장 방식 선택">
             <div style={{ marginBottom: 8 }}>
@@ -388,21 +355,15 @@ export default function GuidePage() {
         <Section title="커뮤니티">
           <SubSection title="루틴 둘러보기">
             <P>
-              하단 탭 커뮤니티에서 다른 사용자들이 공유한 루틴을 볼 수 있습니다.
-              최신순 / 인기순 / 많이 가져간 순으로 정렬할 수 있습니다.
+              하단 탭 커뮤니티에서 다른 사용자들이 공유한 루틴을 볼 수 있습니다. 최신순 / 인기순 /
+              많이 가져간 순으로 정렬할 수 있습니다.
             </P>
           </SubSection>
           <SubSection title="루틴 가져오기">
             <OL
-              items={[
-                "공유 루틴 상세 페이지 접속",
-                "가져오기 버튼",
-                "내 루틴 목록에 자동 추가",
-              ]}
+              items={["공유 루틴 상세 페이지 접속", "가져오기 버튼", "내 루틴 목록에 자동 추가"]}
             />
-            <Callout>
-              가져온 루틴은 내 것이 되어 자유롭게 수정할 수 있습니다.
-            </Callout>
+            <Callout>가져온 루틴은 내 것이 되어 자유롭게 수정할 수 있습니다.</Callout>
           </SubSection>
           <SubSection title="내 루틴 공유하기">
             <OL
@@ -412,14 +373,12 @@ export default function GuidePage() {
                 "공유 완료",
               ]}
             />
-            <Callout>
-              공유 후 원본 루틴을 수정하거나 삭제해도 공유된 내용은 유지됩니다.
-            </Callout>
+            <Callout>공유 후 원본 루틴을 수정하거나 삭제해도 공유된 내용은 유지됩니다.</Callout>
           </SubSection>
           <SubSection title="댓글">
             <P>
-              공유 루틴 상세 페이지에서 댓글을 남기거나 확인할 수 있습니다.
-              본인이 작성한 댓글만 삭제 가능합니다.
+              공유 루틴 상세 페이지에서 댓글을 남기거나 확인할 수 있습니다. 본인이 작성한 댓글만
+              삭제 가능합니다.
             </P>
           </SubSection>
         </Section>
@@ -478,8 +437,7 @@ export default function GuidePage() {
             직접 문의하기
           </h2>
           <P>
-            FAQ에서 해결되지 않은 문제는 이메일로 문의해 주세요. 최대한 빠르게
-            답변드리겠습니다.
+            FAQ에서 해결되지 않은 문제는 이메일로 문의해 주세요. 최대한 빠르게 답변드리겠습니다.
           </P>
           <a
             href={`mailto:${CONTACT_EMAIL}`}

@@ -20,25 +20,25 @@ GET /api/workout/stats/home
 ```typescript
 interface HomeStatsResponse {
   thisWeek: {
-    workouts: number;        // 이번 주 운동 횟수 (월~일 기준)
-    goal: number;            // 주간 목표 (현재 하드코딩 5, 추후 User.weeklyGoal 필드 추가 예정)
+    workouts: number; // 이번 주 운동 횟수 (월~일 기준)
+    goal: number; // 주간 목표 (현재 하드코딩 5, 추후 User.weeklyGoal 필드 추가 예정)
   };
   thisMonth: {
-    workouts: number;        // 이번 달 운동 횟수 (1일~오늘)
+    workouts: number; // 이번 달 운동 횟수 (1일~오늘)
   };
   avgWorkoutDuration: number; // 이번 달 평균 운동 시간 (초)
 
-  weeklyActivity: DailyActivity[];      // 오늘 포함 과거 7일 (오래된 순)
+  weeklyActivity: DailyActivity[]; // 오늘 포함 과거 7일 (오래된 순)
   exerciseProgress: ExerciseProgress[]; // 최대 5개 (조건 만족 시)
   recentWorkouts: RecentWorkoutSummary[]; // 최대 5개
 }
 
 interface DailyActivity {
-  date: string;              // "2024-02-25" (ISO 형식)
-  dayOfWeek: string;         // "화" (월/화/수/목/금/토/일)
-  formattedDate: string;     // "2/25" (M/D 형식)
-  workoutCount: number;      // 해당 날짜 운동 횟수
-  bodyParts: BodyPart[];     // 운동한 부위들 (중복 제거됨)
+  date: string; // "2024-02-25" (ISO 형식)
+  dayOfWeek: string; // "화" (월/화/수/목/금/토/일)
+  formattedDate: string; // "2/25" (M/D 형식)
+  workoutCount: number; // 해당 날짜 운동 횟수
+  bodyParts: BodyPart[]; // 운동한 부위들 (중복 제거됨)
 }
 
 interface ExerciseProgress {
@@ -49,10 +49,10 @@ interface ExerciseProgress {
 }
 
 interface ExerciseSession {
-  date: string;              // "2/10" (M/D 형식)
-  totalVolume: number;       // 해당 운동의 총 볼륨 (kg, 정수)
-  routineName: string;       // 루틴명 또는 "자유 운동"
-  sets: SetDetail[];         // 세트 상세 정보
+  date: string; // "2/10" (M/D 형식)
+  totalVolume: number; // 해당 운동의 총 볼륨 (kg, 정수)
+  routineName: string; // 루틴명 또는 "자유 운동"
+  sets: SetDetail[]; // 세트 상세 정보
 }
 
 interface SetDetail {
@@ -62,18 +62,19 @@ interface SetDetail {
 
 interface RecentWorkoutSummary {
   sessionId: number;
-  title: string;             // 루틴명 또는 "자유 운동"
-  completedAt: string;       // ISO 8601 형식
+  title: string; // 루틴명 또는 "자유 운동"
+  completedAt: string; // ISO 8601 형식
   exerciseCount: number;
   totalSets: number;
   totalVolume: number;
-  duration: number;          // 초
+  duration: number; // 초
 }
 ```
 
 ## 비즈니스 로직
 
 ### 1. thisWeek 계산
+
 ```sql
 -- 이번 주 월요일~일요일 기준
 SELECT COUNT(DISTINCT DATE(completed_at)) as workouts
@@ -84,6 +85,7 @@ WHERE user_id = :userId
 ```
 
 ### 2. thisMonth 계산
+
 ```sql
 -- 이번 달 1일~오늘
 SELECT COUNT(DISTINCT DATE(completed_at)) as workouts
@@ -94,6 +96,7 @@ WHERE user_id = :userId
 ```
 
 ### 3. avgWorkoutDuration 계산
+
 ```sql
 -- 이번 달 평균 운동 시간
 SELECT AVG(TIMESTAMPDIFF(SECOND, started_at, completed_at)) as avg_duration
@@ -105,6 +108,7 @@ WHERE user_id = :userId
 ```
 
 ### 4. weeklyActivity 계산
+
 ```
 1. 오늘 포함 과거 7일 날짜 생성
    - 예: 오늘이 2/25(화)라면 → 2/19(수) ~ 2/25(화)
@@ -116,8 +120,9 @@ WHERE user_id = :userId
 ```
 
 **한국어 요일 유틸:**
+
 ```typescript
-const DAYS_KR = ['일', '월', '화', '수', '목', '금', '토'];
+const DAYS_KR = ["일", "월", "화", "수", "목", "금", "토"];
 const dayOfWeek = DAYS_KR[new Date(date).getDay()];
 ```
 
@@ -136,6 +141,7 @@ WHERE ws.user_id = :userId
 ### 5. exerciseProgress 선정
 
 **선정 조건:**
+
 - 최근 1달 내 수행한 운동
 - 최소 3회 이상 수행한 운동
 - 빈도 순으로 정렬

@@ -43,9 +43,7 @@ export function UserTable({ users, onSelect }: UserTableProps) {
               <td className="px-4 py-3 text-muted-foreground">{user.username}</td>
               <td className="px-4 py-3 text-muted-foreground">{user.email}</td>
               <td className="px-4 py-3">
-                <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>
-                  {user.role}
-                </Badge>
+                <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>{user.role}</Badge>
               </td>
               <td className="px-4 py-3 text-muted-foreground">
                 {new Date(user.createdAt).toLocaleDateString("ko-KR")}

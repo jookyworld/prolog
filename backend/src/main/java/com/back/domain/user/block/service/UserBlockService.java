@@ -7,11 +7,10 @@ import com.back.domain.user.user.entity.User;
 import com.back.domain.user.user.repository.UserRepository;
 import com.back.global.exception.type.BadRequestException;
 import com.back.global.exception.type.NotFoundException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,10 +36,8 @@ public class UserBlockService {
         User blocker = userRepository.getReferenceById(blockerId);
         User blocked = userRepository.getReferenceById(blockedId);
 
-        userBlockRepository.save(UserBlock.builder()
-                .blocker(blocker)
-                .blocked(blocked)
-                .build());
+        userBlockRepository.save(
+                UserBlock.builder().blocker(blocker).blocked(blocked).build());
     }
 
     @Transactional
@@ -55,8 +52,7 @@ public class UserBlockService {
 
     @Transactional(readOnly = true)
     public List<BlockedUserResponse> getBlockedUsers(Long blockerId) {
-        return userBlockRepository.findAllByBlockerIdWithBlocked(blockerId)
-                .stream()
+        return userBlockRepository.findAllByBlockerIdWithBlocked(blockerId).stream()
                 .map(BlockedUserResponse::from)
                 .toList();
     }

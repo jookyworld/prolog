@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import type { UserResponse } from "@/lib/types";
 
@@ -34,7 +29,9 @@ export function UserDetailModal({ open, onOpenChange, user }: UserDetailModalPro
   if (!user) return null;
 
   const joinedAt = new Date(user.createdAt).toLocaleDateString("ko-KR", {
-    year: "numeric", month: "long", day: "numeric",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
   const marketingConsent = user.marketingConsentedAt
@@ -47,15 +44,15 @@ export function UserDetailModal({ open, onOpenChange, user }: UserDetailModalPro
         <DialogHeader>
           <div className="flex items-center gap-3">
             <DialogTitle>{user.nickname}</DialogTitle>
-            <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>
-              {user.role}
-            </Badge>
+            <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>{user.role}</Badge>
           </div>
         </DialogHeader>
 
         <div className="mt-2 space-y-4">
           <section>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">계정 정보</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              계정 정보
+            </p>
             <div className="rounded-lg border border-border px-4">
               <Row label="아이디" value={user.username} />
               <Row label="이메일" value={user.email} />
@@ -65,7 +62,9 @@ export function UserDetailModal({ open, onOpenChange, user }: UserDetailModalPro
           </section>
 
           <section>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">신체 정보</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              신체 정보
+            </p>
             <div className="rounded-lg border border-border px-4">
               <Row label="성별" value={GENDER_LABEL[user.gender] ?? user.gender} />
               <Row label="키" value={user.height > 0 ? `${user.height} cm` : "미설정"} />

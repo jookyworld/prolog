@@ -2,7 +2,6 @@ package com.back.domain.community.sharedRoutine.dto;
 
 import com.back.domain.community.sharedRoutine.entity.SharedRoutine;
 import com.back.domain.exercise.entity.BodyPart;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,8 +17,7 @@ public record SharedRoutineResponse(
         List<String> exerciseNames, // 대표 운동 종목 이름 (최대 3개)
         int viewCount,
         int commentCount,
-        LocalDateTime createdAt
-) {
+        LocalDateTime createdAt) {
     public static SharedRoutineResponse from(SharedRoutine sharedRoutine, int commentCount) {
         RoutineSnapshotWrapper snapshot = sharedRoutine.getRoutineSnapshot();
 
@@ -44,7 +42,6 @@ public record SharedRoutineResponse(
                 exerciseNames,
                 sharedRoutine.getViewCount(),
                 commentCount,
-                sharedRoutine.getCreatedAt()
-        );
+                sharedRoutine.getCreatedAt());
     }
 }

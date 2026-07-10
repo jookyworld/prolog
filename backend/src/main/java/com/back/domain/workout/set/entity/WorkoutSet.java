@@ -2,12 +2,11 @@ package com.back.domain.workout.set.entity;
 
 import com.back.domain.workout.sessionexercise.entity.WorkoutSessionExercise;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Entity
@@ -42,5 +41,4 @@ public class WorkoutSet {
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-
 }

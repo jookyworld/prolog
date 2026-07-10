@@ -15,8 +15,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteComment(@AuthenticationPrincipal UserPrincipal principal,
-                                              @PathVariable Long id) {
+    public ResponseEntity<Void> deleteComment(@AuthenticationPrincipal UserPrincipal principal, @PathVariable Long id) {
         commentService.deleteComment(principal.getId(), id);
         return ResponseEntity.noContent().build();
     }

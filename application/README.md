@@ -291,13 +291,14 @@ Step 2: 신체 정보 (성별 MALE/FEMALE 토글, 키, 체중)
 ```
 
 **상태 관리 (useState):**
-| 상태 | 타입 | 설명 |
-|------|------|------|
-| `exercises` | `ActiveExercise[]` | 운동 목록 + 각 세트 (weight/reps는 string) |
-| `currentIndex` | `number` | 현재 선택된 운동 인덱스 |
-| `elapsedTime` | `number` | 경과 시간 (초) |
-| `sessionId` | `number \| null` | 백엔드 세션 ID |
-| `routineTitle` | `string` | 헤더에 표시할 루틴 제목 |
+
+| 상태           | 타입               | 설명                                       |
+| -------------- | ------------------ | ------------------------------------------ |
+| `exercises`    | `ActiveExercise[]` | 운동 목록 + 각 세트 (weight/reps는 string) |
+| `currentIndex` | `number`           | 현재 선택된 운동 인덱스                    |
+| `elapsedTime`  | `number`           | 경과 시간 (초)                             |
+| `sessionId`    | `number \| null`   | 백엔드 세션 ID                             |
+| `routineTitle` | `string`           | 헤더에 표시할 루틴 제목                    |
 
 ### 3.7 프로필 탭
 
@@ -539,11 +540,11 @@ Context나 AsyncStorage보다 가볍고, 같은 프로세스 내 페이지 간 �
 
 ### 6.14 validations/auth.ts — 폼 유효성 검증
 
-| 스키마              | 검증 규칙                                                  |
-| ------------------- | ---------------------------------------------------------- |
-| `loginSchema`       | 아이디/비밀번호 필수 입력                                  |
-| `signupStep1Schema` | 아이디 4~20자, 비밀번호 8~30자, 이메일 형식, 닉네임 2~10자 |
-| `signupStep2Schema` | 성별 선택 필수, 키 100~250cm, 체중 30~300kg                |
+| 스키마              | 검증 규칙                                                    |
+| ------------------- | ------------------------------------------------------------ |
+| `loginSchema`       | 아이디/비밀번호 필수 입력                                    |
+| `signupStep1Schema` | 아이디 4~~20자, 비밀번호 8~~30자, 이메일 형식, 닉네임 2~10자 |
+| `signupStep2Schema` | 성별 선택 필수, 키 100~~250cm, 체중 30~~300kg                |
 
 ---
 

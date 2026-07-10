@@ -21,27 +21,35 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
   const [isRestoring, setIsRestoring] = useState(true);
 
   useEffect(() => {
-    workoutApi.getActiveSession().then((session) => {
-      if (session) {
-        setActiveSession({ sessionId: session.id, routineId: session.routineId ?? null, startedAt: session.startedAt });
-      }
-    }).finally(() => {
-      setIsRestoring(false);
-    });
+    workoutApi
+      .getActiveSession()
+      .then((session) => {
+        if (session) {
+          setActiveSession({
+            sessionId: session.id,
+            routineId: session.routineId ?? null,
+            startedAt: session.startedAt,
+          });
+        }
+      })
+      .finally(() => {
+        setIsRestoring(false);
+      });
   }, []);
 
-  const startWorkout = useCallback((sessionId: number, routineId: number | null, startedAt: string) => {
-    setActiveSession({ sessionId, routineId, startedAt });
-  }, []);
+  const startWorkout = useCallback(
+    (sessionId: number, routineId: number | null, startedAt: string) => {
+      setActiveSession({ sessionId, routineId, startedAt });
+    },
+    [],
+  );
 
   const endWorkout = useCallback(() => {
     setActiveSession(null);
   }, []);
 
   return (
-    <WorkoutContext.Provider
-      value={{ activeSession, isRestoring, startWorkout, endWorkout }}
-    >
+    <WorkoutContext.Provider value={{ activeSession, isRestoring, startWorkout, endWorkout }}>
       {children}
     </WorkoutContext.Provider>
   );

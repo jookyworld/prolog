@@ -1,12 +1,11 @@
 package com.back.global.security.token;
 
 import com.back.global.exception.type.TooManyRequestsException;
+import java.security.SecureRandom;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-
-import java.security.SecureRandom;
-import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor

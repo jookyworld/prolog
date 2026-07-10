@@ -22,10 +22,7 @@ export async function getRefreshToken(): Promise<string | null> {
   return SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
 }
 
-export async function setTokens(
-  accessToken: string,
-  refreshToken: string,
-): Promise<void> {
+export async function setTokens(accessToken: string, refreshToken: string): Promise<void> {
   await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
   await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
 }
@@ -83,10 +80,7 @@ async function refreshAccessToken(): Promise<void> {
   }
 }
 
-export async function apiFetch<T>(
-  path: string,
-  options?: RequestInit,
-): Promise<T> {
+export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const accessToken = await getAccessToken();
 
   const headers: HeadersInit = {
@@ -103,11 +97,7 @@ export async function apiFetch<T>(
     credentials: "include", // Always include credentials for cookie-based auth
   });
 
-  if (
-    res.status === 401 &&
-    !path.includes("/auth/refresh") &&
-    !path.includes("/auth/login")
-  ) {
+  if (res.status === 401 && !path.includes("/auth/refresh") && !path.includes("/auth/login")) {
     try {
       if (!refreshPromise) {
         refreshPromise = refreshAccessToken().finally(() => {
@@ -119,9 +109,7 @@ export async function apiFetch<T>(
       const newAccessToken = await getAccessToken();
       const retryHeaders: HeadersInit = {
         "Content-Type": "application/json",
-        ...(newAccessToken
-          ? { Authorization: `Bearer ${newAccessToken}` }
-          : {}),
+        ...(newAccessToken ? { Authorization: `Bearer ${newAccessToken}` } : {}),
         ...options?.headers,
       };
 
@@ -132,10 +120,7 @@ export async function apiFetch<T>(
       });
 
       if (!retryRes.ok) {
-        throw new ApiError(
-          retryRes.status,
-          `API 요청 실패 (${retryRes.status})`,
-        );
+        throw new ApiError(retryRes.status, `API 요청 실패 (${retryRes.status})`);
       }
 
       if (retryRes.status === 204) return undefined as T;

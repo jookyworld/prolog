@@ -11,8 +11,7 @@ public record RoutineItemDetailResponse(
         BodyPart bodyPart,
         String partDetail,
         int sets,
-        int restSeconds
-) {
+        int restSeconds) {
     public static RoutineItemDetailResponse from(RoutineItem routineItem) {
         return new RoutineItemDetailResponse(
                 routineItem.getId(),
@@ -22,7 +21,6 @@ public record RoutineItemDetailResponse(
                 routineItem.getExercise().getBodyPart(),
                 routineItem.getExercise().getPartDetail(),
                 routineItem.getSets(),
-                routineItem.getRestSeconds()
-        );
+                routineItem.getRestSeconds());
     }
 }

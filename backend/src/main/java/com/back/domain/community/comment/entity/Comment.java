@@ -3,12 +3,11 @@ package com.back.domain.community.comment.entity;
 import com.back.domain.community.sharedRoutine.entity.SharedRoutine;
 import com.back.domain.user.user.entity.User;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter

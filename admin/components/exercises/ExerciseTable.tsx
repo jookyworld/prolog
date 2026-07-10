@@ -34,17 +34,10 @@ export function ExerciseTable({ exercises, onEdit }: ExerciseTableProps) {
         </thead>
         <tbody>
           {exercises.map((ex, i) => (
-            <tr
-              key={ex.id}
-              className={
-                i < exercises.length - 1 ? "border-b border-border" : ""
-              }
-            >
+            <tr key={ex.id} className={i < exercises.length - 1 ? "border-b border-border" : ""}>
               <td className="px-4 py-3 font-medium text-foreground">{ex.name}</td>
               <td className="px-4 py-3 text-foreground">{ex.bodyPart}</td>
-              <td className="px-4 py-3 text-muted-foreground">
-                {ex.partDetail ?? "-"}
-              </td>
+              <td className="px-4 py-3 text-muted-foreground">{ex.partDetail ?? "-"}</td>
               <td className="px-4 py-3">
                 {ex.custom ? (
                   <Badge variant="secondary">커스텀</Badge>

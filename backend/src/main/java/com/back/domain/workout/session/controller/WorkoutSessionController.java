@@ -18,8 +18,8 @@ public class WorkoutSessionController {
     private final WorkoutSessionService workoutSessionService;
 
     @PostMapping
-    public ResponseEntity<WorkoutSessionResponse> startSession(@AuthenticationPrincipal UserPrincipal principal,
-                                                                @RequestBody WorkoutSessionStartRequest request) {
+    public ResponseEntity<WorkoutSessionResponse> startSession(
+            @AuthenticationPrincipal UserPrincipal principal, @RequestBody WorkoutSessionStartRequest request) {
         WorkoutSessionResponse response = workoutSessionService.startSession(principal.getId(), request.routineId());
         return ResponseEntity.ok(response);
     }
@@ -34,9 +34,10 @@ public class WorkoutSessionController {
     }
 
     @PatchMapping("/{sessionId}/complete")
-    public ResponseEntity<WorkoutSessionCompleteResponse> complete(@AuthenticationPrincipal UserPrincipal principal,
-                                                                   @PathVariable Long sessionId,
-                                                                   @RequestBody WorkoutSessionCompleteRequest request) {
+    public ResponseEntity<WorkoutSessionCompleteResponse> complete(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long sessionId,
+            @RequestBody WorkoutSessionCompleteRequest request) {
         return ResponseEntity.ok(workoutSessionService.completeSession(principal.getId(), sessionId, request));
     }
 
@@ -53,29 +54,31 @@ public class WorkoutSessionController {
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<WorkoutSessionListItemResponse>> getMySessions(@AuthenticationPrincipal UserPrincipal principal,
-                                                                                       @RequestParam(defaultValue = "0") int page,
-                                                                                       @RequestParam(defaultValue = "20") int size,
-                                                                                       @RequestParam(required = false) String type,
-                                                                                       @RequestParam(required = false) String bodyPart) {
+    public ResponseEntity<PageResponse<WorkoutSessionListItemResponse>> getMySessions(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String bodyPart) {
         PageRequest pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(PageResponse.from(workoutSessionService.getWorkoutSessions(principal.getId(), type, bodyPart, pageable)));
+        return ResponseEntity.ok(PageResponse.from(
+                workoutSessionService.getWorkoutSessions(principal.getId(), type, bodyPart, pageable)));
     }
 
     @GetMapping("/{sessionId}")
-    public ResponseEntity<WorkoutSessionDetailResponse> getDetail(@AuthenticationPrincipal UserPrincipal principal,
-                                                                  @PathVariable Long sessionId) {
+    public ResponseEntity<WorkoutSessionDetailResponse> getDetail(
+            @AuthenticationPrincipal UserPrincipal principal, @PathVariable Long sessionId) {
         return ResponseEntity.ok(workoutSessionService.getWorkoutSessionDetail(principal.getId(), sessionId));
     }
 
     @GetMapping("/routines/{routineId}/last")
-    public ResponseEntity<WorkoutSessionDetailResponse> getLastSessionByRoutine(@AuthenticationPrincipal UserPrincipal principal,
-                                                                                 @PathVariable Long routineId) {
-        WorkoutSessionDetailResponse response = workoutSessionService.getLastSessionByRoutine(principal.getId(), routineId);
+    public ResponseEntity<WorkoutSessionDetailResponse> getLastSessionByRoutine(
+            @AuthenticationPrincipal UserPrincipal principal, @PathVariable Long routineId) {
+        WorkoutSessionDetailResponse response =
+                workoutSessionService.getLastSessionByRoutine(principal.getId(), routineId);
         if (response == null) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(response);
     }
-
 }

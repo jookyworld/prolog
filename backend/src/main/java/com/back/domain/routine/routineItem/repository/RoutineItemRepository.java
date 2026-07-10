@@ -1,12 +1,11 @@
 package com.back.domain.routine.routineItem.repository;
 
 import com.back.domain.routine.routineItem.entity.RoutineItem;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public interface RoutineItemRepository extends JpaRepository<RoutineItem, Long> {
@@ -23,6 +22,7 @@ public interface RoutineItemRepository extends JpaRepository<RoutineItem, Long> 
     long countByExercise_IdAndRoutine_ActiveFalseAndRoutine_User_Id(Long exerciseId, Long userId);
 
     @Modifying
-    @Query("delete from RoutineItem ri where ri.exercise.id = :exerciseId and ri.routine.active = false and ri.routine.user.id = :userId")
+    @Query(
+            "delete from RoutineItem ri where ri.exercise.id = :exerciseId and ri.routine.active = false and ri.routine.user.id = :userId")
     void deleteByExerciseInArchivedRoutines(Long exerciseId, Long userId);
 }

@@ -4,11 +4,10 @@ import com.back.domain.exercise.dto.AdminExerciseResponse;
 import com.back.domain.exercise.dto.ExerciseCreateRequest;
 import com.back.domain.exercise.dto.ExerciseUpdateRequest;
 import com.back.domain.exercise.service.ExerciseService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,8 +28,7 @@ public class AdminExerciseController {
 
     @PutMapping("/{id}")
     public AdminExerciseResponse updateAdminExercise(
-            @PathVariable Long id,
-            @RequestBody ExerciseUpdateRequest request) {
+            @PathVariable Long id, @RequestBody ExerciseUpdateRequest request) {
         return exerciseService.adminUpdateExercise(id, request);
     }
 }

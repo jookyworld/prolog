@@ -1,7 +1,6 @@
 package com.back.domain.workout.session.dto;
 
 import com.back.domain.workout.session.entity.WorkoutSession;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,17 +10,16 @@ public record WorkoutSessionDetailResponse(
         String routineTitle,
         LocalDateTime startedAt,
         LocalDateTime completedAt,
-        List<WorkoutExerciseDetailResponse> exercises
-) {
-    public static WorkoutSessionDetailResponse of(WorkoutSession session, List<WorkoutExerciseDetailResponse> exercises) {
+        List<WorkoutExerciseDetailResponse> exercises) {
+    public static WorkoutSessionDetailResponse of(
+            WorkoutSession session, List<WorkoutExerciseDetailResponse> exercises) {
         return new WorkoutSessionDetailResponse(
                 session.getId(),
                 session.getRoutine() != null ? session.getRoutine().getId() : null,
                 getRoutineTitle(session),
                 session.getStartedAt(),
                 session.getCompletedAt(),
-                exercises
-        );
+                exercises);
     }
 
     private static String getRoutineTitle(WorkoutSession session) {

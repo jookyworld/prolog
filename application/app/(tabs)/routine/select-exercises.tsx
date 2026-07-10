@@ -46,9 +46,7 @@ export default function SelectExercisesScreen() {
       const data = await exerciseApi.getExercises();
       setExercises(data);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "운동 목록을 불러오지 못했습니다.",
-      );
+      setError(err instanceof Error ? err.message : "운동 목록을 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
@@ -125,10 +123,7 @@ export default function SelectExercisesScreen() {
       setNewPartDetail("");
       setNewBodyPart("가슴");
     } catch (err) {
-      Alert.alert(
-        "오류",
-        err instanceof Error ? err.message : "종목 생성에 실패했습니다.",
-      );
+      Alert.alert("오류", err instanceof Error ? err.message : "종목 생성에 실패했습니다.");
     } finally {
       setCreating(false);
     }
@@ -191,15 +186,13 @@ export default function SelectExercisesScreen() {
           disabled={selectedIds.size === 0}
           className="rounded-xl px-4 py-2"
           style={{
-            backgroundColor:
-              selectedIds.size > 0 ? COLORS.primary : "rgba(255,255,255,0.05)",
+            backgroundColor: selectedIds.size > 0 ? COLORS.primary : "rgba(255,255,255,0.05)",
           }}
         >
           <Text
             className="text-sm font-semibold"
             style={{
-              color:
-                selectedIds.size > 0 ? COLORS.white : "rgba(255,255,255,0.3)",
+              color: selectedIds.size > 0 ? COLORS.white : "rgba(255,255,255,0.3)",
             }}
           >
             확인{selectedIds.size > 0 ? ` (${selectedIds.size})` : ""}
@@ -238,8 +231,7 @@ export default function SelectExercisesScreen() {
           onPress={() => setFilterBodyPart(null)}
           className="rounded-full px-4 py-2"
           style={{
-            backgroundColor:
-              filterBodyPart === null ? COLORS.primary : "rgba(255,255,255,0.08)",
+            backgroundColor: filterBodyPart === null ? COLORS.primary : "rgba(255,255,255,0.08)",
           }}
         >
           <Text
@@ -257,15 +249,13 @@ export default function SelectExercisesScreen() {
             onPress={() => setFilterBodyPart(bp === filterBodyPart ? null : bp)}
             className="rounded-full px-4 py-2"
             style={{
-              backgroundColor:
-                filterBodyPart === bp ? COLORS.primary : "rgba(255,255,255,0.08)",
+              backgroundColor: filterBodyPart === bp ? COLORS.primary : "rgba(255,255,255,0.08)",
             }}
           >
             <Text
               className="text-sm font-medium"
               style={{
-                color:
-                  filterBodyPart === bp ? COLORS.white : "rgba(255,255,255,0.6)",
+                color: filterBodyPart === bp ? COLORS.white : "rgba(255,255,255,0.6)",
               }}
             >
               {bp}
@@ -292,9 +282,7 @@ export default function SelectExercisesScreen() {
           ListEmptyComponent={
             <View className="items-center py-20">
               <Text className="text-sm text-white/40">
-                {search.trim()
-                  ? "검색 결과가 없습니다"
-                  : "등록된 운동이 없습니다"}
+                {search.trim() ? "검색 결과가 없습니다" : "등록된 운동이 없습니다"}
               </Text>
             </View>
           }
@@ -321,9 +309,7 @@ export default function SelectExercisesScreen() {
           >
             {/* 모달 헤더 */}
             <View className="mb-5 flex-row items-center justify-between">
-              <Text className="text-xl font-bold text-white">
-                커스텀 종목 추가
-              </Text>
+              <Text className="text-xl font-bold text-white">커스텀 종목 추가</Text>
               <Pressable
                 onPress={() => setShowCreateModal(false)}
                 className="rounded-lg p-1 active:bg-white/5"
@@ -333,9 +319,7 @@ export default function SelectExercisesScreen() {
             </View>
 
             {/* 종목 이름 */}
-            <Text className="mb-2 text-sm font-medium text-white/60">
-              종목 이름
-            </Text>
+            <Text className="mb-2 text-sm font-medium text-white/60">종목 이름</Text>
             <TextInput
               value={newName}
               onChangeText={setNewName}
@@ -345,9 +329,7 @@ export default function SelectExercisesScreen() {
             />
 
             {/* 운동 부위 */}
-            <Text className="mb-2 text-sm font-medium text-white/60">
-              운동 부위
-            </Text>
+            <Text className="mb-2 text-sm font-medium text-white/60">운동 부위</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -360,15 +342,13 @@ export default function SelectExercisesScreen() {
                   onPress={() => setNewBodyPart(bp)}
                   className="rounded-full px-3.5 py-2"
                   style={{
-                    backgroundColor:
-                      newBodyPart === bp ? COLORS.primary : "rgba(255,255,255,0.08)",
+                    backgroundColor: newBodyPart === bp ? COLORS.primary : "rgba(255,255,255,0.08)",
                   }}
                 >
                   <Text
                     className="text-sm font-medium"
                     style={{
-                      color:
-                        newBodyPart === bp ? COLORS.white : "rgba(255,255,255,0.6)",
+                      color: newBodyPart === bp ? COLORS.white : "rgba(255,255,255,0.6)",
                     }}
                   >
                     {bp}
@@ -378,9 +358,7 @@ export default function SelectExercisesScreen() {
             </ScrollView>
 
             {/* 세부 타겟 (선택) */}
-            <Text className="mb-2 text-sm font-medium text-white/60">
-              세부 타겟 (선택)
-            </Text>
+            <Text className="mb-2 text-sm font-medium text-white/60">세부 타겟 (선택)</Text>
             <TextInput
               value={newPartDetail}
               onChangeText={setNewPartDetail}
@@ -395,9 +373,7 @@ export default function SelectExercisesScreen() {
               disabled={creating || !newName.trim()}
               className="items-center rounded-xl py-3.5 active:opacity-80"
               style={{
-                backgroundColor: newName.trim()
-                  ? COLORS.primary
-                  : "rgba(255,255,255,0.05)",
+                backgroundColor: newName.trim() ? COLORS.primary : "rgba(255,255,255,0.05)",
               }}
             >
               {creating ? (

@@ -24,10 +24,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface RoutineItem {
   exercise: ExerciseResponse;
@@ -56,9 +53,7 @@ export default function NewRoutineScreen() {
       .then((data) => {
         setTitle(data.title);
         setDescription(data.description ?? "");
-        const sorted = [...data.routineItems].sort(
-          (a, b) => a.orderInRoutine - b.orderInRoutine,
-        );
+        const sorted = [...data.routineItems].sort((a, b) => a.orderInRoutine - b.orderInRoutine);
         setItems(
           sorted.map((item) => ({
             exercise: {
@@ -74,9 +69,7 @@ export default function NewRoutineScreen() {
         );
       })
       .catch(() => {
-        Alert.alert(
-          "루틴 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
-        );
+        Alert.alert("루틴 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
         router.back();
       })
       .finally(() => setLoadingRoutine(false));
@@ -127,9 +120,7 @@ export default function NewRoutineScreen() {
   };
 
   const updateItem = (index: number, update: Partial<RoutineItem>) => {
-    setItems((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, ...update } : item)),
-    );
+    setItems((prev) => prev.map((item, i) => (i === index ? { ...item, ...update } : item)));
   };
 
   const removeItem = (index: number) => {
@@ -175,9 +166,7 @@ export default function NewRoutineScreen() {
           disabled={!canSave || saving}
           className="rounded-xl px-4 py-2"
           style={{
-            backgroundColor: canSave
-              ? COLORS.primary
-              : "rgba(255,255,255,0.05)",
+            backgroundColor: canSave ? COLORS.primary : "rgba(255,255,255,0.05)",
           }}
         >
           {saving ? (
@@ -204,9 +193,7 @@ export default function NewRoutineScreen() {
       >
         {/* 루틴 정보 */}
         <View className="mb-4 rounded-2xl bg-card p-5">
-          <Text className="mb-2 text-sm font-medium text-white/60">
-            루틴 이름 *
-          </Text>
+          <Text className="mb-2 text-sm font-medium text-white/60">루틴 이름 *</Text>
           <TextInput
             value={title}
             onChangeText={setTitle}
@@ -241,33 +228,22 @@ export default function NewRoutineScreen() {
 
         {items.length === 0 ? (
           <View className="mb-4 items-center rounded-2xl bg-card p-8">
-            <Text className="text-sm text-white/40">
-              아래 버튼으로 운동 종목을 추가하세요
-            </Text>
+            <Text className="text-sm text-white/40">아래 버튼으로 운동 종목을 추가하세요</Text>
           </View>
         ) : (
           <View className="mb-4 gap-3">
             {items.map((item, idx) => (
-              <View
-                key={`${item.exercise.id}-${idx}`}
-                className="rounded-2xl bg-card p-4"
-              >
+              <View key={`${item.exercise.id}-${idx}`} className="rounded-2xl bg-card p-4">
                 {/* 운동명 + 순서/삭제 */}
                 <View className="mb-3 flex-row items-center gap-3">
                   <View className="h-8 w-8 items-center justify-center rounded-lg bg-primary/15">
-                    <Text className="text-sm font-bold text-primary">
-                      {idx + 1}
-                    </Text>
+                    <Text className="text-sm font-bold text-primary">{idx + 1}</Text>
                   </View>
                   <View className="flex-1">
-                    <Text className="text-base font-semibold text-white">
-                      {item.exercise.name}
-                    </Text>
+                    <Text className="text-base font-semibold text-white">{item.exercise.name}</Text>
                     <Text className="text-xs text-white/40">
                       {item.exercise.bodyPart}
-                      {item.exercise.partDetail
-                        ? ` · ${item.exercise.partDetail}`
-                        : ""}
+                      {item.exercise.partDetail ? ` · ${item.exercise.partDetail}` : ""}
                     </Text>
                   </View>
                   <View className="flex-row items-center gap-1">
@@ -278,9 +254,7 @@ export default function NewRoutineScreen() {
                     >
                       <ChevronUp
                         size={16}
-                        color={
-                          idx === 0 ? "rgba(255,255,255,0.15)" : COLORS.white
-                        }
+                        color={idx === 0 ? "rgba(255,255,255,0.15)" : COLORS.white}
                       />
                     </Pressable>
                     <Pressable
@@ -290,11 +264,7 @@ export default function NewRoutineScreen() {
                     >
                       <ChevronDown
                         size={16}
-                        color={
-                          idx === items.length - 1
-                            ? "rgba(255,255,255,0.15)"
-                            : COLORS.white
-                        }
+                        color={idx === items.length - 1 ? "rgba(255,255,255,0.15)" : COLORS.white}
                       />
                     </Pressable>
                     <Pressable
@@ -324,11 +294,7 @@ export default function NewRoutineScreen() {
                     >
                       <Minus
                         size={14}
-                        color={
-                          item.sets <= 1
-                            ? "rgba(255,255,255,0.15)"
-                            : COLORS.white
-                        }
+                        color={item.sets <= 1 ? "rgba(255,255,255,0.15)" : COLORS.white}
                       />
                     </Pressable>
                     <Text className="w-8 text-center text-base font-semibold text-white">
@@ -345,11 +311,7 @@ export default function NewRoutineScreen() {
                     >
                       <Plus
                         size={14}
-                        color={
-                          item.sets >= 20
-                            ? "rgba(255,255,255,0.15)"
-                            : COLORS.white
-                        }
+                        color={item.sets >= 20 ? "rgba(255,255,255,0.15)" : COLORS.white}
                       />
                     </Pressable>
                   </View>
@@ -373,11 +335,7 @@ export default function NewRoutineScreen() {
                     >
                       <Minus
                         size={14}
-                        color={
-                          item.restSeconds <= 0
-                            ? "rgba(255,255,255,0.15)"
-                            : COLORS.white
-                        }
+                        color={item.restSeconds <= 0 ? "rgba(255,255,255,0.15)" : COLORS.white}
                       />
                     </Pressable>
                     <Text className="min-w-[60px] text-center text-base font-semibold text-white">
@@ -394,11 +352,7 @@ export default function NewRoutineScreen() {
                     >
                       <Plus
                         size={14}
-                        color={
-                          item.restSeconds >= 600
-                            ? "rgba(255,255,255,0.15)"
-                            : COLORS.white
-                        }
+                        color={item.restSeconds >= 600 ? "rgba(255,255,255,0.15)" : COLORS.white}
                       />
                     </Pressable>
                   </View>

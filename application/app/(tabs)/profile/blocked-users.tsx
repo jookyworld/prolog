@@ -3,14 +3,7 @@ import { COLORS } from "@/lib/constants";
 import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BlockedUsersScreen() {
@@ -43,9 +36,7 @@ export default function BlockedUsersScreen() {
           setUnblockingId(user.userId);
           try {
             await blockApi.unblockUser(user.userId);
-            setBlockedUsers((prev) =>
-              prev.filter((u) => u.userId !== user.userId),
-            );
+            setBlockedUsers((prev) => prev.filter((u) => u.userId !== user.userId));
           } catch {
             Alert.alert("차단 해제에 실패했습니다. 잠시 후 다시 시도해주세요.");
           } finally {
@@ -76,9 +67,7 @@ export default function BlockedUsersScreen() {
           </View>
         ) : blockedUsers.length === 0 ? (
           <View className="flex-1 items-center justify-top mt-10">
-            <Text className="text-sm text-white/40">
-              차단한 사용자가 없습니다
-            </Text>
+            <Text className="text-sm text-white/40">차단한 사용자가 없습니다</Text>
           </View>
         ) : (
           <ScrollView showsVerticalScrollIndicator={false}>
@@ -87,9 +76,7 @@ export default function BlockedUsersScreen() {
                 <View key={user.userId}>
                   {index > 0 && <View className="mx-5 h-px bg-white/5" />}
                   <View className="flex-row items-center px-5 py-4">
-                    <Text className="flex-1 text-base text-white">
-                      {user.nickname}
-                    </Text>
+                    <Text className="flex-1 text-base text-white">{user.nickname}</Text>
                     <Pressable
                       onPress={() => handleUnblock(user)}
                       disabled={unblockingId === user.userId}

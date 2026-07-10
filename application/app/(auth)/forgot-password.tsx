@@ -83,16 +83,10 @@ export default function ForgotPasswordScreen() {
                   />
                 )}
               />
-              {errors.email && (
-                <Text className="text-xs text-red-400">
-                  {errors.email.message}
-                </Text>
-              )}
+              {errors.email && <Text className="text-xs text-red-400">{errors.email.message}</Text>}
             </View>
 
-            {error ? (
-              <Text className="text-center text-sm text-red-400">{error}</Text>
-            ) : null}
+            {error ? <Text className="text-center text-sm text-red-400">{error}</Text> : null}
 
             <Button
               onPress={handleSubmit(onSubmit)}

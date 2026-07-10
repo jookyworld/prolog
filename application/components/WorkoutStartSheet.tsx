@@ -22,10 +22,7 @@ interface WorkoutStartSheetProps {
   onClose: () => void;
 }
 
-export default function WorkoutStartSheet({
-  visible,
-  onClose,
-}: WorkoutStartSheetProps) {
+export default function WorkoutStartSheet({ visible, onClose }: WorkoutStartSheetProps) {
   const router = useRouter();
   const [routines, setRoutines] = useState<RoutineListItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -133,13 +130,8 @@ export default function WorkoutStartSheet({
 
         {/* Header */}
         <View className="mb-4 mt-2 flex-row items-center justify-between px-6">
-          <Text className="text-2xl font-bold text-white">
-            어떤 운동을 할까요?
-          </Text>
-          <Pressable
-            onPress={onClose}
-            className="rounded-xl p-2 active:bg-white/5"
-          >
+          <Text className="text-2xl font-bold text-white">어떤 운동을 할까요?</Text>
+          <Pressable onPress={onClose} className="rounded-xl p-2 active:bg-white/5">
             <X size={20} color={COLORS.mutedForeground} />
           </Pressable>
         </View>
@@ -159,40 +151,28 @@ export default function WorkoutStartSheet({
               <Dumbbell size={22} color={COLORS.mutedForeground} />
             </View>
             <View className="flex-1">
-              <Text className="mb-0.5 text-base font-bold text-white">
-                자유 운동
-              </Text>
-              <Text className="text-sm text-white/50">
-                루틴 없이 자유롭게 운동하기
-              </Text>
+              <Text className="mb-0.5 text-base font-bold text-white">자유 운동</Text>
+              <Text className="text-sm text-white/50">루틴 없이 자유롭게 운동하기</Text>
             </View>
           </Pressable>
 
           {loading ? (
             <View className="items-center py-10">
               <ActivityIndicator size="small" color={COLORS.primary} />
-              <Text className="mt-3 text-sm text-white/50">
-                루틴 불러오는 중...
-              </Text>
+              <Text className="mt-3 text-sm text-white/50">루틴 불러오는 중...</Text>
             </View>
           ) : error ? (
             <View className="items-center py-10">
               <View className="mb-3 h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
                 <AlertCircle size={24} color={COLORS.destructive} />
               </View>
-              <Text className="mb-1 text-base font-semibold text-white/60">
-                불러오기 실패
-              </Text>
-              <Text className="mb-4 text-sm text-white/40">
-                네트워크 연결을 확인해주세요
-              </Text>
+              <Text className="mb-1 text-base font-semibold text-white/60">불러오기 실패</Text>
+              <Text className="mb-4 text-sm text-white/40">네트워크 연결을 확인해주세요</Text>
               <Pressable
                 onPress={fetchActiveRoutines}
                 className="rounded-xl bg-white/5 px-5 py-2.5 active:opacity-80"
               >
-                <Text className="text-sm font-medium text-white/70">
-                  다시 시도
-                </Text>
+                <Text className="text-sm font-medium text-white/70">다시 시도</Text>
               </Pressable>
             </View>
           ) : routines.length === 0 ? (
@@ -200,12 +180,8 @@ export default function WorkoutStartSheet({
               <View className="mb-3 h-12 w-12 items-center justify-center rounded-full bg-white/5">
                 <LayoutGrid size={24} color={COLORS.iconMuted} />
               </View>
-              <Text className="mb-1 text-base font-semibold text-white/60">
-                활성 루틴이 없어요
-              </Text>
-              <Text className="mb-4 text-sm text-white/40">
-                루틴 탭에서 루틴을 추가해보세요
-              </Text>
+              <Text className="mb-1 text-base font-semibold text-white/60">활성 루틴이 없어요</Text>
+              <Text className="mb-4 text-sm text-white/40">루틴 탭에서 루틴을 추가해보세요</Text>
               <Pressable
                 onPress={() => {
                   onClose();
@@ -213,9 +189,7 @@ export default function WorkoutStartSheet({
                 }}
                 className="rounded-xl bg-white/5 px-5 py-2.5 active:opacity-80"
               >
-                <Text className="text-sm font-medium text-white/70">
-                  루틴 보러가기
-                </Text>
+                <Text className="text-sm font-medium text-white/70">루틴 보러가기</Text>
               </Pressable>
             </View>
           ) : (
@@ -229,10 +203,7 @@ export default function WorkoutStartSheet({
                     <Dumbbell size={22} color={COLORS.primary} />
                   </View>
                   <View className="min-w-0 flex-1">
-                    <Text
-                      className="mb-0.5 text-base font-bold text-white"
-                      numberOfLines={1}
-                    >
+                    <Text className="mb-0.5 text-base font-bold text-white" numberOfLines={1}>
                       {routine.title}
                     </Text>
                     {routine.description ? (
@@ -245,9 +216,7 @@ export default function WorkoutStartSheet({
                     onPress={() => handleSelectRoutine(routine.id)}
                     className="rounded-xl bg-primary px-5 py-2.5 active:opacity-80"
                   >
-                    <Text className="text-sm font-semibold text-white">
-                      시작
-                    </Text>
+                    <Text className="text-sm font-semibold text-white">시작</Text>
                   </Pressable>
                 </View>
               ))}

@@ -6,7 +6,14 @@ export type Role = "USER" | "ADMIN";
 export type BodyPart = "가슴" | "어깨" | "등" | "팔" | "하체" | "코어" | "유산소" | "기타";
 
 export const BODY_PARTS: BodyPart[] = [
-  "가슴", "어깨", "등", "팔", "하체", "코어", "유산소", "기타",
+  "가슴",
+  "어깨",
+  "등",
+  "팔",
+  "하체",
+  "코어",
+  "유산소",
+  "기타",
 ];
 
 export interface AdminExerciseResponse {

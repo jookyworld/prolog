@@ -59,10 +59,7 @@ export interface WorkoutExerciseCompleteReq {
 
 export interface WorkoutSessionCompleteReq {
   action:
-    | "RECORD_ONLY"
-    | "CREATE_ROUTINE_AND_RECORD"
-    | "DETACH_AND_RECORD"
-    | "UPDATE_ROUTINE_AND_RECORD";
+    "RECORD_ONLY" | "CREATE_ROUTINE_AND_RECORD" | "DETACH_AND_RECORD" | "UPDATE_ROUTINE_AND_RECORD";
   exercises: WorkoutExerciseCompleteReq[];
   routineTitle?: string;
 }
@@ -123,9 +120,7 @@ export interface WorkoutSessionDetail {
 
 // --- Conversion ---
 
-export function toWorkoutSession(
-  res: WorkoutSessionListItemRes,
-): WorkoutSession {
+export function toWorkoutSession(res: WorkoutSessionListItemRes): WorkoutSession {
   // 제목: routineTitle이 있으면 사용, 없으면 "자유 운동"
   const title = res.routineTitle ?? "자유 운동";
 
@@ -141,9 +136,7 @@ export function toWorkoutSession(
   };
 }
 
-export function toWorkoutSessionDetail(
-  res: WorkoutSessionDetailRes,
-): WorkoutSessionDetail {
+export function toWorkoutSessionDetail(res: WorkoutSessionDetailRes): WorkoutSessionDetail {
   const exercises: WorkoutExercise[] = res.exercises.map((ex, idx) => ({
     id: String(ex.exerciseId),
     orderNo: idx + 1,
@@ -158,17 +151,14 @@ export function toWorkoutSessionDetail(
 
   const totalSets = exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
   const totalVolume = exercises.reduce(
-    (sum, ex) =>
-      sum + ex.sets.reduce((s, set) => s + set.weight * set.reps, 0),
+    (sum, ex) => sum + ex.sets.reduce((s, set) => s + set.weight * set.reps, 0),
     0,
   );
 
   let elapsedTime = 0;
   if (res.startedAt && res.completedAt) {
     elapsedTime = Math.floor(
-      (new Date(res.completedAt).getTime() -
-        new Date(res.startedAt).getTime()) /
-        1000,
+      (new Date(res.completedAt).getTime() - new Date(res.startedAt).getTime()) / 1000,
     );
   }
 

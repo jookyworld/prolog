@@ -1,16 +1,15 @@
 package com.back.domain.user.user.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
-import org.hibernate.annotations.BatchSize;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @BatchSize(size = 20)
 @Entity
@@ -25,20 +24,26 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false, unique = true, length = 50)
     private String username;
+
     @Column(nullable = false)
     private String password;
 
     @Column(nullable = false, unique = true, length = 100)
     private String email;
+
     @Column(nullable = false, unique = true, length = 50)
     private String nickname;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Gender gender = Gender.UNKNOWN;
+
     @Column(nullable = false)
     private double height;
+
     @Column(nullable = false)
     private double weight;
 
@@ -55,6 +60,7 @@ public class User {
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;

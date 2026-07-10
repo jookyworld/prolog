@@ -1,21 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { reportApi } from "@/lib/api";
 import type { AdminReportResponse, ReportStatus } from "@/lib/types";
-import {
-  REPORT_REASON_LABEL,
-  REPORT_STATUS_LABEL,
-  REPORT_TARGET_LABEL,
-} from "@/lib/types";
+import { REPORT_REASON_LABEL, REPORT_STATUS_LABEL, REPORT_TARGET_LABEL } from "@/lib/types";
 
 interface ReportDetailModalProps {
   open: boolean;

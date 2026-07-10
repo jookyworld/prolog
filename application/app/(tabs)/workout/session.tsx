@@ -25,10 +25,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function WorkoutSessionScreen() {
   const router = useRouter();
@@ -46,9 +43,7 @@ export default function WorkoutSessionScreen() {
   const [routineTitle, setRoutineTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
-  const [originalRoutineItems, setOriginalRoutineItems] = useState<
-    RoutineItemRes[] | null
-  >(null);
+  const [originalRoutineItems, setOriginalRoutineItems] = useState<RoutineItemRes[] | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const setIdCounter = useRef(0);
   const initRef = useRef(false);
@@ -111,28 +106,18 @@ export default function WorkoutSessionScreen() {
               startedAtRef.current = new Date(session.startedAt).getTime();
               startWorkout(session.id, null, session.startedAt);
             }
-          } else if (
-            currentSession &&
-            currentSession.routineId === numericRoutineId
-          ) {
+          } else if (currentSession && currentSession.routineId === numericRoutineId) {
             // Resume existing routine session
-            const routine = await routineApi.getRoutineDetail(
-              numericRoutineId!,
-            );
+            const routine = await routineApi.getRoutineDetail(numericRoutineId!);
             setRoutineTitle(routine.title);
             setSessionId(currentSession.sessionId);
             setOriginalRoutineItems(routine.routineItems);
             startedAtRef.current = new Date(currentSession.startedAt).getTime();
 
             // Load last session data for pre-filling
-            let lastDataMap = new Map<
-              number,
-              { weight: number; reps: number }[]
-            >();
+            let lastDataMap = new Map<number, { weight: number; reps: number }[]>();
             try {
-              const lastSession = await workoutApi.getLastSessionByRoutine(
-                numericRoutineId!,
-              );
+              const lastSession = await workoutApi.getLastSessionByRoutine(numericRoutineId!);
               lastSession.exercises.forEach((ex) => {
                 lastDataMap.set(
                   ex.exerciseId,
@@ -181,14 +166,9 @@ export default function WorkoutSessionScreen() {
             startWorkout(session.id, numericRoutineId, session.startedAt);
 
             // Load last session data for pre-filling
-            let lastDataMap = new Map<
-              number,
-              { weight: number; reps: number }[]
-            >();
+            let lastDataMap = new Map<number, { weight: number; reps: number }[]>();
             try {
-              const lastSession = await workoutApi.getLastSessionByRoutine(
-                numericRoutineId!,
-              );
+              const lastSession = await workoutApi.getLastSessionByRoutine(numericRoutineId!);
               lastSession.exercises.forEach((ex) => {
                 lastDataMap.set(
                   ex.exerciseId,
@@ -225,11 +205,9 @@ export default function WorkoutSessionScreen() {
             setExercises(activeExercises);
           }
         } catch (err) {
-          Alert.alert(
-            "운동을 시작할 수 없습니다. 잠시 후 다시 시도해주세요.",
-            undefined,
-            [{ text: "확인", onPress: () => router.back() }],
-          );
+          Alert.alert("운동을 시작할 수 없습니다. 잠시 후 다시 시도해주세요.", undefined, [
+            { text: "확인", onPress: () => router.back() },
+          ]);
         } finally {
           setLoading(false);
         }
@@ -260,9 +238,7 @@ export default function WorkoutSessionScreen() {
           i === exerciseIdx
             ? {
                 ...ex,
-                sets: ex.sets.map((s) =>
-                  s.id === setId ? { ...s, ...updates } : s,
-                ),
+                sets: ex.sets.map((s) => (s.id === setId ? { ...s, ...updates } : s)),
               }
             : ex,
         ),
@@ -337,9 +313,7 @@ export default function WorkoutSessionScreen() {
   const hasRoutineChanged = useCallback(() => {
     if (!originalRoutineItems) return false;
 
-    const sorted = [...originalRoutineItems].sort(
-      (a, b) => a.orderInRoutine - b.orderInRoutine,
-    );
+    const sorted = [...originalRoutineItems].sort((a, b) => a.orderInRoutine - b.orderInRoutine);
 
     if (sorted.length !== exercises.length) return true;
 
@@ -378,9 +352,7 @@ export default function WorkoutSessionScreen() {
     }
   };
 
-  const promptRoutineTitleAndCreate = (
-    completedExercises: WorkoutExerciseCompleteReq[],
-  ) => {
+  const promptRoutineTitleAndCreate = (completedExercises: WorkoutExerciseCompleteReq[]) => {
     Alert.prompt(
       "루틴 이름 입력",
       "이 운동을 루틴으로 저장합니다.",
@@ -394,11 +366,7 @@ export default function WorkoutSessionScreen() {
               Alert.alert("알림", "루틴 이름을 입력해주세요.");
               return;
             }
-            completeWithAction(
-              "CREATE_ROUTINE_AND_RECORD",
-              completedExercises,
-              trimmed,
-            );
+            completeWithAction("CREATE_ROUTINE_AND_RECORD", completedExercises, trimmed);
           },
         },
       ],
@@ -427,10 +395,7 @@ export default function WorkoutSessionScreen() {
       return;
     }
 
-    const totalSets = completedExercises.reduce(
-      (sum, ex) => sum + ex.sets.length,
-      0,
-    );
+    const totalSets = completedExercises.reduce((sum, ex) => sum + ex.sets.length, 0);
 
     if (isFreeWorkout) {
       // Free workout: offer to record only or create a routine
@@ -450,31 +415,21 @@ export default function WorkoutSessionScreen() {
 
     // Routine-based session with changes
     if (originalRoutineItems && hasRoutineChanged()) {
-      Alert.alert(
-        "운동 구성이 변경됨",
-        "루틴과 다른 구성으로 운동했습니다. 어떻게 저장할까요?",
-        [
-          { text: "취소", style: "cancel" },
-          {
-            text: "이대로 저장",
-            onPress: () =>
-              completeWithAction("RECORD_ONLY", completedExercises),
-          },
-          {
-            text: "자유 운동으로 저장",
-            onPress: () =>
-              completeWithAction("DETACH_AND_RECORD", completedExercises),
-          },
-          {
-            text: "루틴도 업데이트",
-            onPress: () =>
-              completeWithAction(
-                "UPDATE_ROUTINE_AND_RECORD",
-                completedExercises,
-              ),
-          },
-        ],
-      );
+      Alert.alert("운동 구성이 변경됨", "루틴과 다른 구성으로 운동했습니다. 어떻게 저장할까요?", [
+        { text: "취소", style: "cancel" },
+        {
+          text: "이대로 저장",
+          onPress: () => completeWithAction("RECORD_ONLY", completedExercises),
+        },
+        {
+          text: "자유 운동으로 저장",
+          onPress: () => completeWithAction("DETACH_AND_RECORD", completedExercises),
+        },
+        {
+          text: "루틴도 업데이트",
+          onPress: () => completeWithAction("UPDATE_ROUTINE_AND_RECORD", completedExercises),
+        },
+      ]);
       return;
     }
 
@@ -488,31 +443,27 @@ export default function WorkoutSessionScreen() {
   };
 
   const handleCancel = () => {
-    Alert.alert(
-      "운동 중단",
-      "운동을 중단하시겠습니까?\n기록이 저장되지 않습니다.",
-      [
-        { text: "계속하기", style: "cancel" },
-        {
-          text: "그만하기",
-          style: "destructive",
-          onPress: async () => {
-            if (sessionId) {
-              try {
-                await workoutApi.cancelSession(sessionId);
-              } catch {
-                // 취소 실패해도 로컬 상태는 정리
-              }
+    Alert.alert("운동 중단", "운동을 중단하시겠습니까?\n기록이 저장되지 않습니다.", [
+      { text: "계속하기", style: "cancel" },
+      {
+        text: "그만하기",
+        style: "destructive",
+        onPress: async () => {
+          if (sessionId) {
+            try {
+              await workoutApi.cancelSession(sessionId);
+            } catch {
+              // 취소 실패해도 로컬 상태는 정리
             }
-            endWorkout();
-            initRef.current = false;
-            setLoading(true);
-            setElapsedTime(0);
-            router.back();
-          },
+          }
+          endWorkout();
+          initRef.current = false;
+          setLoading(true);
+          setElapsedTime(0);
+          router.back();
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const handleAddExercise = () => {
@@ -524,10 +475,7 @@ export default function WorkoutSessionScreen() {
     return exercise.sets.every((set) => set.completed);
   };
 
-  const handleExerciseLongPress = (
-    exerciseIdx: number,
-    exerciseName: string,
-  ) => {
+  const handleExerciseLongPress = (exerciseIdx: number, exerciseName: string) => {
     const buttons: any[] = [];
 
     if (exerciseIdx > 0) {
@@ -579,274 +527,230 @@ export default function WorkoutSessionScreen() {
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-      {/* Header */}
-      <View className="border-b border-white/10 px-5 py-3">
-        {/* Row 1: Back, Timer, Complete */}
-        <View className="flex-row items-center">
-          <Pressable
-            onPress={handleCancel}
-            className="h-10 w-10 items-center justify-center"
-          >
-            <ChevronLeft size={24} color={COLORS.white} />
-          </Pressable>
+        {/* Header */}
+        <View className="border-b border-white/10 px-5 py-3">
+          {/* Row 1: Back, Timer, Complete */}
+          <View className="flex-row items-center">
+            <Pressable onPress={handleCancel} className="h-10 w-10 items-center justify-center">
+              <ChevronLeft size={24} color={COLORS.white} />
+            </Pressable>
 
-          <Text className="flex-1 text-center text-3xl font-bold text-white">
-            {formatElapsedTime(elapsedTime)}
-          </Text>
-
-          <Pressable
-            onPress={handleComplete}
-            disabled={completing}
-            className="rounded-xl bg-primary px-4 py-2 active:opacity-80"
-          >
-            {completing ? (
-              <ActivityIndicator size="small" color={COLORS.white} />
-            ) : (
-              <Text className="text-sm font-semibold text-white">완료</Text>
-            )}
-          </Pressable>
-        </View>
-
-        {/* Row 2: Routine title */}
-        <Text
-          className="mt-4 pb-1 text-2xl font-bold text-white"
-          numberOfLines={1}
-        >
-          {routineTitle}
-        </Text>
-
-        {/* Row 3: Progress bar */}
-        {exercises.length > 0 &&
-          (() => {
-            const totalSets = exercises.reduce(
-              (sum, ex) => sum + ex.sets.length,
-              0,
-            );
-            const completedSets = exercises.reduce(
-              (sum, ex) => sum + ex.sets.filter((s) => s.completed).length,
-              0,
-            );
-            const progress =
-              totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
-
-            return (
-              <View className="mt-3">
-                <View className="mb-1.5 flex-row items-center justify-between">
-                  <Text className="text-xs font-medium text-white/50">
-                    진행률
-                  </Text>
-                  <Text className="text-xs font-semibold text-white/70">
-                    {completedSets}/{totalSets}
-                  </Text>
-                </View>
-                <View className="h-1.5 overflow-hidden rounded-full bg-white/10">
-                  <View
-                    className="h-full rounded-full bg-primary"
-                    style={{ width: `${progress}%` }}
-                  />
-                </View>
-              </View>
-            );
-          })()}
-      </View>
-
-      {/* Exercise list */}
-      {exercises.length === 0 ? (
-        <View className="flex-1 items-center justify-center px-6">
-          <Text className="mb-2 text-lg font-semibold text-white/60">
-            종목을 추가해주세요
-          </Text>
-          <Text className="mb-6 text-sm text-white/40">
-            하단의 버튼을 눌러 운동을 추가하세요
-          </Text>
-          <Pressable
-            onPress={handleAddExercise}
-            className="rounded-xl bg-primary px-6 py-3 active:opacity-80"
-          >
-            <Text className="text-base font-semibold text-white">
-              종목 추가하기
+            <Text className="flex-1 text-center text-3xl font-bold text-white">
+              {formatElapsedTime(elapsedTime)}
             </Text>
-          </Pressable>
-        </View>
-      ) : (
-        <ScrollView
-          className="flex-1 pt-4"
-          contentContainerStyle={{
-            paddingBottom: 60 + TAB_BAR_HEIGHT + insets.bottom,
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          {exercises.map((exercise, exerciseIdx) => {
-            const isCompleted = isExerciseCompleted(exercise);
-            const completedSets = exercise.sets.filter(
-              (s) => s.completed,
-            ).length;
 
-            return (
-              <View key={exercise.id} className="mb-8 px-5">
-                <View className="flex-row">
-                  {/* Left: Number + Buttons */}
-                  <View
-                    className="mr-4 items-center gap-3"
-                    style={{ width: 48 }}
-                  >
-                    {/* Exercise number */}
-                    <Pressable
-                      onPress={() =>
-                        handleExerciseLongPress(exerciseIdx, exercise.name)
-                      }
-                      className="h-10 w-10 items-center justify-center rounded-full bg-white/8 active:bg-white/10"
-                    >
-                      <Text
-                        className="text-base font-bold"
-                        style={{
-                          color: isCompleted
-                            ? "#22c55e"
-                            : "rgba(255,255,255,0.6)",
-                        }}
-                      >
-                        {exerciseIdx + 1}
-                      </Text>
-                    </Pressable>
+            <Pressable
+              onPress={handleComplete}
+              disabled={completing}
+              className="rounded-xl bg-primary px-4 py-2 active:opacity-80"
+            >
+              {completing ? (
+                <ActivityIndicator size="small" color={COLORS.white} />
+              ) : (
+                <Text className="text-sm font-semibold text-white">완료</Text>
+              )}
+            </Pressable>
+          </View>
 
-                    {/* Add/Remove set buttons - vertical */}
-                    <View className="items-center gap-1 rounded-xl bg-white/5 px-2 py-2">
-                      <Pressable
-                        onPress={() => removeSet(exerciseIdx)}
-                        disabled={exercise.sets.length <= 1}
-                        className="h-7 w-7 items-center justify-center rounded-lg active:bg-white/10"
-                        style={{
-                          opacity: exercise.sets.length <= 1 ? 0.3 : 1,
-                        }}
-                      >
-                        <Minus size={14} color={COLORS.mutedForeground} />
-                      </Pressable>
-                      <Text className="text-[10px] font-medium text-white/40">
-                        세트
-                      </Text>
-                      <Pressable
-                        onPress={() => addSet(exerciseIdx)}
-                        className="h-7 w-7 items-center justify-center rounded-lg active:bg-white/10"
-                      >
-                        <Plus size={14} color={COLORS.mutedForeground} />
-                      </Pressable>
-                    </View>
+          {/* Row 2: Routine title */}
+          <Text className="mt-4 pb-1 text-2xl font-bold text-white" numberOfLines={1}>
+            {routineTitle}
+          </Text>
+
+          {/* Row 3: Progress bar */}
+          {exercises.length > 0 &&
+            (() => {
+              const totalSets = exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
+              const completedSets = exercises.reduce(
+                (sum, ex) => sum + ex.sets.filter((s) => s.completed).length,
+                0,
+              );
+              const progress = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
+
+              return (
+                <View className="mt-3">
+                  <View className="mb-1.5 flex-row items-center justify-between">
+                    <Text className="text-xs font-medium text-white/50">진행률</Text>
+                    <Text className="text-xs font-semibold text-white/70">
+                      {completedSets}/{totalSets}
+                    </Text>
                   </View>
+                  <View className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                    <View
+                      className="h-full rounded-full bg-primary"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </View>
+                </View>
+              );
+            })()}
+        </View>
 
-                  {/* Right: Header + Sets */}
-                  <View className="flex-1">
-                    {/* Header */}
-                    <View className="mb-3 h-10 flex-row items-center justify-between">
-                      <Text className="text-lg font-bold text-white">
-                        {exercise.name}
-                      </Text>
-                      <View className="flex-row items-center gap-2">
-                        {isCompleted && (
-                          <View className="rounded-full bg-green-500/20 px-2 py-0.5">
-                            <Text className="text-[10px] font-bold text-green-400">
-                              완료
-                            </Text>
-                          </View>
-                        )}
-                        <Text className="text-xs text-white/40">
-                          {completedSets}/{exercise.sets.length} 세트
+        {/* Exercise list */}
+        {exercises.length === 0 ? (
+          <View className="flex-1 items-center justify-center px-6">
+            <Text className="mb-2 text-lg font-semibold text-white/60">종목을 추가해주세요</Text>
+            <Text className="mb-6 text-sm text-white/40">하단의 버튼을 눌러 운동을 추가하세요</Text>
+            <Pressable
+              onPress={handleAddExercise}
+              className="rounded-xl bg-primary px-6 py-3 active:opacity-80"
+            >
+              <Text className="text-base font-semibold text-white">종목 추가하기</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <ScrollView
+            className="flex-1 pt-4"
+            contentContainerStyle={{
+              paddingBottom: 60 + TAB_BAR_HEIGHT + insets.bottom,
+            }}
+            showsVerticalScrollIndicator={false}
+          >
+            {exercises.map((exercise, exerciseIdx) => {
+              const isCompleted = isExerciseCompleted(exercise);
+              const completedSets = exercise.sets.filter((s) => s.completed).length;
+
+              return (
+                <View key={exercise.id} className="mb-8 px-5">
+                  <View className="flex-row">
+                    {/* Left: Number + Buttons */}
+                    <View className="mr-4 items-center gap-3" style={{ width: 48 }}>
+                      {/* Exercise number */}
+                      <Pressable
+                        onPress={() => handleExerciseLongPress(exerciseIdx, exercise.name)}
+                        className="h-10 w-10 items-center justify-center rounded-full bg-white/8 active:bg-white/10"
+                      >
+                        <Text
+                          className="text-base font-bold"
+                          style={{
+                            color: isCompleted ? "#22c55e" : "rgba(255,255,255,0.6)",
+                          }}
+                        >
+                          {exerciseIdx + 1}
                         </Text>
+                      </Pressable>
+
+                      {/* Add/Remove set buttons - vertical */}
+                      <View className="items-center gap-1 rounded-xl bg-white/5 px-2 py-2">
+                        <Pressable
+                          onPress={() => removeSet(exerciseIdx)}
+                          disabled={exercise.sets.length <= 1}
+                          className="h-7 w-7 items-center justify-center rounded-lg active:bg-white/10"
+                          style={{
+                            opacity: exercise.sets.length <= 1 ? 0.3 : 1,
+                          }}
+                        >
+                          <Minus size={14} color={COLORS.mutedForeground} />
+                        </Pressable>
+                        <Text className="text-[10px] font-medium text-white/40">세트</Text>
+                        <Pressable
+                          onPress={() => addSet(exerciseIdx)}
+                          className="h-7 w-7 items-center justify-center rounded-lg active:bg-white/10"
+                        >
+                          <Plus size={14} color={COLORS.mutedForeground} />
+                        </Pressable>
                       </View>
                     </View>
 
-                    {/* Set rows */}
-                    <View className="gap-2.5">
-                      {exercise.sets.map((set) => (
-                        <View
-                          key={set.id}
-                          className="flex-row items-center gap-2.5"
-                        >
-                          <View style={{ width: 36 }}>
-                            <Text className="text-center text-base font-bold text-white">
-                              {set.setNumber}
-                            </Text>
-                          </View>
-                          <View
-                            className="flex-1 flex-row items-center gap-1 rounded-lg px-3 py-2.5"
-                            style={{
-                              backgroundColor: "rgba(255,255,255,0.08)",
-                            }}
-                          >
-                            <TextInput
-                              className="flex-1 text-center text-sm font-semibold text-white"
-                              placeholder="0"
-                              placeholderTextColor={COLORS.placeholder}
-                              keyboardType="numeric"
-                              value={set.weight}
-                              onChangeText={(v) =>
+                    {/* Right: Header + Sets */}
+                    <View className="flex-1">
+                      {/* Header */}
+                      <View className="mb-3 h-10 flex-row items-center justify-between">
+                        <Text className="text-lg font-bold text-white">{exercise.name}</Text>
+                        <View className="flex-row items-center gap-2">
+                          {isCompleted && (
+                            <View className="rounded-full bg-green-500/20 px-2 py-0.5">
+                              <Text className="text-[10px] font-bold text-green-400">완료</Text>
+                            </View>
+                          )}
+                          <Text className="text-xs text-white/40">
+                            {completedSets}/{exercise.sets.length} 세트
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Set rows */}
+                      <View className="gap-2.5">
+                        {exercise.sets.map((set) => (
+                          <View key={set.id} className="flex-row items-center gap-2.5">
+                            <View style={{ width: 36 }}>
+                              <Text className="text-center text-base font-bold text-white">
+                                {set.setNumber}
+                              </Text>
+                            </View>
+                            <View
+                              className="flex-1 flex-row items-center gap-1 rounded-lg px-3 py-2.5"
+                              style={{
+                                backgroundColor: "rgba(255,255,255,0.08)",
+                              }}
+                            >
+                              <TextInput
+                                className="flex-1 text-center text-sm font-semibold text-white"
+                                placeholder="0"
+                                placeholderTextColor={COLORS.placeholder}
+                                keyboardType="numeric"
+                                value={set.weight}
+                                onChangeText={(v) =>
+                                  updateSet(exerciseIdx, set.id, {
+                                    weight: v,
+                                  })
+                                }
+                              />
+                              <Text className="text-sm font-medium text-white/50">kg</Text>
+                            </View>
+                            <View
+                              className="flex-1 flex-row items-center gap-1 rounded-lg px-3 py-2.5"
+                              style={{
+                                backgroundColor: "rgba(255,255,255,0.08)",
+                              }}
+                            >
+                              <TextInput
+                                className="flex-1 text-center text-sm font-semibold text-white"
+                                placeholder="0"
+                                placeholderTextColor={COLORS.placeholder}
+                                keyboardType="numeric"
+                                value={set.reps}
+                                onChangeText={(v) => updateSet(exerciseIdx, set.id, { reps: v })}
+                              />
+                              <Text className="text-sm font-medium text-white/50">회</Text>
+                            </View>
+                            <Pressable
+                              onPress={() =>
                                 updateSet(exerciseIdx, set.id, {
-                                  weight: v,
+                                  completed: !set.completed,
                                 })
                               }
-                            />
-                            <Text className="text-sm font-medium text-white/50">
-                              kg
-                            </Text>
+                              className="h-10 w-10 items-center justify-center rounded-lg"
+                              style={{
+                                backgroundColor: set.completed
+                                  ? COLORS.primary
+                                  : "rgba(255,255,255,0.08)",
+                              }}
+                            >
+                              <Check
+                                size={16}
+                                color={set.completed ? COLORS.white : COLORS.iconMuted}
+                              />
+                            </Pressable>
                           </View>
-                          <View
-                            className="flex-1 flex-row items-center gap-1 rounded-lg px-3 py-2.5"
-                            style={{
-                              backgroundColor: "rgba(255,255,255,0.08)",
-                            }}
-                          >
-                            <TextInput
-                              className="flex-1 text-center text-sm font-semibold text-white"
-                              placeholder="0"
-                              placeholderTextColor={COLORS.placeholder}
-                              keyboardType="numeric"
-                              value={set.reps}
-                              onChangeText={(v) =>
-                                updateSet(exerciseIdx, set.id, { reps: v })
-                              }
-                            />
-                            <Text className="text-sm font-medium text-white/50">
-                              회
-                            </Text>
-                          </View>
-                          <Pressable
-                            onPress={() =>
-                              updateSet(exerciseIdx, set.id, {
-                                completed: !set.completed,
-                              })
-                            }
-                            className="h-10 w-10 items-center justify-center rounded-lg"
-                            style={{
-                              backgroundColor: set.completed
-                                ? COLORS.primary
-                                : "rgba(255,255,255,0.08)",
-                            }}
-                          >
-                            <Check
-                              size={16}
-                              color={
-                                set.completed ? COLORS.white : COLORS.iconMuted
-                              }
-                            />
-                          </Pressable>
-                        </View>
-                      ))}
+                        ))}
+                      </View>
                     </View>
                   </View>
                 </View>
-              </View>
-            );
-          })}
+              );
+            })}
 
-          {/* 종목 추가 버튼 */}
-          <Pressable
-            onPress={handleAddExercise}
-            className="mx-5 mb-4 flex-row items-center justify-center gap-2 rounded-2xl bg-white/8 py-4 active:opacity-80"
-          >
-            <Plus size={18} color={COLORS.white} />
-            <Text className="text-sm font-semibold text-white">종목 추가</Text>
-          </Pressable>
-        </ScrollView>
-      )}
+            {/* 종목 추가 버튼 */}
+            <Pressable
+              onPress={handleAddExercise}
+              className="mx-5 mb-4 flex-row items-center justify-center gap-2 rounded-2xl bg-white/8 py-4 active:opacity-80"
+            >
+              <Plus size={18} color={COLORS.white} />
+              <Text className="text-sm font-semibold text-white">종목 추가</Text>
+            </Pressable>
+          </ScrollView>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

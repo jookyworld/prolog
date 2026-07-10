@@ -24,10 +24,10 @@ public class CommentService {
 
     @Transactional
     public CommentResponse createComment(Long userId, Long sharedRoutineId, CommentCreateRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
 
-        SharedRoutine sharedRoutine = sharedRoutineRepository.findById(sharedRoutineId)
+        SharedRoutine sharedRoutine = sharedRoutineRepository
+                .findById(sharedRoutineId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 공유 루틴입니다."));
 
         Comment comment = Comment.builder()
@@ -43,8 +43,8 @@ public class CommentService {
 
     @Transactional
     public void deleteComment(Long userId, Long commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 댓글입니다."));
+        Comment comment =
+                commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("존재하지 않는 댓글입니다."));
 
         if (!userId.equals(comment.getUser().getId())) {
             throw new ForbiddenException("권한이 없습니다.");
@@ -55,8 +55,8 @@ public class CommentService {
 
     @Transactional
     public void adminDeleteComment(Long commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 댓글입니다."));
+        Comment comment =
+                commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("존재하지 않는 댓글입니다."));
         commentRepository.delete(comment);
     }
 }

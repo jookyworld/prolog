@@ -5,17 +5,8 @@ import { WorkoutSession, toWorkoutSession } from "@/lib/types/workout";
 import { useRouter } from "expo-router";
 import { ChevronLeft, Dumbbell } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 const BODY_PART_FILTERS: { value: string | null; label: string }[] = [
   { value: null, label: "전체" },
@@ -47,18 +38,12 @@ export default function WorkoutHistoryScreen() {
     setLoading(true);
     setError(null);
     try {
-      const data = await workoutApi.getSessions(
-        0,
-        PAGE_SIZE,
-        filter ?? undefined,
-      );
+      const data = await workoutApi.getSessions(0, PAGE_SIZE, filter ?? undefined);
       setSessions(data.content.map(toWorkoutSession));
       setPage(0);
       setHasMore(!data.last);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "데이터를 불러오지 못했습니다.",
-      );
+      setError(err instanceof Error ? err.message : "데이터를 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
@@ -70,11 +55,7 @@ export default function WorkoutHistoryScreen() {
     setLoadingMore(true);
     try {
       const nextPage = page + 1;
-      const data = await workoutApi.getSessions(
-        nextPage,
-        PAGE_SIZE,
-        bodyPart ?? undefined,
-      );
+      const data = await workoutApi.getSessions(nextPage, PAGE_SIZE, bodyPart ?? undefined);
       setSessions((prev) => [...prev, ...data.content.map(toWorkoutSession)]);
       setPage(nextPage);
       setHasMore(!data.last);
@@ -91,8 +72,7 @@ export default function WorkoutHistoryScreen() {
   }, [bodyPart]);
 
   const monthGroups = useMemo(() => {
-    const groups: { key: string; label: string; sessions: WorkoutSession[] }[] =
-      [];
+    const groups: { key: string; label: string; sessions: WorkoutSession[] }[] = [];
     for (const session of sessions) {
       const d = new Date(session.completedAt);
       const key = `${d.getFullYear()}-${d.getMonth()}`;
@@ -110,10 +90,7 @@ export default function WorkoutHistoryScreen() {
   const handleScroll = useCallback(
     ({ nativeEvent }: { nativeEvent: any }) => {
       const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-      if (
-        layoutMeasurement.height + contentOffset.y >=
-        contentSize.height - 300
-      ) {
+      if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 300) {
         loadMore();
       }
     },
@@ -148,9 +125,7 @@ export default function WorkoutHistoryScreen() {
               onPress={() => setBodyPart(f.value)}
               className={`rounded-full px-4 py-2 ${active ? "bg-primary" : "bg-card"}`}
             >
-              <Text
-                className={`text-sm font-medium ${active ? "text-white" : "text-white/50"}`}
-              >
+              <Text className={`text-sm font-medium ${active ? "text-white" : "text-white/50"}`}>
                 {f.label}
               </Text>
             </Pressable>
@@ -190,9 +165,7 @@ export default function WorkoutHistoryScreen() {
               </View>
               <View className="flex-1">
                 <Text className="mb-1 text-base font-semibold text-white">
-                  {bodyPart
-                    ? `${bodyPart} 운동 기록이 없어요`
-                    : "아직 운동 기록이 없어요"}
+                  {bodyPart ? `${bodyPart} 운동 기록이 없어요` : "아직 운동 기록이 없어요"}
                 </Text>
                 <Text className="text-sm leading-5 text-white/50">
                   {bodyPart
@@ -207,34 +180,23 @@ export default function WorkoutHistoryScreen() {
             {monthGroups.map((group) => (
               <View key={group.key}>
                 {/* 월 헤더 */}
-                <Text className="pb-3 pt-5 text-lg font-bold text-white">
-                  {group.label}
-                </Text>
+                <Text className="pb-3 pt-5 text-lg font-bold text-white">{group.label}</Text>
 
                 {/* 해당 월 카드들 */}
                 <View className="gap-3">
                   {group.sessions.map((session) => (
                     <Pressable
                       key={session.id}
-                      onPress={() =>
-                        router.push(`/(tabs)/profile/history/${session.id}`)
-                      }
+                      onPress={() => router.push(`/(tabs)/profile/history/${session.id}`)}
                       className="rounded-2xl bg-card px-5 py-4 active:opacity-80"
                     >
-                      <Text className="mb-2 text-xl font-semibold text-white">
-                        {session.title}
-                      </Text>
+                      <Text className="mb-2 text-xl font-semibold text-white">{session.title}</Text>
                       <View className="flex-row items-end justify-between">
                         {session.bodyParts.length > 0 ? (
                           <View className="flex-1 flex-row flex-wrap gap-1.5">
                             {session.bodyParts.map((part) => (
-                              <View
-                                key={part}
-                                className="rounded-full bg-primary/10 px-2.5 py-0.5"
-                              >
-                                <Text className="text-xs font-medium text-primary">
-                                  {part}
-                                </Text>
+                              <View key={part} className="rounded-full bg-primary/10 px-2.5 py-0.5">
+                                <Text className="text-xs font-medium text-primary">{part}</Text>
                               </View>
                             ))}
                           </View>

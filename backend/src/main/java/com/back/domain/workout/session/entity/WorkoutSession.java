@@ -4,6 +4,9 @@ import com.back.domain.routine.routine.entity.Routine;
 import com.back.domain.user.user.entity.User;
 import com.back.domain.workout.sessionexercise.entity.WorkoutSessionExercise;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,10 +14,6 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Entity
@@ -34,12 +33,13 @@ public class WorkoutSession {
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "routine_id",
-        foreignKey = @ForeignKey(
-            name = "fk_workout_sessions_routines",
-            foreignKeyDefinition = "FOREIGN KEY (routine_id) REFERENCES routines(id) ON DELETE SET NULL"
-        )
-    )
+    @JoinColumn(
+            name = "routine_id",
+            foreignKey =
+                    @ForeignKey(
+                            name = "fk_workout_sessions_routines",
+                            foreignKeyDefinition =
+                                    "FOREIGN KEY (routine_id) REFERENCES routines(id) ON DELETE SET NULL"))
     private Routine routine;
 
     // 스냅샷: 세션 시작 시점의 루틴 제목 (루틴 삭제 후에도 보존)
@@ -48,18 +48,19 @@ public class WorkoutSession {
 
     @Column(nullable = false)
     private LocalDateTime startedAt;
+
     private LocalDateTime completedAt;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "workoutSession", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkoutSessionExercise> sessionExercises = new ArrayList<>();
-
 
     private WorkoutSession(User user, Routine routine, LocalDateTime startedAt) {
         this.user = user;
@@ -79,5 +80,4 @@ public class WorkoutSession {
     public boolean isCompleted() {
         return completedAt != null;
     }
-
 }

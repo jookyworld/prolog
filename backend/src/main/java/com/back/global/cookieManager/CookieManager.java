@@ -11,8 +11,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CookieManager {
     private final HttpServletResponse httpServletResponse;
+
     @Value("${jwt.access-exp}")
     private int accessExp;
+
     @Value("${jwt.refresh-exp}")
     private int refreshExp;
 
@@ -29,7 +31,6 @@ public class CookieManager {
         deleteCookie("refreshToken");
     }
 
-
     public void setCookie(String name, String value, int maxAge) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .httpOnly(true)
@@ -45,5 +46,4 @@ public class CookieManager {
     public void deleteCookie(String name) {
         setCookie(name, "", 0);
     }
-
 }

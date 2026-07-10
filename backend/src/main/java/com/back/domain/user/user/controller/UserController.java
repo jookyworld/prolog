@@ -19,18 +19,14 @@ public class UserController {
 
     @PatchMapping("/me")
     public ResponseEntity<UserResponse> updateProfile(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @Valid @RequestBody UpdateProfileRequest dto
-    ) {
+            @AuthenticationPrincipal UserPrincipal principal, @Valid @RequestBody UpdateProfileRequest dto) {
         UserResponse response = userService.updateProfile(principal.getId(), dto);
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/me/marketing-consent")
     public ResponseEntity<UserResponse> updateMarketingConsent(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @RequestBody UpdateMarketingConsentRequest dto
-    ) {
+            @AuthenticationPrincipal UserPrincipal principal, @RequestBody UpdateMarketingConsentRequest dto) {
         UserResponse response = userService.updateMarketingConsent(principal.getId(), dto.marketingConsent());
         return ResponseEntity.ok(response);
     }

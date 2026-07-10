@@ -61,7 +61,7 @@ export default function ReportsPage() {
             ...prev,
             content: prev.content.map((r) => (r.id === updated.id ? updated : r)),
           }
-        : prev
+        : prev,
     );
     setSelectedReport(updated);
   };
