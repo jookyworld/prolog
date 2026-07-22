@@ -105,12 +105,50 @@ npm run build              # 프로덕션 빌드
 
 ### Git 컨벤션
 
+#### 브랜치
+
+- `main`: 프로덕션 — 직접 push 최소화, PR(squash merge) 권장.
+- 브랜치 접두어: `feat/`, `fix/`, `chore/`, `refactor/`, `docs/`
+- 이름은 설명적으로: `feat/exercise-search`, `fix/login-token-expiry`
+- merge 완료 후 브랜치 즉시 삭제 (원격 + 로컬).
+
+#### 작업 흐름
+
+1. `main`에서 `git checkout -b feat/xxx`
+2. 작업 단위로 커밋
+3. 필요 시 `git pull origin main --rebase`
+4. push → PR 생성 → CI 통과 → squash merge
+5. `main` pull 후 로컬 브랜치 삭제, `git fetch --prune`
+
+#### 커밋 메시지
+
 ```
 <type>(<scope>): <subject>
 ```
-- type: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`
-- scope: `backend`, `application`, `admin`, `web`, 또는 도메인명
-- 예: `feat(backend): 볼륨 통계 API 추가`
+
+| type | 용도 |
+|---|---|
+| `feat` | 신규 기능 (UI 변경 포함) |
+| `fix` | 버그 및 디자인 수정 |
+| `refactor` | 동작 변화 없는 코드 구조 개선 |
+| `chore` | 설정, 배포, 인프라, 의존성, 기타 |
+| `docs` | 문서 작업 |
+| `test` | 테스트 추가/수정 |
+| `style` | 코드 포맷팅 (디자인 아님) |
+
+| scope | 대상 |
+|---|---|
+| `backend` | 백엔드 |
+| `application` | 앱 |
+| `admin` | 관리자 페이지 |
+| `web` | 웹 페이지 |
+| `infra` | 인프라 |
+| `deploy` | 배포 |
+| `db` | DB |
+| `docs` | 문서 |
+
+- 예: `feat(application): 종목 검색 시 부위로도 검색 가능`
+- 사용자가 보는 변화는 `feat`, `fix`만 해당
 
 ### 보안
 
