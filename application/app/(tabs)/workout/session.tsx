@@ -29,7 +29,6 @@ import DraggableFlatList, {
   ScaleDecorator,
 } from "react-native-draggable-flatlist";
 import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
-import { Animated } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function WorkoutSessionScreen() {
@@ -468,39 +467,35 @@ export default function WorkoutSessionScreen() {
     ]);
   };
 
-  const renderSwipeDeleteAction = useCallback(
-    (_progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
-      const opacity = dragX.interpolate({
-        inputRange: [-70, -30, 0],
-        outputRange: [1, 0.5, 0],
-        extrapolate: "clamp",
-      });
-      return (
-        <View style={{ width: 70, justifyContent: "flex-start", paddingTop: 4 }}>
-          <Animated.View
-            style={{ opacity }}
-            className="h-10 w-14 items-center justify-center self-center rounded-xl bg-destructive/15"
-          >
-            <Trash2 size={18} color={COLORS.destructive} />
-          </Animated.View>
-        </View>
-      );
-    },
-    [],
-  );
+  const swipeableRefs = useRef<Map<string, Swipeable>>(new Map());
 
   const renderExerciseItem = useCallback(
     ({ item: exercise, drag, isActive, getIndex }: RenderItemParams<ActiveExercise>) => {
       const exerciseIdx = getIndex() ?? 0;
       const completed = isExerciseCompleted(exercise);
 
+      const renderDeleteButton = () => (
+        <Pressable
+          onPress={() => {
+            swipeableRefs.current.get(exercise.id)?.close();
+            handleExerciseDelete(exerciseIdx, exercise.name);
+          }}
+          style={{ width: 70, justifyContent: "flex-start", paddingTop: 4 }}
+        >
+          <View className="h-10 w-14 items-center justify-center self-center rounded-xl bg-destructive/15">
+            <Trash2 size={18} color={COLORS.destructive} />
+          </View>
+        </Pressable>
+      );
+
       return (
         <ScaleDecorator>
           <Swipeable
-            renderRightActions={renderSwipeDeleteAction}
-            onSwipeableOpen={() => {
-              handleExerciseDelete(exerciseIdx, exercise.name);
+            ref={(ref) => {
+              if (ref) swipeableRefs.current.set(exercise.id, ref);
+              else swipeableRefs.current.delete(exercise.id);
             }}
+            renderRightActions={renderDeleteButton}
             overshootRight={false}
           >
             <View className="mb-8 bg-background px-5" style={{ opacity: isActive ? 0.9 : 1 }}>
@@ -635,7 +630,7 @@ export default function WorkoutSessionScreen() {
         </ScaleDecorator>
       );
     },
-    [exercises.length, updateSet, addSet, removeSet, renderSwipeDeleteAction],
+    [exercises, updateSet, addSet, removeSet, removeExercise],
   );
 
   if (loading) {
@@ -740,14 +735,18 @@ export default function WorkoutSessionScreen() {
           ) : (
             <DraggableFlatList
               data={exercises}
+              extraData={exercises}
               keyExtractor={(item) => item.id}
               renderItem={renderExerciseItem}
               onDragEnd={({ data }) => setExercises(data)}
+              onScrollBeginDrag={() => {
+                swipeableRefs.current.forEach((ref) => ref.close());
+              }}
               ListFooterComponent={addExerciseButton}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{
                 paddingTop: 16,
-                paddingBottom: 60 + TAB_BAR_HEIGHT + insets.bottom,
+                paddingBottom: 120 + TAB_BAR_HEIGHT + insets.bottom,
               }}
             />
           )}

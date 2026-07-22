@@ -254,7 +254,7 @@ export default function NewRoutineScreen() {
         </ScaleDecorator>
       );
     },
-    [items.length],
+    [items],
   );
 
   if (loadingRoutine) {
@@ -363,6 +363,7 @@ export default function NewRoutineScreen() {
 
         <DraggableFlatList
           data={items}
+          extraData={items}
           keyExtractor={(item, idx) => `${item.exercise.id}-${idx}`}
           renderItem={renderItem}
           onDragEnd={({ data }) => setItems(data)}
