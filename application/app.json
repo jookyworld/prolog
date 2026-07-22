@@ -36,12 +36,16 @@
     "web": {
       "favicon": "./assets/icon.png"
     },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "updates": {
       "enabled": true,
-      "checkOnLaunch": "NEVER",
+      "url": "https://u.expo.dev/99e3012a-4870-47c2-be53-1a4a586de32d",
+      "checkOnLaunch": "ALWAYS",
       "fallbackToCacheTimeout": 0
     },
-    "plugins": ["expo-router", "expo-secure-store"],
+    "plugins": ["expo-router", "expo-secure-store", "expo-updates"],
     "extra": {
       "router": {},
       "eas": {
