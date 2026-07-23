@@ -13,7 +13,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react-native";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -27,7 +27,7 @@ import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
 } from "react-native-draggable-flatlist";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface RoutineItem {
@@ -131,43 +131,64 @@ export default function NewRoutineScreen() {
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const swipeableRefs = useRef<Map<string, Swipeable>>(new Map());
+
   const renderItem = useCallback(
     ({ item, drag, isActive, getIndex }: RenderItemParams<RoutineItem>) => {
       const idx = getIndex() ?? 0;
+      const key = `${item.exercise.id}-${idx}`;
+
+      const renderDeleteButton = () => (
+        <Pressable
+          onPress={() => {
+            swipeableRefs.current.get(key)?.close();
+            Alert.alert("종목 삭제", `${item.exercise.name}을(를) 삭제하시겠습니까?`, [
+              { text: "취소", style: "cancel" },
+              { text: "삭제", style: "destructive", onPress: () => removeItem(idx) },
+            ]);
+          }}
+          style={{ width: 70, justifyContent: "center", alignItems: "center" }}
+        >
+          <View className="h-10 w-14 items-center justify-center rounded-xl bg-destructive/15">
+            <Trash2 size={18} color={COLORS.destructive} />
+          </View>
+        </Pressable>
+      );
+
       return (
         <ScaleDecorator>
-          <View
-            className="rounded-2xl bg-card p-4"
-            style={{ opacity: isActive ? 0.9 : 1, marginBottom: 12 }}
+          <Swipeable
+            ref={(ref) => {
+              if (ref) swipeableRefs.current.set(key, ref);
+              else swipeableRefs.current.delete(key);
+            }}
+            renderRightActions={renderDeleteButton}
+            overshootRight={false}
           >
-            {/* 운동명 + 드래그 핸들/삭제 */}
-            <View className="mb-3 flex-row items-center gap-3">
-              <View className="h-8 w-8 items-center justify-center rounded-lg bg-primary/15">
-                <Text className="text-sm font-bold text-primary">{idx + 1}</Text>
-              </View>
-              <View className="flex-1">
-                <Text className="text-base font-semibold text-white">{item.exercise.name}</Text>
-                <Text className="text-xs text-white/40">
-                  {item.exercise.bodyPart}
-                  {item.exercise.partDetail ? ` · ${item.exercise.partDetail}` : ""}
-                </Text>
-              </View>
-              <View className="flex-row items-center gap-1">
+            <View
+              className="rounded-2xl bg-card p-4"
+              style={{ opacity: isActive ? 0.9 : 1, marginBottom: 12 }}
+            >
+              {/* 운동명 + 드래그 핸들 */}
+              <View className="mb-3 flex-row items-center gap-3">
+                <View className="h-8 w-8 items-center justify-center rounded-lg bg-primary/15">
+                  <Text className="text-sm font-bold text-primary">{idx + 1}</Text>
+                </View>
+                <View className="flex-1">
+                  <Text className="text-base font-semibold text-white">{item.exercise.name}</Text>
+                  <Text className="text-xs text-white/40">
+                    {item.exercise.bodyPart}
+                    {item.exercise.partDetail ? ` · ${item.exercise.partDetail}` : ""}
+                  </Text>
+                </View>
                 <Pressable
                   onLongPress={drag}
                   delayLongPress={100}
-                  className="h-8 w-8 items-center justify-center rounded-lg bg-white/5"
+                  className="h-8 w-8 items-center justify-center"
                 >
                   <GripVertical size={16} color={COLORS.white} />
                 </Pressable>
-                <Pressable
-                  onPress={() => removeItem(idx)}
-                  className="h-8 w-8 items-center justify-center rounded-lg bg-destructive/10"
-                >
-                  <Trash2 size={14} color={COLORS.destructive} />
-                </Pressable>
               </View>
-            </View>
 
             {/* 세트 수 조절 */}
             <View className="mb-2 flex-row items-center justify-between rounded-xl bg-white/5 px-4 py-3">
@@ -250,7 +271,8 @@ export default function NewRoutineScreen() {
                 </Pressable>
               </View>
             </View>
-          </View>
+            </View>
+          </Swipeable>
         </ScaleDecorator>
       );
     },
@@ -367,6 +389,9 @@ export default function NewRoutineScreen() {
           keyExtractor={(item, idx) => `${item.exercise.id}-${idx}`}
           renderItem={renderItem}
           onDragEnd={({ data }) => setItems(data)}
+          onScrollBeginDrag={() => {
+            swipeableRefs.current.forEach((ref) => ref.close());
+          }}
           ListHeaderComponent={listHeader}
           ListFooterComponent={listFooter}
           showsVerticalScrollIndicator={false}

@@ -480,9 +480,9 @@ export default function WorkoutSessionScreen() {
             swipeableRefs.current.get(exercise.id)?.close();
             handleExerciseDelete(exerciseIdx, exercise.name);
           }}
-          style={{ width: 70, justifyContent: "flex-start", paddingTop: 4 }}
+          style={{ width: 70, justifyContent: "center", alignItems: "center" }}
         >
-          <View className="h-10 w-14 items-center justify-center self-center rounded-xl bg-destructive/15">
+          <View className="h-10 w-14 items-center justify-center rounded-xl bg-destructive/15">
             <Trash2 size={18} color={COLORS.destructive} />
           </View>
         </Pressable>
@@ -550,7 +550,7 @@ export default function WorkoutSessionScreen() {
                       <Pressable
                         onLongPress={drag}
                         delayLongPress={100}
-                        className="h-8 w-8 items-center justify-center rounded-lg bg-white/5 active:bg-white/10"
+                        className="h-8 w-8 items-center justify-center"
                       >
                         <GripVertical size={16} color={COLORS.mutedForeground} />
                       </Pressable>
