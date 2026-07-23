@@ -8,6 +8,7 @@ import {
   Dumbbell,
   Flag,
   Activity,
+  MessageCircleQuestion,
   LogOut,
   ChevronRight,
 } from "lucide-react";
@@ -44,6 +45,12 @@ const NAV_ITEMS = [
     label: "세션 조회",
     href: "/sessions",
     icon: Activity,
+    available: true,
+  },
+  {
+    label: "문의 관리",
+    href: "/inquiries",
+    icon: MessageCircleQuestion,
     available: true,
   },
 ];

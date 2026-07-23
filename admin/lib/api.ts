@@ -3,6 +3,7 @@ import type {
   AdminExerciseResponse,
   AdminReportResponse,
   AdminWorkoutSessionResponse,
+  InquiryResponse,
   LoginResponse,
   PageResponse,
   ReportStatus,
@@ -131,6 +132,16 @@ export const reportApi = {
 
   deleteComment: (id: number) =>
     request<void>(`/api/admin/community/comments/${id}`, { method: "DELETE" }),
+};
+
+export const inquiryApi = {
+  getAll: () => request<InquiryResponse[]>("/api/admin/inquiries"),
+
+  answer: (id: number, answer: string) =>
+    request<InquiryResponse>(`/api/admin/inquiries/${id}/answer`, {
+      method: "PUT",
+      body: JSON.stringify({ answer }),
+    }),
 };
 
 export const exerciseApi = {

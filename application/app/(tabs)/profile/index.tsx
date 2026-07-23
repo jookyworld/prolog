@@ -1,7 +1,14 @@
 import { useAuth } from "@/contexts/auth-context";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { useRouter } from "expo-router";
-import { ChevronRight, Dumbbell, Settings, Share2, Swords } from "lucide-react-native";
+import {
+  ChevronRight,
+  Dumbbell,
+  MessageCircleQuestion,
+  Settings,
+  Share2,
+  Swords,
+} from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -92,6 +99,19 @@ export default function ProfileScreen() {
               <Share2 size={18} color={COLORS.white} />
             </View>
             <Text className="ml-3 flex-1 text-base text-white">공유 기록</Text>
+            <ChevronRight size={18} color={COLORS.iconMuted} />
+          </Pressable>
+
+          <View className="mx-5 h-px bg-white/5" />
+
+          <Pressable
+            onPress={() => router.push("/(tabs)/profile/inquiries")}
+            className="flex-row items-center px-5 py-4 active:opacity-70"
+          >
+            <View className="h-10 w-10 items-center justify-center rounded-xl bg-white/5">
+              <MessageCircleQuestion size={18} color={COLORS.white} />
+            </View>
+            <Text className="ml-3 flex-1 text-base text-white">문의하기</Text>
             <ChevronRight size={18} color={COLORS.iconMuted} />
           </Pressable>
         </View>
