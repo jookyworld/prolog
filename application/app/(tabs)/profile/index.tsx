@@ -6,7 +6,6 @@ import {
   Dumbbell,
   MessageCircleQuestion,
   Settings,
-  Share2,
   Swords,
 } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -86,19 +85,6 @@ export default function ProfileScreen() {
               <Swords size={18} color={COLORS.white} />
             </View>
             <Text className="ml-3 flex-1 text-base text-white">종목 관리</Text>
-            <ChevronRight size={18} color={COLORS.iconMuted} />
-          </Pressable>
-
-          <View className="mx-5 h-px bg-white/5" />
-
-          <Pressable
-            onPress={() => router.push("/(tabs)/profile/shared")}
-            className="flex-row items-center px-5 py-4 active:opacity-70"
-          >
-            <View className="h-10 w-10 items-center justify-center rounded-xl bg-white/5">
-              <Share2 size={18} color={COLORS.white} />
-            </View>
-            <Text className="ml-3 flex-1 text-base text-white">공유 기록</Text>
             <ChevronRight size={18} color={COLORS.iconMuted} />
           </Pressable>
 
