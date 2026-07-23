@@ -2,9 +2,9 @@ import { workoutApi } from "@/lib/api/workout";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import { formatShortDate } from "@/lib/format";
 import { WorkoutSession, toWorkoutSession } from "@/lib/types/workout";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { ChevronLeft, Dumbbell } from "lucide-react-native";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -75,9 +75,11 @@ export default function WorkoutHistoryList({
     }
   }, [hasMore, page, bodyPart]);
 
-  useEffect(() => {
-    fetchSessions(bodyPart);
-  }, [bodyPart]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchSessions(bodyPart);
+    }, [bodyPart]),
+  );
 
   const monthGroups = useMemo(() => {
     const groups: { key: string; label: string; sessions: WorkoutSession[] }[] = [];

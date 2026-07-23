@@ -120,12 +120,20 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
       });
 
       if (!retryRes.ok) {
-        throw new ApiError(retryRes.status, `API 요청 실패 (${retryRes.status})`);
+        let errorMessage = `API 요청 실패 (${retryRes.status})`;
+        try {
+          const errorData = await retryRes.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          // JSON 파싱 실패 시 기본 메시지 사용
+        }
+        throw new ApiError(retryRes.status, errorMessage);
       }
 
       if (retryRes.status === 204) return undefined as T;
       return retryRes.json();
-    } catch {
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
       throw new ApiError(401, "인증이 만료되었습니다. 다시 로그인해주세요.");
     }
   }
