@@ -9,6 +9,7 @@ import com.back.domain.user.user.entity.User;
 import com.back.domain.user.user.repository.UserRepository;
 import com.back.global.exception.type.ForbiddenException;
 import com.back.global.exception.type.NotFoundException;
+import com.back.global.mail.EmailService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class InquiryService {
 
     private final InquiryRepository inquiryRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     @Transactional
     public InquiryResponse createInquiry(Long userId, InquiryCreateRequest request) {
@@ -33,6 +35,7 @@ public class InquiryService {
                 .build();
 
         inquiryRepository.save(inquiry);
+        emailService.sendInquiryNotificationToAdmin(user.getNickname(), request.title());
         return InquiryResponse.from(inquiry);
     }
 
@@ -76,6 +79,7 @@ public class InquiryService {
                 inquiryRepository.findById(inquiryId).orElseThrow(() -> new NotFoundException("존재하지 않는 문의입니다."));
 
         inquiry.answer(request.answer());
+        emailService.sendInquiryAnswerNotification(inquiry.getUser().getEmail(), inquiry.getTitle());
         return InquiryResponse.from(inquiry);
     }
 }
