@@ -2,7 +2,7 @@ import CustomTabBar from "@/components/CustomTabBar";
 import WorkoutStartSheet from "@/components/WorkoutStartSheet";
 import { useWorkout } from "@/contexts/workout-context";
 import { Tabs, useRouter, usePathname } from "expo-router";
-import { Home, LayoutGrid, User, Users } from "lucide-react-native";
+import { ClipboardList, Home, LayoutGrid, User } from "lucide-react-native";
 import { useState } from "react";
 
 export default function TabsLayout() {
@@ -57,10 +57,10 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="community"
+          name="history"
           options={{
-            title: "커뮤니티",
-            tabBarIcon: ({ color }) => <Users size={26} color={color} />,
+            title: "기록",
+            tabBarIcon: ({ color }) => <ClipboardList size={26} color={color} />,
           }}
         />
         <Tabs.Screen

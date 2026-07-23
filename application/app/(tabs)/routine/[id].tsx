@@ -1,20 +1,10 @@
-import { communityApi } from "@/lib/api/community";
 import { routineApi } from "@/lib/api/routine";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import type { RoutineDetail } from "@/lib/types/routine";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { ChevronLeft, EllipsisVertical, Play, Share2 } from "lucide-react-native";
+import { ChevronLeft, EllipsisVertical, Play } from "lucide-react-native";
 import { useCallback, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Modal,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function RoutineDetailScreen() {
@@ -26,9 +16,6 @@ export default function RoutineDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const [shareModalVisible, setShareModalVisible] = useState(false);
-  const [shareTitle, setShareTitle] = useState("");
-  const [shareDescription, setShareDescription] = useState("");
 
   const bottomPadding = TAB_BAR_HEIGHT + insets.bottom + 16;
 
@@ -97,44 +84,6 @@ export default function RoutineDetailScreen() {
     }
   };
 
-  const handleShare = () => {
-    if (!routine) return;
-    setShareTitle(routine.title);
-    setShareDescription(routine.description || "");
-    setShareModalVisible(true);
-  };
-
-  const handleShareSubmit = async () => {
-    if (!shareTitle.trim()) {
-      Alert.alert("제목을 입력해주세요.");
-      return;
-    }
-
-    setActionLoading(true);
-    try {
-      await communityApi.createSharedRoutine({
-        routineId: Number(id),
-        title: shareTitle,
-        description: shareDescription,
-      });
-
-      setShareModalVisible(false);
-      Alert.alert("공유 완료", "루틴이 커뮤니티에 공유되었습니다!", [
-        {
-          text: "확인",
-          onPress: () => {
-            router.push("/(tabs)/community");
-          },
-        },
-      ]);
-    } catch (err) {
-      Alert.alert("공유하지 못했습니다. 잠시 후 다시 시도해주세요.");
-      console.error("Failed to share routine:", err);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
   const handleSettingsMenu = () => {
     if (!routine) return;
 
@@ -143,11 +92,6 @@ export default function RoutineDetailScreen() {
       style?: "cancel" | "destructive";
       onPress?: () => void;
     }> = [{ text: "취소", style: "cancel" }];
-
-    buttons.push({
-      text: "커뮤니티에 공유",
-      onPress: handleShare,
-    });
 
     if (routine.active) {
       // 활성 루틴: 보관만 가능 (삭제 불가)
@@ -308,65 +252,6 @@ export default function RoutineDetailScreen() {
           <Text className="text-base font-semibold text-white">바로 시작</Text>
         </Pressable>
       )}
-
-      {/* 공유 모달 */}
-      <Modal
-        visible={shareModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShareModalVisible(false)}
-      >
-        <View className="flex-1 justify-end bg-black/50">
-          <View
-            className="rounded-t-3xl bg-background px-5 pt-6"
-            style={{ paddingBottom: insets.bottom + 20 }}
-          >
-            <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-xl font-bold text-white">커뮤니티에 공유</Text>
-              <Pressable onPress={() => setShareModalVisible(false)}>
-                <Text className="text-base text-white/50">취소</Text>
-              </Pressable>
-            </View>
-
-            <Text className="mb-2 text-sm font-medium text-white/70">제목</Text>
-            <TextInput
-              value={shareTitle}
-              onChangeText={setShareTitle}
-              placeholder="공유할 루틴의 제목을 입력하세요"
-              placeholderTextColor={COLORS.mutedForeground}
-              className="mb-4 rounded-xl bg-card px-4 py-3 text-base text-white"
-              maxLength={100}
-            />
-
-            <Text className="mb-2 text-sm font-medium text-white/70">설명</Text>
-            <TextInput
-              value={shareDescription}
-              onChangeText={setShareDescription}
-              placeholder="루틴에 대한 설명을 입력하세요 (선택사항)"
-              placeholderTextColor={COLORS.mutedForeground}
-              className="mb-6 h-24 rounded-xl bg-card px-4 py-3 text-base text-white"
-              multiline
-              textAlignVertical="top"
-              maxLength={500}
-            />
-
-            <Pressable
-              onPress={handleShareSubmit}
-              disabled={actionLoading}
-              className="flex-row items-center justify-center gap-2 rounded-xl bg-primary py-4"
-            >
-              {actionLoading ? (
-                <ActivityIndicator size="small" color={COLORS.white} />
-              ) : (
-                <>
-                  <Share2 size={18} color={COLORS.white} />
-                  <Text className="text-base font-semibold text-white">공유하기</Text>
-                </>
-              )}
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }

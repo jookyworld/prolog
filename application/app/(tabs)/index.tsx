@@ -3,8 +3,9 @@ import { homeApi } from "@/lib/api/home";
 import { COLORS, TAB_BAR_HEIGHT } from "@/lib/constants";
 import type { BodyPart } from "@/lib/types/exercise";
 import type { HomeStatsResponse } from "@/lib/types/home";
+import { useFocusEffect } from "expo-router";
 import { TrendingUp, X } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -47,11 +48,13 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      loadHomeStats();
-    }
-  }, [user]);
+  useFocusEffect(
+    useCallback(() => {
+      if (user) {
+        loadHomeStats();
+      }
+    }, [user]),
+  );
 
   const loadHomeStats = async () => {
     try {

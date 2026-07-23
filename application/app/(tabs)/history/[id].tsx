@@ -1,5 +1,5 @@
 import WorkoutHistoryDetail from "@/components/WorkoutHistoryDetail";
 
-export default function WorkoutHistoryDetailScreen() {
+export default function HistoryDetailScreen() {
   return <WorkoutHistoryDetail />;
 }
