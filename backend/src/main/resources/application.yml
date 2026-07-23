@@ -35,3 +35,4 @@ jwt:
 
 mail:
   from: ${MAIL_FROM:noreply@prolog.local}
+  admin: ${MAIL_ADMIN:}
