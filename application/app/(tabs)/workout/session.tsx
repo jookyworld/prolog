@@ -12,7 +12,7 @@ import type {
   WorkoutSessionCompleteReq,
 } from "@/lib/types/workout";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { Check, ChevronLeft, Minus, Plus } from "lucide-react-native";
+import { Check, ChevronLeft, GripVertical, Minus, Plus, Trash2 } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -20,11 +20,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  ScrollView,
   Text,
   TextInput,
   View,
 } from "react-native";
+import DraggableFlatList, {
+  RenderItemParams,
+  ScaleDecorator,
+} from "react-native-draggable-flatlist";
+import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function WorkoutSessionScreen() {
@@ -286,30 +290,6 @@ export default function WorkoutSessionScreen() {
     setExercises((prev) => prev.filter((_, i) => i !== exerciseIdx));
   }, []);
 
-  const moveExerciseUp = useCallback((exerciseIdx: number) => {
-    if (exerciseIdx === 0) return;
-    setExercises((prev) => {
-      const updated = [...prev];
-      [updated[exerciseIdx - 1], updated[exerciseIdx]] = [
-        updated[exerciseIdx],
-        updated[exerciseIdx - 1],
-      ];
-      return updated;
-    });
-  }, []);
-
-  const moveExerciseDown = useCallback((exerciseIdx: number) => {
-    setExercises((prev) => {
-      if (exerciseIdx >= prev.length - 1) return prev;
-      const updated = [...prev];
-      [updated[exerciseIdx], updated[exerciseIdx + 1]] = [
-        updated[exerciseIdx + 1],
-        updated[exerciseIdx],
-      ];
-      return updated;
-    });
-  }, []);
-
   const hasRoutineChanged = useCallback(() => {
     if (!originalRoutineItems) return false;
 
@@ -475,42 +455,182 @@ export default function WorkoutSessionScreen() {
     return exercise.sets.every((set) => set.completed);
   };
 
-  const handleExerciseLongPress = (exerciseIdx: number, exerciseName: string) => {
-    const buttons: any[] = [];
-
-    if (exerciseIdx > 0) {
-      buttons.push({
-        text: "위로 이동",
-        onPress: () => moveExerciseUp(exerciseIdx),
-      });
-    }
-
-    if (exerciseIdx < exercises.length - 1) {
-      buttons.push({
-        text: "아래로 이동",
-        onPress: () => moveExerciseDown(exerciseIdx),
-      });
-    }
-
-    buttons.push({
-      text: "삭제",
-      style: "destructive",
-      onPress: () => {
-        Alert.alert("종목 삭제", `${exerciseName}을(를) 삭제하시겠습니까?`, [
-          { text: "취소", style: "cancel" },
-          {
-            text: "삭제",
-            style: "destructive",
-            onPress: () => removeExercise(exerciseIdx),
-          },
-        ]);
+  const handleExerciseDelete = (exerciseIdx: number, exerciseName: string) => {
+    Alert.alert("종목 삭제", `${exerciseName}을(를) 삭제하시겠습니까?`, [
+      { text: "취소", style: "cancel" },
+      {
+        text: "삭제",
+        style: "destructive",
+        onPress: () => removeExercise(exerciseIdx),
       },
-    });
-
-    buttons.push({ text: "취소", style: "cancel" });
-
-    Alert.alert("종목 관리", exerciseName, buttons);
+    ]);
   };
+
+  const swipeableRefs = useRef<Map<string, Swipeable>>(new Map());
+
+  const renderExerciseItem = useCallback(
+    ({ item: exercise, drag, isActive, getIndex }: RenderItemParams<ActiveExercise>) => {
+      const exerciseIdx = getIndex() ?? 0;
+      const completed = isExerciseCompleted(exercise);
+
+      const renderDeleteButton = () => (
+        <Pressable
+          onPress={() => {
+            swipeableRefs.current.get(exercise.id)?.close();
+            handleExerciseDelete(exerciseIdx, exercise.name);
+          }}
+          style={{ width: 70, justifyContent: "center", alignItems: "center" }}
+        >
+          <View className="h-10 w-14 items-center justify-center rounded-xl bg-destructive/15">
+            <Trash2 size={18} color={COLORS.destructive} />
+          </View>
+        </Pressable>
+      );
+
+      return (
+        <ScaleDecorator>
+          <Swipeable
+            ref={(ref) => {
+              if (ref) swipeableRefs.current.set(exercise.id, ref);
+              else swipeableRefs.current.delete(exercise.id);
+            }}
+            renderRightActions={renderDeleteButton}
+            overshootRight={false}
+          >
+            <View className="mb-8 bg-background px-5" style={{ opacity: isActive ? 0.9 : 1 }}>
+              <View className="flex-row">
+                {/* Left: Number + Buttons */}
+                <View className="mr-4 items-center gap-3" style={{ width: 48 }}>
+                  {/* Exercise number */}
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-white/8">
+                    <Text
+                      className="text-base font-bold"
+                      style={{
+                        color: completed ? "#22c55e" : "rgba(255,255,255,0.6)",
+                      }}
+                    >
+                      {exerciseIdx + 1}
+                    </Text>
+                  </View>
+
+                  {/* Add/Remove set buttons - vertical */}
+                  <View className="items-center gap-1 rounded-xl bg-white/5 px-2 py-2">
+                    <Pressable
+                      onPress={() => removeSet(exerciseIdx)}
+                      disabled={exercise.sets.length <= 1}
+                      className="h-7 w-7 items-center justify-center rounded-lg active:bg-white/10"
+                      style={{
+                        opacity: exercise.sets.length <= 1 ? 0.3 : 1,
+                      }}
+                    >
+                      <Minus size={14} color={COLORS.mutedForeground} />
+                    </Pressable>
+                    <Text className="text-[10px] font-medium text-white/40">세트</Text>
+                    <Pressable
+                      onPress={() => addSet(exerciseIdx)}
+                      className="h-7 w-7 items-center justify-center rounded-lg active:bg-white/10"
+                    >
+                      <Plus size={14} color={COLORS.mutedForeground} />
+                    </Pressable>
+                  </View>
+                </View>
+
+                {/* Right: Header + Sets */}
+                <View className="flex-1">
+                  {/* Header */}
+                  <View className="mb-3 h-10 flex-row items-center justify-between">
+                    <Text className="flex-1 text-lg font-bold text-white">{exercise.name}</Text>
+                    <View className="flex-row items-center gap-2">
+                      {completed && (
+                        <View className="rounded-full bg-green-500/20 px-2 py-0.5">
+                          <Text className="text-[10px] font-bold text-green-400">완료</Text>
+                        </View>
+                      )}
+                      <Pressable
+                        onLongPress={drag}
+                        delayLongPress={100}
+                        className="h-8 w-8 items-center justify-center"
+                      >
+                        <GripVertical size={16} color={COLORS.mutedForeground} />
+                      </Pressable>
+                    </View>
+                  </View>
+
+                  {/* Set rows */}
+                  <View className="gap-2.5">
+                    {exercise.sets.map((set) => (
+                      <View key={set.id} className="flex-row items-center gap-2.5">
+                        <View style={{ width: 36 }}>
+                          <Text className="text-center text-base font-bold text-white">
+                            {set.setNumber}
+                          </Text>
+                        </View>
+                        <View
+                          className="flex-1 flex-row items-center gap-1 rounded-lg px-3 py-2.5"
+                          style={{
+                            backgroundColor: "rgba(255,255,255,0.08)",
+                          }}
+                        >
+                          <TextInput
+                            className="flex-1 text-center text-sm font-semibold text-white"
+                            placeholder="0"
+                            placeholderTextColor={COLORS.placeholder}
+                            keyboardType="numeric"
+                            value={set.weight}
+                            onChangeText={(v) =>
+                              updateSet(exerciseIdx, set.id, {
+                                weight: v,
+                              })
+                            }
+                          />
+                          <Text className="text-sm font-medium text-white/50">kg</Text>
+                        </View>
+                        <View
+                          className="flex-1 flex-row items-center gap-1 rounded-lg px-3 py-2.5"
+                          style={{
+                            backgroundColor: "rgba(255,255,255,0.08)",
+                          }}
+                        >
+                          <TextInput
+                            className="flex-1 text-center text-sm font-semibold text-white"
+                            placeholder="0"
+                            placeholderTextColor={COLORS.placeholder}
+                            keyboardType="numeric"
+                            value={set.reps}
+                            onChangeText={(v) => updateSet(exerciseIdx, set.id, { reps: v })}
+                          />
+                          <Text className="text-sm font-medium text-white/50">회</Text>
+                        </View>
+                        <Pressable
+                          onPress={() =>
+                            updateSet(exerciseIdx, set.id, {
+                              completed: !set.completed,
+                            })
+                          }
+                          className="h-10 w-10 items-center justify-center rounded-lg"
+                          style={{
+                            backgroundColor: set.completed
+                              ? COLORS.primary
+                              : "rgba(255,255,255,0.08)",
+                          }}
+                        >
+                          <Check
+                            size={16}
+                            color={set.completed ? COLORS.white : COLORS.iconMuted}
+                          />
+                        </Pressable>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            </View>
+          </Swipeable>
+        </ScaleDecorator>
+      );
+    },
+    [exercises, updateSet, addSet, removeSet, removeExercise],
+  );
 
   if (loading) {
     return (
@@ -521,237 +641,116 @@ export default function WorkoutSessionScreen() {
     );
   }
 
-  return (
-    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        {/* Header */}
-        <View className="border-b border-white/10 px-5 py-3">
-          {/* Row 1: Back, Timer, Complete */}
-          <View className="flex-row items-center">
-            <Pressable onPress={handleCancel} className="h-10 w-10 items-center justify-center">
-              <ChevronLeft size={24} color={COLORS.white} />
-            </Pressable>
+  const addExerciseButton = (
+    <Pressable
+      onPress={handleAddExercise}
+      className="mx-5 mb-4 flex-row items-center justify-center gap-2 rounded-2xl bg-white/8 py-4 active:opacity-80"
+    >
+      <Plus size={18} color={COLORS.white} />
+      <Text className="text-sm font-semibold text-white">종목 추가</Text>
+    </Pressable>
+  );
 
-            <Text className="flex-1 text-center text-3xl font-bold text-white">
-              {formatElapsedTime(elapsedTime)}
+  return (
+    <GestureHandlerRootView className="flex-1 bg-background">
+      <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
+        <KeyboardAvoidingView
+          className="flex-1"
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+          {/* Header */}
+          <View className="border-b border-white/10 px-5 py-3">
+            {/* Row 1: Back, Timer, Complete */}
+            <View className="flex-row items-center">
+              <Pressable onPress={handleCancel} className="h-10 w-10 items-center justify-center">
+                <ChevronLeft size={24} color={COLORS.white} />
+              </Pressable>
+
+              <Text className="flex-1 text-center text-3xl font-bold text-white">
+                {formatElapsedTime(elapsedTime)}
+              </Text>
+
+              <Pressable
+                onPress={handleComplete}
+                disabled={completing}
+                className="rounded-xl bg-primary px-4 py-2 active:opacity-80"
+              >
+                {completing ? (
+                  <ActivityIndicator size="small" color={COLORS.white} />
+                ) : (
+                  <Text className="text-sm font-semibold text-white">완료</Text>
+                )}
+              </Pressable>
+            </View>
+
+            {/* Row 2: Routine title */}
+            <Text className="mt-4 pb-1 text-2xl font-bold text-white" numberOfLines={1}>
+              {routineTitle}
             </Text>
 
-            <Pressable
-              onPress={handleComplete}
-              disabled={completing}
-              className="rounded-xl bg-primary px-4 py-2 active:opacity-80"
-            >
-              {completing ? (
-                <ActivityIndicator size="small" color={COLORS.white} />
-              ) : (
-                <Text className="text-sm font-semibold text-white">완료</Text>
-              )}
-            </Pressable>
-          </View>
+            {/* Row 3: Progress bar */}
+            {exercises.length > 0 &&
+              (() => {
+                const totalSets = exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
+                const completedSets = exercises.reduce(
+                  (sum, ex) => sum + ex.sets.filter((s) => s.completed).length,
+                  0,
+                );
+                const progress = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
 
-          {/* Row 2: Routine title */}
-          <Text className="mt-4 pb-1 text-2xl font-bold text-white" numberOfLines={1}>
-            {routineTitle}
-          </Text>
-
-          {/* Row 3: Progress bar */}
-          {exercises.length > 0 &&
-            (() => {
-              const totalSets = exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
-              const completedSets = exercises.reduce(
-                (sum, ex) => sum + ex.sets.filter((s) => s.completed).length,
-                0,
-              );
-              const progress = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
-
-              return (
-                <View className="mt-3">
-                  <View className="mb-1.5 flex-row items-center justify-between">
-                    <Text className="text-xs font-medium text-white/50">진행률</Text>
-                    <Text className="text-xs font-semibold text-white/70">
-                      {completedSets}/{totalSets}
-                    </Text>
-                  </View>
-                  <View className="h-1.5 overflow-hidden rounded-full bg-white/10">
-                    <View
-                      className="h-full rounded-full bg-primary"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </View>
-                </View>
-              );
-            })()}
-        </View>
-
-        {/* Exercise list */}
-        {exercises.length === 0 ? (
-          <View className="flex-1 items-center justify-center px-6">
-            <Text className="mb-2 text-lg font-semibold text-white/60">종목을 추가해주세요</Text>
-            <Text className="mb-6 text-sm text-white/40">하단의 버튼을 눌러 운동을 추가하세요</Text>
-            <Pressable
-              onPress={handleAddExercise}
-              className="rounded-xl bg-primary px-6 py-3 active:opacity-80"
-            >
-              <Text className="text-base font-semibold text-white">종목 추가하기</Text>
-            </Pressable>
-          </View>
-        ) : (
-          <ScrollView
-            className="flex-1 pt-4"
-            contentContainerStyle={{
-              paddingBottom: 60 + TAB_BAR_HEIGHT + insets.bottom,
-            }}
-            showsVerticalScrollIndicator={false}
-          >
-            {exercises.map((exercise, exerciseIdx) => {
-              const isCompleted = isExerciseCompleted(exercise);
-              const completedSets = exercise.sets.filter((s) => s.completed).length;
-
-              return (
-                <View key={exercise.id} className="mb-8 px-5">
-                  <View className="flex-row">
-                    {/* Left: Number + Buttons */}
-                    <View className="mr-4 items-center gap-3" style={{ width: 48 }}>
-                      {/* Exercise number */}
-                      <Pressable
-                        onPress={() => handleExerciseLongPress(exerciseIdx, exercise.name)}
-                        className="h-10 w-10 items-center justify-center rounded-full bg-white/8 active:bg-white/10"
-                      >
-                        <Text
-                          className="text-base font-bold"
-                          style={{
-                            color: isCompleted ? "#22c55e" : "rgba(255,255,255,0.6)",
-                          }}
-                        >
-                          {exerciseIdx + 1}
-                        </Text>
-                      </Pressable>
-
-                      {/* Add/Remove set buttons - vertical */}
-                      <View className="items-center gap-1 rounded-xl bg-white/5 px-2 py-2">
-                        <Pressable
-                          onPress={() => removeSet(exerciseIdx)}
-                          disabled={exercise.sets.length <= 1}
-                          className="h-7 w-7 items-center justify-center rounded-lg active:bg-white/10"
-                          style={{
-                            opacity: exercise.sets.length <= 1 ? 0.3 : 1,
-                          }}
-                        >
-                          <Minus size={14} color={COLORS.mutedForeground} />
-                        </Pressable>
-                        <Text className="text-[10px] font-medium text-white/40">세트</Text>
-                        <Pressable
-                          onPress={() => addSet(exerciseIdx)}
-                          className="h-7 w-7 items-center justify-center rounded-lg active:bg-white/10"
-                        >
-                          <Plus size={14} color={COLORS.mutedForeground} />
-                        </Pressable>
-                      </View>
+                return (
+                  <View className="mt-3">
+                    <View className="mb-1.5 flex-row items-center justify-between">
+                      <Text className="text-xs font-medium text-white/50">진행률</Text>
+                      <Text className="text-xs font-semibold text-white/70">
+                        {completedSets}/{totalSets}
+                      </Text>
                     </View>
-
-                    {/* Right: Header + Sets */}
-                    <View className="flex-1">
-                      {/* Header */}
-                      <View className="mb-3 h-10 flex-row items-center justify-between">
-                        <Text className="text-lg font-bold text-white">{exercise.name}</Text>
-                        <View className="flex-row items-center gap-2">
-                          {isCompleted && (
-                            <View className="rounded-full bg-green-500/20 px-2 py-0.5">
-                              <Text className="text-[10px] font-bold text-green-400">완료</Text>
-                            </View>
-                          )}
-                          <Text className="text-xs text-white/40">
-                            {completedSets}/{exercise.sets.length} 세트
-                          </Text>
-                        </View>
-                      </View>
-
-                      {/* Set rows */}
-                      <View className="gap-2.5">
-                        {exercise.sets.map((set) => (
-                          <View key={set.id} className="flex-row items-center gap-2.5">
-                            <View style={{ width: 36 }}>
-                              <Text className="text-center text-base font-bold text-white">
-                                {set.setNumber}
-                              </Text>
-                            </View>
-                            <View
-                              className="flex-1 flex-row items-center gap-1 rounded-lg px-3 py-2.5"
-                              style={{
-                                backgroundColor: "rgba(255,255,255,0.08)",
-                              }}
-                            >
-                              <TextInput
-                                className="flex-1 text-center text-sm font-semibold text-white"
-                                placeholder="0"
-                                placeholderTextColor={COLORS.placeholder}
-                                keyboardType="numeric"
-                                value={set.weight}
-                                onChangeText={(v) =>
-                                  updateSet(exerciseIdx, set.id, {
-                                    weight: v,
-                                  })
-                                }
-                              />
-                              <Text className="text-sm font-medium text-white/50">kg</Text>
-                            </View>
-                            <View
-                              className="flex-1 flex-row items-center gap-1 rounded-lg px-3 py-2.5"
-                              style={{
-                                backgroundColor: "rgba(255,255,255,0.08)",
-                              }}
-                            >
-                              <TextInput
-                                className="flex-1 text-center text-sm font-semibold text-white"
-                                placeholder="0"
-                                placeholderTextColor={COLORS.placeholder}
-                                keyboardType="numeric"
-                                value={set.reps}
-                                onChangeText={(v) => updateSet(exerciseIdx, set.id, { reps: v })}
-                              />
-                              <Text className="text-sm font-medium text-white/50">회</Text>
-                            </View>
-                            <Pressable
-                              onPress={() =>
-                                updateSet(exerciseIdx, set.id, {
-                                  completed: !set.completed,
-                                })
-                              }
-                              className="h-10 w-10 items-center justify-center rounded-lg"
-                              style={{
-                                backgroundColor: set.completed
-                                  ? COLORS.primary
-                                  : "rgba(255,255,255,0.08)",
-                              }}
-                            >
-                              <Check
-                                size={16}
-                                color={set.completed ? COLORS.white : COLORS.iconMuted}
-                              />
-                            </Pressable>
-                          </View>
-                        ))}
-                      </View>
+                    <View className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                      <View
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${progress}%` }}
+                      />
                     </View>
                   </View>
-                </View>
-              );
-            })}
+                );
+              })()}
+          </View>
 
-            {/* 종목 추가 버튼 */}
-            <Pressable
-              onPress={handleAddExercise}
-              className="mx-5 mb-4 flex-row items-center justify-center gap-2 rounded-2xl bg-white/8 py-4 active:opacity-80"
-            >
-              <Plus size={18} color={COLORS.white} />
-              <Text className="text-sm font-semibold text-white">종목 추가</Text>
-            </Pressable>
-          </ScrollView>
-        )}
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          {/* Exercise list */}
+          {exercises.length === 0 ? (
+            <View className="flex-1 items-center justify-center px-6">
+              <Text className="mb-2 text-lg font-semibold text-white/60">종목을 추가해주세요</Text>
+              <Text className="mb-6 text-sm text-white/40">
+                하단의 버튼을 눌러 운동을 추가하세요
+              </Text>
+              <Pressable
+                onPress={handleAddExercise}
+                className="rounded-xl bg-primary px-6 py-3 active:opacity-80"
+              >
+                <Text className="text-base font-semibold text-white">종목 추가하기</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <DraggableFlatList
+              data={exercises}
+              extraData={exercises}
+              keyExtractor={(item) => item.id}
+              renderItem={renderExerciseItem}
+              onDragEnd={({ data }) => setExercises(data)}
+              onScrollBeginDrag={() => {
+                swipeableRefs.current.forEach((ref) => ref.close());
+              }}
+              ListFooterComponent={addExerciseButton}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{
+                paddingTop: 16,
+                paddingBottom: 120 + TAB_BAR_HEIGHT + insets.bottom,
+              }}
+            />
+          )}
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
