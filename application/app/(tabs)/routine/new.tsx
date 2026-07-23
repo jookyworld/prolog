@@ -4,15 +4,7 @@ import { formatRestTime } from "@/lib/format";
 import { getSelectedExercises } from "@/lib/store/exercise-selection";
 import type { BodyPart, ExerciseResponse } from "@/lib/types/exercise";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import {
-  ChevronLeft,
-  Clock,
-  GripVertical,
-  Layers,
-  Minus,
-  Plus,
-  Trash2,
-} from "lucide-react-native";
+import { ChevronLeft, Clock, GripVertical, Layers, Minus, Plus, Trash2 } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -190,87 +182,87 @@ export default function NewRoutineScreen() {
                 </Pressable>
               </View>
 
-            {/* 세트 수 조절 */}
-            <View className="mb-2 flex-row items-center justify-between rounded-xl bg-white/5 px-4 py-3">
-              <View className="flex-row items-center gap-2">
-                <Layers size={14} color={COLORS.mutedForeground} />
-                <Text className="text-sm text-white/60">세트</Text>
+              {/* 세트 수 조절 */}
+              <View className="mb-2 flex-row items-center justify-between rounded-xl bg-white/5 px-4 py-3">
+                <View className="flex-row items-center gap-2">
+                  <Layers size={14} color={COLORS.mutedForeground} />
+                  <Text className="text-sm text-white/60">세트</Text>
+                </View>
+                <View className="flex-row items-center gap-3">
+                  <Pressable
+                    onPress={() =>
+                      updateItem(idx, {
+                        sets: Math.max(1, item.sets - 1),
+                      })
+                    }
+                    disabled={item.sets <= 1}
+                    className="h-8 w-8 items-center justify-center rounded-lg bg-white/10"
+                  >
+                    <Minus
+                      size={14}
+                      color={item.sets <= 1 ? "rgba(255,255,255,0.15)" : COLORS.white}
+                    />
+                  </Pressable>
+                  <Text className="w-8 text-center text-base font-semibold text-white">
+                    {item.sets}
+                  </Text>
+                  <Pressable
+                    onPress={() =>
+                      updateItem(idx, {
+                        sets: Math.min(20, item.sets + 1),
+                      })
+                    }
+                    disabled={item.sets >= 20}
+                    className="h-8 w-8 items-center justify-center rounded-lg bg-white/10"
+                  >
+                    <Plus
+                      size={14}
+                      color={item.sets >= 20 ? "rgba(255,255,255,0.15)" : COLORS.white}
+                    />
+                  </Pressable>
+                </View>
               </View>
-              <View className="flex-row items-center gap-3">
-                <Pressable
-                  onPress={() =>
-                    updateItem(idx, {
-                      sets: Math.max(1, item.sets - 1),
-                    })
-                  }
-                  disabled={item.sets <= 1}
-                  className="h-8 w-8 items-center justify-center rounded-lg bg-white/10"
-                >
-                  <Minus
-                    size={14}
-                    color={item.sets <= 1 ? "rgba(255,255,255,0.15)" : COLORS.white}
-                  />
-                </Pressable>
-                <Text className="w-8 text-center text-base font-semibold text-white">
-                  {item.sets}
-                </Text>
-                <Pressable
-                  onPress={() =>
-                    updateItem(idx, {
-                      sets: Math.min(20, item.sets + 1),
-                    })
-                  }
-                  disabled={item.sets >= 20}
-                  className="h-8 w-8 items-center justify-center rounded-lg bg-white/10"
-                >
-                  <Plus
-                    size={14}
-                    color={item.sets >= 20 ? "rgba(255,255,255,0.15)" : COLORS.white}
-                  />
-                </Pressable>
-              </View>
-            </View>
 
-            {/* 휴식 시간 조절 */}
-            <View className="flex-row items-center justify-between rounded-xl bg-white/5 px-4 py-3">
-              <View className="flex-row items-center gap-2">
-                <Clock size={14} color={COLORS.mutedForeground} />
-                <Text className="text-sm text-white/60">휴식</Text>
+              {/* 휴식 시간 조절 */}
+              <View className="flex-row items-center justify-between rounded-xl bg-white/5 px-4 py-3">
+                <View className="flex-row items-center gap-2">
+                  <Clock size={14} color={COLORS.mutedForeground} />
+                  <Text className="text-sm text-white/60">휴식</Text>
+                </View>
+                <View className="flex-row items-center gap-3">
+                  <Pressable
+                    onPress={() =>
+                      updateItem(idx, {
+                        restSeconds: Math.max(0, item.restSeconds - 30),
+                      })
+                    }
+                    disabled={item.restSeconds <= 0}
+                    className="h-8 w-8 items-center justify-center rounded-lg bg-white/10"
+                  >
+                    <Minus
+                      size={14}
+                      color={item.restSeconds <= 0 ? "rgba(255,255,255,0.15)" : COLORS.white}
+                    />
+                  </Pressable>
+                  <Text className="min-w-[60px] text-center text-base font-semibold text-white">
+                    {formatRestTime(item.restSeconds)}
+                  </Text>
+                  <Pressable
+                    onPress={() =>
+                      updateItem(idx, {
+                        restSeconds: Math.min(600, item.restSeconds + 30),
+                      })
+                    }
+                    disabled={item.restSeconds >= 600}
+                    className="h-8 w-8 items-center justify-center rounded-lg bg-white/10"
+                  >
+                    <Plus
+                      size={14}
+                      color={item.restSeconds >= 600 ? "rgba(255,255,255,0.15)" : COLORS.white}
+                    />
+                  </Pressable>
+                </View>
               </View>
-              <View className="flex-row items-center gap-3">
-                <Pressable
-                  onPress={() =>
-                    updateItem(idx, {
-                      restSeconds: Math.max(0, item.restSeconds - 30),
-                    })
-                  }
-                  disabled={item.restSeconds <= 0}
-                  className="h-8 w-8 items-center justify-center rounded-lg bg-white/10"
-                >
-                  <Minus
-                    size={14}
-                    color={item.restSeconds <= 0 ? "rgba(255,255,255,0.15)" : COLORS.white}
-                  />
-                </Pressable>
-                <Text className="min-w-[60px] text-center text-base font-semibold text-white">
-                  {formatRestTime(item.restSeconds)}
-                </Text>
-                <Pressable
-                  onPress={() =>
-                    updateItem(idx, {
-                      restSeconds: Math.min(600, item.restSeconds + 30),
-                    })
-                  }
-                  disabled={item.restSeconds >= 600}
-                  className="h-8 w-8 items-center justify-center rounded-lg bg-white/10"
-                >
-                  <Plus
-                    size={14}
-                    color={item.restSeconds >= 600 ? "rgba(255,255,255,0.15)" : COLORS.white}
-                  />
-                </Pressable>
-              </View>
-            </View>
             </View>
           </Swipeable>
         </ScaleDecorator>
@@ -315,9 +307,7 @@ export default function NewRoutineScreen() {
 
       {/* 구성 종목 */}
       <View className="mb-3 mr-4 flex-row items-center justify-between">
-        <Text className="text-base font-semibold text-white/80">
-          구성 종목 ({items.length}개)
-        </Text>
+        <Text className="text-base font-semibold text-white/80">구성 종목 ({items.length}개)</Text>
         {items.length > 0 && (
           <Text className="text-sm text-white/40">
             총 {items.reduce((sum, item) => sum + item.sets, 0)}세트

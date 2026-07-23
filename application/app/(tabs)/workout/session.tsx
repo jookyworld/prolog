@@ -290,7 +290,6 @@ export default function WorkoutSessionScreen() {
     setExercises((prev) => prev.filter((_, i) => i !== exerciseIdx));
   }, []);
 
-
   const hasRoutineChanged = useCallback(() => {
     if (!originalRoutineItems) return false;
 
