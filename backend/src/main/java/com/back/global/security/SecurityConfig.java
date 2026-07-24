@@ -51,7 +51,8 @@ public class SecurityConfig {
         "/api/auth/email-verification/send",
         "/api/auth/email-verification/confirm",
         "/api/auth/password-reset/request",
-        "/api/auth/password-reset/confirm"
+        "/api/auth/password-reset/confirm",
+        "/actuator/health"
     };
 
     @Bean
