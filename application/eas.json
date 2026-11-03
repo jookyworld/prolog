@@ -17,7 +17,7 @@
       "channel": "preview",
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
-        "EXPO_PUBLIC_API_URL": "https://api.prolog.jooky.site"
+        "EXPO_PUBLIC_API_URL": "https://api.prolog.jooky.co.kr"
       }
     },
     "production": {
@@ -25,7 +25,7 @@
       "channel": "production",
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
-        "EXPO_PUBLIC_API_URL": "https://api.prolog.jooky.site"
+        "EXPO_PUBLIC_API_URL": "https://api.prolog.jooky.co.kr"
       }
     }
   },
