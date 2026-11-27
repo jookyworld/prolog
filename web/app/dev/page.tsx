@@ -5,7 +5,7 @@ export const metadata = {
 };
 
 const GITHUB_URL = "https://github.com/jookyworld/prolog";
-const SWAGGER_URL = "https://api.prolog.jooky.site/swagger-ui/index.html";
+const SWAGGER_URL = "https://api.prolog.jooky.co.kr/swagger-ui/index.html";
 const APP_STORE_URL =
   "https://apps.apple.com/kr/app/%EC%83%81%EA%B8%89%EB%85%B8%ED%95%98%EC%9A%B0/id6760579875";
 

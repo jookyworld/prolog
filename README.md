@@ -13,7 +13,7 @@
 | [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md) | 개발자 | 파일 구조, 작업 패턴, 배포, 트러블슈팅 |
 | [docs/REQUIREMENTS.md](./docs/REQUIREMENTS.md) | 개발자 | 비즈니스 로직, 데이터 모델 |
 | [docs/USER_GUIDE.md](./docs/USER_GUIDE.md) | 앱 사용자 | 앱 사용 방법 |
-| Swagger UI | 개발자 | API 명세 (https://api.prolog.jooky.site/swagger-ui/index.html) |
+| Swagger UI | 개발자 | API 명세 (https://api.prolog.jooky.co.kr/swagger-ui/index.html) |
 
 ---
 
@@ -58,11 +58,11 @@ prolog/
 
 | 항목 | 상태 | 주소 / 비고 |
 |------|------|-------------|
-| **Backend API** | ✅ 운영 중 | [서버 바로가기](https://api.prolog.jooky.site) |
-| **Swagger UI** | ✅ 운영 중 | [API 명세서 바로가기](https://api.prolog.jooky.site/swagger-ui/index.html) |
+| **Backend API** | ✅ 운영 중 | [서버 바로가기](https://api.prolog.jooky.co.kr) |
+| **Swagger UI** | ✅ 운영 중 | [API 명세서 바로가기](https://api.prolog.jooky.co.kr/swagger-ui/index.html) |
 | **Mobile App** | ✅ App Store 출시 (v1.0.0) | [App Store 바로가기](https://apps.apple.com/kr/app/%EC%83%81%EA%B8%89%EB%85%B8%ED%95%98%EC%9A%B0/id6760579875) |
-| **공식 웹페이지** | ✅ 운영 중 | [웹 페이지 바로가기](https://prolog.jooky.site) |
-| **Admin Web** | ✅ 운영 중 | [관리자 페이지 바로가기](https://admin.prolog.jooky.site) |
+| **공식 웹페이지** | ✅ 운영 중 | [웹 페이지 바로가기](https://prolog.jooky.co.kr) |
+| **Admin Web** | ✅ 운영 중 | [관리자 페이지 바로가기](https://admin.prolog.jooky.co.kr) |
 
 > **배포 방식:** 현재 EC2 Docker Compose 기반 중단 배포. 추후 Blue-Green 무중단 배포로 전환 예정.
 

@@ -2,8 +2,8 @@
 export const CONTACT_EMAIL = "prolog.noreply@gmail.com";
 
 export const TERMS_URLS = {
-  terms: "https://prolog.jooky.site/terms",
-  privacy: "https://prolog.jooky.site/privacy",
+  terms: "https://prolog.jooky.co.kr/terms",
+  privacy: "https://prolog.jooky.co.kr/privacy",
 } as const;
 
 export const MARKETING_CONSENT = `서비스의 새로운 기능, 업데이트, 이벤트 등에 관한 소식을 이메일로 받아보실 수 있습니다.

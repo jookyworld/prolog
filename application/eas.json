@@ -7,7 +7,13 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "channel": "development"
+      "channel": "development",
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "RCT_USE_RN_DEP": "0",
+        "RCT_USE_PREBUILT_RNCORE": "0",
+        "EXPO_PUBLIC_API_URL": "https://api.prolog.jooky.co.kr"
+      }
     },
     "preview": {
       "distribution": "internal",
@@ -17,6 +23,8 @@
       "channel": "preview",
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "RCT_USE_RN_DEP": "0",
+        "RCT_USE_PREBUILT_RNCORE": "0",
         "EXPO_PUBLIC_API_URL": "https://api.prolog.jooky.co.kr"
       }
     },
@@ -25,6 +33,8 @@
       "channel": "production",
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "RCT_USE_RN_DEP": "0",
+        "RCT_USE_PREBUILT_RNCORE": "0",
         "EXPO_PUBLIC_API_URL": "https://api.prolog.jooky.co.kr"
       }
     }
