@@ -34,5 +34,5 @@ resend:
   api-key: ${RESEND_API_KEY:}
 
 mail:
-  from: ${MAIL_FROM:noreply@prolog.jooky.site}
+  from: ${MAIL_FROM:noreply@prolog.jooky.co.kr}
   admin: ${MAIL_ADMIN:}

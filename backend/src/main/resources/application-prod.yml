@@ -1,5 +1,5 @@
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:https://admin.prolog.jooky.site}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:https://admin.prolog.jooky.co.kr}
 
 spring:
   config:

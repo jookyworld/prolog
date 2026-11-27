@@ -25,13 +25,13 @@ ProLog 전체 배포 구성, CI/CD 파이프라인, 환경 설정을 정리한 �
         │               │  prolog-redis  (Redis 7 Alpine)│ :6379 (loopback)
         │               └───────────────────────────────┘
         │                       │
-        │               api.prolog.jooky.site (HTTPS)
+        │               api.prolog.jooky.co.kr (HTTPS)
         │
         ├── admin/** 변경 감지
-        │         └── [Vercel] → admin.prolog.jooky.site
+        │         └── [Vercel] → admin.prolog.jooky.co.kr
         │
         └── web/** 변경 감지
-                  └── [Vercel] → prolog.jooky.site
+                  └── [Vercel] → prolog.jooky.co.kr
 
 [EAS CLI (수동)]
         └── eas build --platform ios
@@ -150,7 +150,7 @@ Nginx Proxy Manager는 웹 GUI로 설정하므로 파일로 관리되지 않음.
 
 | 도메인 | 포워드 대상 | SSL |
 |---|---|---|
-| `api.prolog.jooky.site` | `prolog-backend:8080` | Let's Encrypt 자동 |
+| `api.prolog.jooky.co.kr` | `prolog-backend:8080` | Let's Encrypt 자동 |
 
 **SSL 인증서:** Let's Encrypt 90일 자동 갱신 (`npm-letsencrypt` 볼륨에 저장)
 
@@ -208,7 +208,7 @@ MAIL_PASSWORD=       # Gmail 앱 비밀번호
 MAIL_FROM=
 
 # CORS (쉼표 구분)
-CORS_ALLOWED_ORIGINS=https://admin.prolog.jooky.site
+CORS_ALLOWED_ORIGINS=https://admin.prolog.jooky.co.kr
 ```
 
 **수동 배포 / 재시작이 필요한 경우 (.env 변경 등):**
@@ -268,8 +268,8 @@ sudo docker logs prolog-mysql --tail 50
 
 | 서비스 | 디렉토리 | 도메인 | 프레임워크 |
 |---|---|---|---|
-| admin | `/admin` | admin.prolog.jooky.site | Next.js 15 + React 19 |
-| web | `/web` | prolog.jooky.site | Next.js + React 19 |
+| admin | `/admin` | admin.prolog.jooky.co.kr | Next.js 15 + React 19 |
+| web | `/web` | prolog.jooky.co.kr | Next.js + React 19 |
 
 **배포 트리거:** main 브랜치 push 시 Vercel 자동 빌드·배포 (각 디렉토리 변경 감지)
 
@@ -296,8 +296,8 @@ outputFileTracingRoot: path.join(__dirname, "../")
 | 프로파일 | 목적 | 배포 방식 | API URL |
 |---|---|---|---|
 | `development` | 개발용 (dev client) | internal | - |
-| `preview` | 테스트 / TestFlight 내부 배포 | internal | `https://api.prolog.jooky.site` |
-| `production` | App Store 정식 배포 | 공개 | `https://api.prolog.jooky.site` |
+| `preview` | 테스트 / TestFlight 내부 배포 | internal | `https://api.prolog.jooky.co.kr` |
+| `production` | App Store 정식 배포 | 공개 | `https://api.prolog.jooky.co.kr` |
 
 **주요 설정 (`application/app.json`):**
 
@@ -370,10 +370,10 @@ EXPO_PUBLIC_API_URL=http://192.168.x.x:8080
 
 | 서비스 | 플랫폼 | 도메인 / 주소 |
 |---|---|---|
-| API 서버 | AWS EC2 + Docker | https://api.prolog.jooky.site |
-| Swagger UI | (API 서버 내) | https://api.prolog.jooky.site/swagger-ui/index.html |
-| 관리자 페이지 | Vercel | https://admin.prolog.jooky.site |
-| 공식 웹페이지 | Vercel | https://prolog.jooky.site |
+| API 서버 | AWS EC2 + Docker | https://api.prolog.jooky.co.kr |
+| Swagger UI | (API 서버 내) | https://api.prolog.jooky.co.kr/swagger-ui/index.html |
+| 관리자 페이지 | Vercel | https://admin.prolog.jooky.co.kr |
+| 공식 웹페이지 | Vercel | https://prolog.jooky.co.kr |
 | iOS 앱 | App Store | com.jooky.prolog |
 | Docker Hub | Docker Hub | jookyworld/prolog-backend |
 | EAS 빌드 | expo.dev | 프로젝트 ID: 99e3012a-... |
@@ -395,7 +395,7 @@ EXPO_PUBLIC_API_URL=http://192.168.x.x:8080
 - 리전
 
 ### Nginx Proxy Manager (`http://[EC2 IP]:81`)
-- `api.prolog.jooky.site` → `prolog-backend:8080` 프록시 설정 확인
+- `api.prolog.jooky.co.kr` → `prolog-backend:8080` 프록시 설정 확인
 - SSL 인증서 만료일 및 자동 갱신 상태
 - 리다이렉트 규칙 (HTTP → HTTPS)
 
@@ -480,4 +480,4 @@ sudo docker system df
 | [DEVELOPMENT.md](./DEVELOPMENT.md) | 개발 가이드, 파일 구조, 트러블슈팅 |
 | [REQUIREMENTS.md](./REQUIREMENTS.md) | 비즈니스 로직, 데이터 모델 |
 | [USER_GUIDE.md](./USER_GUIDE.md) | 앱 사용자 가이드 |
-| [Swagger UI](https://api.prolog.jooky.site/swagger-ui/index.html) | API 명세 |
+| [Swagger UI](https://api.prolog.jooky.co.kr/swagger-ui/index.html) | API 명세 |

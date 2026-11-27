@@ -7,7 +7,7 @@ ProLog 관리자 전용 웹 대시보드
 - **Framework:** Next.js 15.1 + React 19 + TypeScript 5
 - **UI:** shadcn/ui + Tailwind CSS
 - **Auth:** JWT (기존 백엔드 `/api/auth/login` 동일 사용, role=ADMIN 검증)
-- **Deploy:** Vercel (`admin.prolog.jooky.site`)
+- **Deploy:** Vercel (`admin.prolog.jooky.co.kr`)
 
 ## 로컬 실행
 
@@ -30,7 +30,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8080
 프로덕션은 Vercel 환경 변수에서 관리:
 
 ```
-NEXT_PUBLIC_API_URL=https://api.prolog.jooky.site
+NEXT_PUBLIC_API_URL=https://api.prolog.jooky.co.kr
 ```
 
 ## 프로젝트 구조

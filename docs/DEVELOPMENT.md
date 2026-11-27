@@ -110,8 +110,8 @@ backend/src/main/java/com/back/
 - `docker-compose.prod.yml` — 프로덕션용
 
 **프로덕션 엔드포인트:**
-- API: `https://api.prolog.jooky.site`
-- Swagger: `https://api.prolog.jooky.site/swagger-ui/index.html`
+- API: `https://api.prolog.jooky.co.kr`
+- Swagger: `https://api.prolog.jooky.co.kr/swagger-ui/index.html`
 
 ### App
 
@@ -573,4 +573,4 @@ useEffect(() => {
 | [REQUIREMENTS.md](./REQUIREMENTS.md) | 비즈니스 로직, 데이터 모델 |
 | [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) | 배포 구성, CI/CD, 환경 변수, 장애 대응 |
 | [USER_GUIDE.md](./USER_GUIDE.md) | 앱 사용자 가이드 |
-| [Swagger UI](https://api.prolog.jooky.site/swagger-ui/index.html) | API 명세 |
+| [Swagger UI](https://api.prolog.jooky.co.kr/swagger-ui/index.html) | API 명세 |
